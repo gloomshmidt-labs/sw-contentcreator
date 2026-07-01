@@ -1,0 +1,11 @@
+{% sw_extends '@Storefront/storefront/component/product/description.html.twig' %}
+
+{# FAQ-Block nach der Produktbeschreibung (inkl. FAQPage-JSON-LD) #}
+{% block component_product_description_content_text %}
+    {{ parent() }}
+
+    {% set faqHtml = page.product.translated.customFields.content_creator_faq ?? null %}
+    {% if faqHtml %}
+        {% sw_include '@ContentCreator/storefront/component/content-creator/faq.html.twig' with { faqHtml: faqHtml } %}
+    {% endif %}
+{% endblock %}

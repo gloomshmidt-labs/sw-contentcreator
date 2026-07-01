@@ -1,0 +1,37 @@
+name: Feature-Vorschlag
+description: Eine neue Funktion oder Verbesserung vorschlagen
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Welches Problem soll gelöst werden?
+      description: Was funktioniert aktuell nicht oder fehlt?
+      placeholder: Beschreibe den Anwendungsfall oder den fehlenden Aspekt.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Lösungsvorschlag
+      description: Wie könnte die Funktion aussehen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternativen
+      description: Welche anderen Wege hast du erwogen?
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Weiterer Kontext
+      description: Screenshots, Mockups, Links zu Diskussionen etc.
+    validations:
+      required: false

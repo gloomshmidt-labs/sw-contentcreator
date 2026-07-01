@@ -1,0 +1,64 @@
+name: Bug-Report
+description: Einen Fehler melden
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Danke, dass du dir die Zeit nimmst, einen Bug zu melden. Bitte fülle die Felder unten so genau wie möglich aus.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Beschreibung des Fehlers
+      description: Was funktioniert nicht wie erwartet?
+      placeholder: Klare und knappe Beschreibung des Problems.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Schritte zum Reproduzieren
+      description: Wie lässt sich der Fehler nachstellen?
+      placeholder: |
+        1. Gehe zu '…'
+        2. Klicke auf '…'
+        3. Beobachtetes Verhalten: '…'
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Erwartetes Verhalten
+      placeholder: Was sollte stattdessen passieren?
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Umgebung
+      description: Versionen / Setup-Details (Plattform, Versionen, OS, etc.)
+      placeholder: |
+        - Plugin-Version:
+        - Shopware-Version / OS:
+        - PHP-Version (falls relevant):
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / Screenshots
+      description: Relevante Auszüge aus Logs, Screenshots oder Konsolen-Ausgabe.
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        **Sicherheitslücken** bitte ebenfalls als Issue melden (Anonymität-bedingt gibt es keinen separaten Security-Kanal).

@@ -1,0 +1,7 @@
+{% block sw_content_creator_test_connection %}
+<div class="sw-content-creator-test-connection">
+    <sw-button :isLoading="isLoading" @click="onTest">
+        {{ label || $tc('sw-content-creator.settings.testButton') }}
+    </sw-button>
+</div>
+{% endblock %}

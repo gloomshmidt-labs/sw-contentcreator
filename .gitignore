@@ -1,0 +1,29 @@
+# Composer
+vendor/
+composer.lock
+
+# Node
+node_modules/
+package-lock.json
+
+# Shopware Build
+src/Resources/app/storefront/dist/
+src/Resources/app/administration/dist/
+# Hinweis: src/Resources/public/ (kompilierte Admin-Assets) wird BEWUSST
+# mitgeliefert, damit das Plugin ohne Build-Schritt installierbar ist
+# (Production-Deploy ohne Administration-Build).
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Lokale Konfiguration
+.env
+.env.local

@@ -1,0 +1,14 @@
+{% sw_extends '@Storefront/storefront/page/content/index.html.twig' %}
+
+{# FAQ-Block nach dem CMS-Inhalt von Kategorieseiten (inkl. FAQPage-JSON-LD) #}
+{% block page_content %}
+    {{ parent() }}
+
+    {% set activeCategory = page.header.navigation.active ?? null %}
+    {% set faqHtml = activeCategory ? (activeCategory.translated.customFields.content_creator_faq ?? null) : null %}
+    {% if faqHtml %}
+        <div class="container">
+            {% sw_include '@ContentCreator/storefront/component/content-creator/faq.html.twig' with { faqHtml: faqHtml } %}
+        </div>
+    {% endif %}
+{% endblock %}

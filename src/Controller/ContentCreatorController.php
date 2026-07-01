@@ -1,0 +1,429 @@
+<?php declare(strict_types=1);
+
+namespace ContentCreator\Controller;
+
+use ContentCreator\Service\BatchDispatcher;
+use ContentCreator\Service\CannibalizationScanner;
+use ContentCreator\Service\ContentBackupService;
+use ContentCreator\Service\ContentGenerator;
+use ContentCreator\Service\ContentWriter;
+use ContentCreator\Service\FactLoader;
+use ContentCreator\Service\FreshnessScanner;
+use ContentCreator\Service\GapScanner;
+use ContentCreator\Service\LineBreakScanner;
+use ContentCreator\Service\Provider\AiRequest;
+use ContentCreator\Service\ProviderRegistry;
+use ContentCreator\Service\QualityChecker;
+use ContentCreator\Service\QualityReport;
+use Doctrine\DBAL\Connection;
+use Shopware\Core\Framework\Context;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
+use Shopware\Core\System\SystemConfig\SystemConfigService;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Attribute\Route;
+
+#[Route(defaults: ['_routeScope' => ['api']])]
+class ContentCreatorController extends AbstractController
+{
+    public function __construct(
+        private readonly ContentGenerator $generator,
+        private readonly ProviderRegistry $providerRegistry,
+        private readonly FactLoader $factLoader,
+        private readonly BatchDispatcher $batchDispatcher,
+        private readonly EntityRepository $generationJobRepository,
+        private readonly SystemConfigService $systemConfig,
+        private readonly ContentWriter $contentWriter,
+        private readonly LineBreakScanner $lineBreakScanner,
+        private readonly ContentBackupService $backupService,
+        private readonly GapScanner $gapScanner,
+        private readonly QualityReport $qualityReport,
+        private readonly CannibalizationScanner $cannibalizationScanner,
+        private readonly FreshnessScanner $freshnessScanner,
+        private readonly Connection $connection
+    ) {
+    }
+
+    #[Route(path: '/api/content-creator/backup/latest', name: 'api.content-creator.backup.latest', defaults: ['_acl' => ['content_creator.viewer']], methods: ['POST'])]
+    public function latestBackup(Request $request, Context $context): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true) ?: [];
+        $entityType = (string) ($data['entityType'] ?? '');
+        $id = (string) ($data['id'] ?? '');
+        $type = (string) ($data['type'] ?? '');
+        $languageId = (string) ($data['languageId'] ?? '');
+
+        if ($entityType === '' || $id === '' || $type === '' || $languageId === '') {
+            return new JsonResponse(['success' => false, 'error' => 'entityType, id, type und languageId sind erforderlich.'], 400);
+        }
+
+        return new JsonResponse([
+            'success' => true,
+            'backup' => $this->backupService->latest($entityType, $id, $languageId, $type, $context),
+        ]);
+    }
+
+    #[Route(path: '/api/content-creator/backup/restore', name: 'api.content-creator.backup.restore', defaults: ['_acl' => ['content_creator.editor']], methods: ['POST'])]
+    public function restoreBackup(Request $request, Context $context): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true) ?: [];
+        $backupId = (string) ($data['backupId'] ?? '');
+        if ($backupId === '') {
+            return new JsonResponse(['success' => false, 'error' => 'backupId ist erforderlich.'], 400);
+        }
+
+        try {
+            $this->backupService->restore($backupId, $context);
+
+            return new JsonResponse(['success' => true]);
+        } catch (\Throwable $e) {
+            return new JsonResponse(['success' => false, 'error' => $e->getMessage()], 400);
+        }
+    }
+
+    #[Route(path: '/api/content-creator/linebreaks/scan', name: 'api.content-creator.linebreaks.scan', defaults: ['_acl' => ['content_creator.viewer']], methods: ['POST'])]
+    public function scanLineBreaks(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true) ?: [];
+        $languageId = (string) ($data['languageId'] ?? '');
+        if ($languageId === '') {
+            return new JsonResponse(['success' => false, 'error' => 'languageId ist erforderlich.'], 400);
+        }
+
+        try {
+            $result = $this->lineBreakScanner->scan($languageId, $this->factLoader->context($languageId));
+
+            return new JsonResponse(['success' => true] + $result);
+        } catch (\Throwable $e) {
+            return new JsonResponse(['success' => false, 'error' => $e->getMessage()], 400);
+        }
+    }
+
+    #[Route(path: '/api/content-creator/linebreaks/fix', name: 'api.content-creator.linebreaks.fix', defaults: ['_acl' => ['content_creator.editor']], methods: ['POST'])]
+    public function fixLineBreaks(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true) ?: [];
+        $categoryId = (string) ($data['categoryId'] ?? '');
+        $languageId = (string) ($data['languageId'] ?? '');
+        if ($categoryId === '' || $languageId === '') {
+            return new JsonResponse(['success' => false, 'error' => 'categoryId und languageId sind erforderlich.'], 400);
+        }
+
+        try {
+            $fixed = $this->lineBreakScanner->fix($categoryId, $languageId, $this->factLoader->context($languageId));
+
+            return new JsonResponse(['success' => true, 'fixed' => $fixed]);
+        } catch (\Throwable $e) {
+            return new JsonResponse(['success' => false, 'error' => $e->getMessage()], 400);
+        }
+    }
+
+    /**
+     * Serverseitiges Übernehmen für Typen, deren Schreiblogik im Backend liegt
+     * (Kategorie-Teaser → CMS-slotConfig-Merge, Startseiten-Meta).
+     */
+    #[Route(path: '/api/content-creator/apply', name: 'api.content-creator.apply', defaults: ['_acl' => ['content_creator.editor']], methods: ['POST'])]
+    public function apply(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true) ?: [];
+        $entityType = (string) ($data['entityType'] ?? '');
+        $id = (string) ($data['id'] ?? '');
+        $type = (string) ($data['type'] ?? '');
+        $languageId = (string) ($data['languageId'] ?? '');
+        $result = \is_array($data['result'] ?? null) ? $data['result'] : [];
+
+        if ($entityType === '' || $id === '' || $type === '' || $languageId === '') {
+            return new JsonResponse(['success' => false, 'error' => 'entityType, id, type und languageId sind erforderlich.'], 400);
+        }
+
+        try {
+            $langContext = $this->factLoader->context($languageId);
+            $this->contentWriter->apply($entityType, $id, $languageId, $type, $result, $langContext);
+
+            return new JsonResponse(['success' => true]);
+        } catch (\Throwable $e) {
+            return new JsonResponse(['success' => false, 'error' => $e->getMessage()], 400);
+        }
+    }
+
+    #[Route(path: '/api/content-creator/generate', name: 'api.content-creator.generate', defaults: ['_acl' => ['content_creator.viewer']], methods: ['POST'])]
+    public function generate(Request $request, Context $context): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true) ?: [];
+        $type = (string) ($data['type'] ?? '');
+        $entityType = $data['entityType'] ?? null;
+        $id = $data['id'] ?? null;
+        $ctx = \is_array($data['context'] ?? null) ? $data['context'] : [];
+
+        // Gewählte Sprache steuert Fakten-Sprache + Prompt-Sprache (mit System-Default-Fallback).
+        $languageId = (\is_string($data['languageId'] ?? null) && $data['languageId'] !== '') ? $data['languageId'] : null;
+        $factsContext = $languageId !== null ? $this->factLoader->context($languageId) : $context;
+
+        try {
+            if (\is_string($entityType) && \is_string($id) && $id !== '') {
+                $facts = match ($entityType) {
+                    'product' => $this->factLoader->loadProduct($id, $factsContext),
+                    'category' => $this->factLoader->loadCategory($id, $factsContext),
+                    'media' => $this->factLoader->loadMedia($id, $factsContext),
+                    'sales_channel' => $this->factLoader->loadSalesChannel($id, $factsContext),
+                    'manufacturer' => $this->factLoader->loadManufacturer($id, $factsContext),
+                    default => [],
+                };
+                $ctx = array_merge($facts, $ctx);
+            }
+
+            $langCode = $languageId !== null
+                ? $this->factLoader->langCode($languageId)
+                : (isset($data['lang'])
+                    ? (str_starts_with(strtolower((string) $data['lang']), 'en') ? 'en' : 'de')
+                    : $this->factLoader->langCode($context->getLanguageId()));
+
+            $mode = \in_array($data['mode'] ?? null, ['create', 'optimize'], true) ? $data['mode'] : 'create';
+            $metaFields = \is_array($data['metaFields'] ?? null) ? array_values(array_filter($data['metaFields'])) : null;
+
+            $result = $this->generator->generate(
+                $type,
+                $langCode,
+                $ctx,
+                $data['provider'] ?? null,
+                $data['model'] ?? null,
+                $mode,
+                $metaFields
+            );
+
+            return new JsonResponse(['success' => true, 'result' => $result]);
+        } catch (\Throwable $e) {
+            return new JsonResponse(['success' => false, 'error' => $e->getMessage()], 400);
+        }
+    }
+
+    #[Route(path: '/api/content-creator/test-connection', name: 'api.content-creator.test-connection', defaults: ['_acl' => ['content_creator.viewer']], methods: ['POST'])]
+    public function testConnection(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true) ?: [];
+
+        try {
+            $provider = $this->providerRegistry->get($data['provider'] ?? null);
+            $result = $provider->generate(new AiRequest(
+                system: 'Antworte ausschließlich mit dem Wort: OK',
+                userPrompt: 'Bitte antworte mit OK.',
+                maxTokens: 20
+            ));
+
+            return new JsonResponse([
+                'success' => true,
+                'provider' => $provider->getName(),
+                'model' => $result->model,
+                'reply' => $result->text,
+            ]);
+        } catch (\Throwable $e) {
+            return new JsonResponse(['success' => false, 'error' => $e->getMessage()], 400);
+        }
+    }
+
+    #[Route(path: '/api/content-creator/batch', name: 'api.content-creator.batch', defaults: ['_acl' => ['content_creator.editor']], methods: ['POST'])]
+    public function batch(Request $request, Context $context): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true) ?: [];
+        $entityType = (string) ($data['entityType'] ?? '');
+        $ids = array_values(array_filter((array) ($data['ids'] ?? [])));
+        $types = array_values(array_filter((array) ($data['types'] ?? [])));
+
+        if ($entityType === '' || $ids === [] || $types === []) {
+            return new JsonResponse(['success' => false, 'error' => 'entityType, ids und types sind erforderlich.'], 400);
+        }
+
+        // Das Batch-Modell ist Claude-spezifisch – nur anwenden, wenn der aktive
+        // Provider auch Claude ist. Bei OpenAI greift dessen Standardmodell (openaiModel).
+        $providerName = $this->providerRegistry->activeProviderName($data['provider'] ?? null);
+        $model = $data['model'] ?? null;
+        if ($model === null && $providerName === 'claude') {
+            $configuredBatchModel = (string) $this->systemConfig->get('ContentCreator.config.batchModel');
+            $model = $configuredBatchModel !== '' ? $configuredBatchModel : null;
+        }
+
+        $mode = \in_array($data['mode'] ?? null, ['create', 'optimize'], true) ? $data['mode'] : 'create';
+        $metaFields = \is_array($data['metaFields'] ?? null) ? array_values(array_filter($data['metaFields'])) : null;
+
+        $jobId = $this->batchDispatcher->dispatch(
+            $entityType,
+            $ids,
+            $types,
+            $data['languageId'] ?? $context->getLanguageId(),
+            $data['provider'] ?? null,
+            $model,
+            $context,
+            $mode,
+            $metaFields,
+            (bool) ($data['dryRun'] ?? false)
+        );
+
+        return new JsonResponse(['success' => true, 'jobId' => $jobId, 'total' => \count($ids)]);
+    }
+
+    #[Route(path: '/api/content-creator/batch/{jobId}', name: 'api.content-creator.batch.status', defaults: ['_acl' => ['content_creator.viewer']], methods: ['GET'])]
+    public function status(string $jobId, Context $context): JsonResponse
+    {
+        $job = $this->generationJobRepository->search(new Criteria([$jobId]), $context)->first();
+        if ($job === null) {
+            return new JsonResponse(['success' => false, 'error' => 'Job nicht gefunden.'], 404);
+        }
+
+        return new JsonResponse(['success' => true, 'job' => [
+            'id' => $job->getId(),
+            'status' => $job->getStatus(),
+            'total' => $job->getTotal(),
+            'processed' => $job->getProcessed(),
+            'failed' => $job->getFailed(),
+            'rejected' => $job->getRejected(),
+            'inputTokens' => $job->getInputTokens(),
+            'outputTokens' => $job->getOutputTokens(),
+            'model' => $job->getModel(),
+            'dryRun' => $job->getDryRun(),
+            // Zählt Ergebnis-ZEILEN (je Typ eine) — die Item-Zähler oben zählen Objekte
+            'pendingResults' => $job->getDryRun() ? (int) $this->connection->fetchOne(
+                'SELECT COUNT(*) FROM content_creator_batch_result WHERE job_id = UNHEX(:job) AND passed = 1 AND applied = 0',
+                ['job' => $jobId]
+            ) : 0,
+        ]]);
+    }
+
+    /**
+     * Dry-Run-Ergebnisse gesammelt übernehmen (nur Gate-bestandene, je 1x).
+     */
+    #[Route(path: '/api/content-creator/batch/{jobId}/commit', name: 'api.content-creator.batch.commit', defaults: ['_acl' => ['content_creator.editor']], methods: ['POST'])]
+    public function commitBatch(string $jobId, Context $context): JsonResponse
+    {
+        $job = $this->generationJobRepository->search(new Criteria([$jobId]), $context)->first();
+        if ($job === null || !$job->getDryRun()) {
+            return new JsonResponse(['success' => false, 'error' => 'Dry-Run-Job nicht gefunden.'], 404);
+        }
+
+        $languageId = (string) ($job->getLanguageId() ?? '');
+        $langContext = $this->factLoader->context($languageId);
+
+        $rows = $this->connection->fetchAllAssociative(
+            'SELECT LOWER(HEX(id)) id, LOWER(HEX(entity_id)) entity_id, content_type, payload
+             FROM content_creator_batch_result
+             WHERE job_id = UNHEX(:job) AND passed = 1 AND applied = 0',
+            ['job' => $jobId]
+        );
+
+        $applied = 0;
+        $errors = 0;
+        foreach ($rows as $row) {
+            try {
+                $payload = json_decode((string) $row['payload'], true) ?: [];
+                $this->contentWriter->apply(
+                    $job->getEntityType(),
+                    (string) $row['entity_id'],
+                    $languageId,
+                    (string) $row['content_type'],
+                    $payload,
+                    $langContext
+                );
+                $this->connection->executeStatement(
+                    'UPDATE content_creator_batch_result SET applied = 1 WHERE id = UNHEX(:id)',
+                    ['id' => $row['id']]
+                );
+                $applied++;
+            } catch (\Throwable) {
+                $errors++;
+            }
+        }
+
+        return new JsonResponse(['success' => true, 'applied' => $applied, 'errors' => $errors]);
+    }
+
+    #[Route(path: '/api/content-creator/gaps', name: 'api.content-creator.gaps', defaults: ['_acl' => ['content_creator.viewer']], methods: ['POST'])]
+    public function gaps(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true) ?: [];
+        $entityType = (string) ($data['entityType'] ?? '');
+        $languageId = (string) ($data['languageId'] ?? '');
+        if ($entityType === '' || $languageId === '') {
+            return new JsonResponse(['success' => false, 'error' => 'entityType und languageId sind erforderlich.'], 400);
+        }
+
+        try {
+            return new JsonResponse(['success' => true, 'gaps' => $this->gapScanner->scan($languageId, $entityType)]);
+        } catch (\Throwable $e) {
+            return new JsonResponse(['success' => false, 'error' => $e->getMessage()], 400);
+        }
+    }
+
+    #[Route(path: '/api/content-creator/freshness', name: 'api.content-creator.freshness', defaults: ['_acl' => ['content_creator.viewer']], methods: ['POST'])]
+    public function freshness(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true) ?: [];
+        $entityType = (string) ($data['entityType'] ?? '');
+        $languageId = (string) ($data['languageId'] ?? '');
+        if ($entityType === '' || $languageId === '') {
+            return new JsonResponse(['success' => false, 'error' => 'entityType und languageId sind erforderlich.'], 400);
+        }
+
+        try {
+            return new JsonResponse(['success' => true] + $this->freshnessScanner->scan($entityType, $languageId));
+        } catch (\Throwable $e) {
+            return new JsonResponse(['success' => false, 'error' => $e->getMessage()], 400);
+        }
+    }
+
+    #[Route(path: '/api/content-creator/cannibalization', name: 'api.content-creator.cannibalization', defaults: ['_acl' => ['content_creator.viewer']], methods: ['POST'])]
+    public function cannibalization(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true) ?: [];
+        $entityType = (string) ($data['entityType'] ?? '');
+        $languageId = (string) ($data['languageId'] ?? '');
+        if ($entityType === '' || $languageId === '') {
+            return new JsonResponse(['success' => false, 'error' => 'entityType und languageId sind erforderlich.'], 400);
+        }
+
+        try {
+            if (\is_string($data['keyword'] ?? null) && trim($data['keyword']) !== '') {
+                return new JsonResponse(['success' => true, 'usedBy' => $this->cannibalizationScanner->keywordUsage(
+                    $entityType,
+                    $languageId,
+                    $data['keyword'],
+                    \is_string($data['excludeId'] ?? null) ? $data['excludeId'] : null
+                )]);
+            }
+
+            return new JsonResponse(['success' => true] + $this->cannibalizationScanner->scan($entityType, $languageId));
+        } catch (\Throwable $e) {
+            return new JsonResponse(['success' => false, 'error' => $e->getMessage()], 400);
+        }
+    }
+
+    #[Route(path: '/api/content-creator/quality-report', name: 'api.content-creator.quality-report', defaults: ['_acl' => ['content_creator.viewer']], methods: ['POST'])]
+    public function qualityReport(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true) ?: [];
+        $entityType = (string) ($data['entityType'] ?? '');
+        $languageId = (string) ($data['languageId'] ?? '');
+        $offset = max(0, (int) ($data['offset'] ?? 0));
+        if ($entityType === '' || $languageId === '') {
+            return new JsonResponse(['success' => false, 'error' => 'entityType und languageId sind erforderlich.'], 400);
+        }
+
+        $whitelist = QualityChecker::parseWhitelist(
+            (string) $this->systemConfig->get('ContentCreator.config.qualityWhitelist')
+        );
+
+        try {
+            $page = $this->qualityReport->page(
+                $entityType,
+                $languageId,
+                $this->factLoader->langCode($languageId),
+                $offset,
+                $whitelist
+            );
+
+            return new JsonResponse(['success' => true] + $page);
+        } catch (\Throwable $e) {
+            return new JsonResponse(['success' => false, 'error' => $e->getMessage()], 400);
+        }
+    }
+}

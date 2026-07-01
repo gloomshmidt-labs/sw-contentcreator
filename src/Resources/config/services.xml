@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services https://symfony.com/schema/dic/services/services-1.0.xsd">
+    <services>
+
+        <!-- Entity: Batch-Job-Tracking -->
+        <service id="ContentCreator\Core\Content\GenerationJob\GenerationJobDefinition">
+            <tag name="shopware.entity.definition" entity="content_creator_generation_job"/>
+        </service>
+
+        <!-- Entity: Text-Backups (Undo) -->
+        <service id="ContentCreator\Core\Content\Backup\ContentBackupDefinition">
+            <tag name="shopware.entity.definition" entity="content_creator_backup"/>
+        </service>
+
+        <!-- AI Provider -->
+        <service id="ContentCreator\Service\Provider\ClaudeProvider">
+            <argument type="service" id="http_client"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="logger"/>
+        </service>
+
+        <service id="ContentCreator\Service\Provider\OpenAiProvider">
+            <argument type="service" id="http_client"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="logger"/>
+        </service>
+
+        <service id="ContentCreator\Service\ProviderRegistry">
+            <argument type="service" id="ContentCreator\Service\Provider\ClaudeProvider"/>
+            <argument type="service" id="ContentCreator\Service\Provider\OpenAiProvider"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+        </service>
+
+        <!-- SEO-Prompt-Aufbau + Orchestrierung -->
+        <service id="ContentCreator\Service\PromptBuilder">
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+        </service>
+
+        <!-- Qualitäts-Gates: KI-Muster-Scoring + Fakten-Erhalt -->
+        <service id="ContentCreator\Service\QualityChecker"/>
+
+        <service id="ContentCreator\Service\FactGuard"/>
+
+        <service id="ContentCreator\Service\FocusKeywordChecker"/>
+
+        <service id="ContentCreator\Service\ReadabilityChecker"/>
+
+        <service id="ContentCreator\Service\ContentGenerator">
+            <argument type="service" id="ContentCreator\Service\ProviderRegistry"/>
+            <argument type="service" id="ContentCreator\Service\PromptBuilder"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="ContentCreator\Service\QualityChecker"/>
+            <argument type="service" id="ContentCreator\Service\FactGuard"/>
+            <argument type="service" id="ContentCreator\Service\FocusKeywordChecker"/>
+            <argument type="service" id="ContentCreator\Service\ReadabilityChecker"/>
+        </service>
+
+        <!-- CMS-Slot-Auflösung (Kategorie-Teaser) -->
+        <service id="ContentCreator\Service\CmsSlotResolver">
+            <argument type="service" id="category.repository"/>
+            <argument type="service" id="cms_page.repository"/>
+        </service>
+
+        <!-- Fakten laden / zurückschreiben / Batch verteilen -->
+        <service id="ContentCreator\Service\FactLoader">
+            <argument type="service" id="product.repository"/>
+            <argument type="service" id="category.repository"/>
+            <argument type="service" id="media.repository"/>
+            <argument type="service" id="language.repository"/>
+            <argument type="service" id="sales_channel.repository"/>
+            <argument type="service" id="product_manufacturer.repository"/>
+            <argument type="service" id="ContentCreator\Service\CmsSlotResolver"/>
+        </service>
+
+        <service id="ContentCreator\Service\ContentBackupService">
+            <argument type="service" id="content_creator_backup.repository"/>
+            <argument type="service" id="product.repository"/>
+            <argument type="service" id="category.repository"/>
+            <argument type="service" id="media.repository"/>
+            <argument type="service" id="sales_channel.repository"/>
+            <argument type="service" id="product_manufacturer.repository"/>
+            <argument type="service" id="ContentCreator\Service\CmsSlotResolver"/>
+        </service>
+
+        <service id="ContentCreator\Service\ContentWriter">
+            <argument type="service" id="product.repository"/>
+            <argument type="service" id="category.repository"/>
+            <argument type="service" id="media.repository"/>
+            <argument type="service" id="sales_channel.repository"/>
+            <argument type="service" id="product_manufacturer.repository"/>
+            <argument type="service" id="ContentCreator\Service\CmsSlotResolver"/>
+            <argument type="service" id="ContentCreator\Service\ContentBackupService"/>
+        </service>
+
+        <service id="ContentCreator\Service\BatchDispatcher">
+            <argument type="service" id="content_creator_generation_job.repository"/>
+            <argument type="service" id="messenger.default_bus"/>
+        </service>
+
+        <!-- Zeilenumbruch-Scan/-Fix für CMS-Slots -->
+        <service id="ContentCreator\Service\LineBreakScanner">
+            <argument type="service" id="category.repository"/>
+        </service>
+
+        <!-- Lücken-Scan + katalogweiter Qualitäts-Report -->
+        <service id="ContentCreator\Service\GapScanner">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+        </service>
+
+        <service id="ContentCreator\Service\QualityReport">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <argument type="service" id="ContentCreator\Service\QualityChecker"/>
+        </service>
+
+        <service id="ContentCreator\Service\CannibalizationScanner">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+        </service>
+
+        <service id="ContentCreator\Service\FreshnessScanner">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+        </service>
+
+        <!-- FAQ-Storefront-Anzeige + FAQPage-JSON-LD -->
+        <service id="ContentCreator\Service\FaqParser"/>
+
+        <service id="ContentCreator\Twig\FaqExtension">
+            <argument type="service" id="ContentCreator\Service\FaqParser"/>
+            <tag name="twig.extension"/>
+        </service>
+
+        <!-- Admin-API-Controller -->
+        <service id="ContentCreator\Controller\ContentCreatorController" public="true">
+            <argument type="service" id="ContentCreator\Service\ContentGenerator"/>
+            <argument type="service" id="ContentCreator\Service\ProviderRegistry"/>
+            <argument type="service" id="ContentCreator\Service\FactLoader"/>
+            <argument type="service" id="ContentCreator\Service\BatchDispatcher"/>
+            <argument type="service" id="content_creator_generation_job.repository"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="ContentCreator\Service\ContentWriter"/>
+            <argument type="service" id="ContentCreator\Service\LineBreakScanner"/>
+            <argument type="service" id="ContentCreator\Service\ContentBackupService"/>
+            <argument type="service" id="ContentCreator\Service\GapScanner"/>
+            <argument type="service" id="ContentCreator\Service\QualityReport"/>
+            <argument type="service" id="ContentCreator\Service\CannibalizationScanner"/>
+            <argument type="service" id="ContentCreator\Service\FreshnessScanner"/>
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
+        </service>
+
+        <!-- Stapelverarbeitung (Messenger) -->
+        <service id="ContentCreator\MessageQueue\BatchGenerateHandler">
+            <argument type="service" id="ContentCreator\Service\ContentGenerator"/>
+            <argument type="service" id="ContentCreator\Service\FactLoader"/>
+            <argument type="service" id="ContentCreator\Service\ContentWriter"/>
+            <argument type="service" id="content_creator_generation_job.repository"/>
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <argument type="service" id="logger"/>
+            <tag name="messenger.message_handler"/>
+        </service>
+
+        <!-- Täglicher Cron: fehlende Inhalte auffüllen -->
+        <service id="ContentCreator\ScheduledTask\FillMissingContentTask">
+            <tag name="shopware.scheduled.task"/>
+        </service>
+        <service id="ContentCreator\ScheduledTask\FillMissingContentTaskHandler">
+            <argument type="service" id="scheduled_task.repository"/>
+            <argument type="service" id="logger"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="product.repository"/>
+            <argument type="service" id="ContentCreator\Service\BatchDispatcher"/>
+            <tag name="messenger.message_handler"/>
+        </service>
+
+        <!-- CLI-Test-Command -->
+        <service id="ContentCreator\Command\GenerateCommand">
+            <argument type="service" id="ContentCreator\Service\ContentGenerator"/>
+            <argument type="service" id="ContentCreator\Service\FactLoader"/>
+            <argument type="service" id="ContentCreator\Service\ContentWriter"/>
+            <tag name="console.command"/>
+        </service>
+
+    </services>
+</container>

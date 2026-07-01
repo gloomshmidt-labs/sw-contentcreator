@@ -1,0 +1,134 @@
+{% block sw_content_creator_settings %}
+<sw-page class="sw-content-creator-settings">
+    <template #smart-bar-actions>
+        <sw-button @click="$router.push({ name: 'sw.content.creator.generator' })">
+            {{ $tc('sw-content-creator.settings.toGenerator') }}
+        </sw-button>
+        <sw-button variant="primary" :isLoading="isSaving" @click="save">
+            {{ $tc('sw-content-creator.settings.save') }}
+        </sw-button>
+    </template>
+
+    <template #content>
+        <sw-card-view>
+            {% block sw_content_creator_settings_provider %}
+            <sw-card :title="$tc('sw-content-creator.settings.providerCard')" :isLoading="isLoading">
+                <sw-single-select
+                    :label="$tc('sw-content-creator.settings.provider')"
+                    :helpText="$tc('sw-content-creator.settings.providerHelp')"
+                    :options="providerOptions"
+                    :value="get('provider')"
+                    @update:value="(v) => set('provider', v)">
+                </sw-single-select>
+
+                <template v-if="get('provider') === 'openai'">
+                    <sw-password-field
+                        :label="$tc('sw-content-creator.settings.openaiKey')"
+                        :value="get('openaiApiKey')"
+                        @update:value="(v) => set('openaiApiKey', v)">
+                    </sw-password-field>
+                    <sw-text-field
+                        :label="$tc('sw-content-creator.settings.openaiModel')"
+                        :helpText="$tc('sw-content-creator.settings.openaiModelHelp')"
+                        :value="get('openaiModel')"
+                        @update:value="(v) => set('openaiModel', v)">
+                    </sw-text-field>
+                </template>
+                <template v-else>
+                    <sw-password-field
+                        :label="$tc('sw-content-creator.settings.anthropicKey')"
+                        :helpText="$tc('sw-content-creator.settings.anthropicKeyHelp')"
+                        :value="get('anthropicApiKey')"
+                        @update:value="(v) => set('anthropicApiKey', v)">
+                    </sw-password-field>
+                    <sw-single-select
+                        :label="$tc('sw-content-creator.settings.anthropicModel')"
+                        :options="anthropicModelOptions"
+                        :value="get('anthropicModel')"
+                        @update:value="(v) => set('anthropicModel', v)">
+                    </sw-single-select>
+                    <sw-single-select
+                        :label="$tc('sw-content-creator.settings.batchModel')"
+                        :helpText="$tc('sw-content-creator.settings.batchModelHelp')"
+                        :options="batchModelOptions"
+                        :value="get('batchModel')"
+                        @update:value="(v) => set('batchModel', v)">
+                    </sw-single-select>
+                </template>
+
+                <div style="margin-top:16px;">
+                    <sw-button :isLoading="isTesting" @click="testConnection">
+                        {{ $tc('sw-content-creator.settings.testButton') }}
+                    </sw-button>
+                    <span style="margin-left:8px; color:#758ca3; font-size:12px;">
+                        {{ $tc('sw-content-creator.settings.testHint') }}
+                    </span>
+                </div>
+            </sw-card>
+            {% endblock %}
+
+            {% block sw_content_creator_settings_automation %}
+            <sw-card :title="$tc('sw-content-creator.settings.automationCard')" :isLoading="isLoading">
+                <sw-switch-field
+                    :label="$tc('sw-content-creator.settings.dailyFill')"
+                    :value="get('dailyFillEnabled')"
+                    @update:value="(v) => set('dailyFillEnabled', v)">
+                </sw-switch-field>
+                <sw-number-field
+                    :label="$tc('sw-content-creator.settings.dailyFillLimit')"
+                    :value="get('dailyFillLimit')"
+                    @update:value="(v) => set('dailyFillLimit', v)">
+                </sw-number-field>
+            </sw-card>
+            {% endblock %}
+
+            {% block sw_content_creator_settings_quality %}
+            <sw-card :title="$tc('sw-content-creator.settings.qualityCard')" :isLoading="isLoading">
+                <sw-number-field
+                    :label="$tc('sw-content-creator.settings.qualityMaxScore')"
+                    :helpText="$tc('sw-content-creator.settings.qualityMaxScoreHelp')"
+                    :value="get('qualityMaxScore')"
+                    @update:value="(v) => set('qualityMaxScore', v)">
+                </sw-number-field>
+                <sw-number-field
+                    :label="$tc('sw-content-creator.settings.qualityMaxRetries')"
+                    :helpText="$tc('sw-content-creator.settings.qualityMaxRetriesHelp')"
+                    :value="get('qualityMaxRetries')"
+                    @update:value="(v) => set('qualityMaxRetries', v)">
+                </sw-number-field>
+                <sw-textarea-field
+                    :label="$tc('sw-content-creator.settings.qualityWhitelist')"
+                    :helpText="$tc('sw-content-creator.settings.qualityWhitelistHelp')"
+                    :value="get('qualityWhitelist')"
+                    @update:value="(v) => set('qualityWhitelist', v)">
+                </sw-textarea-field>
+                <sw-alert variant="info">
+                    {{ $tc('sw-content-creator.settings.qualityHint') }}
+                </sw-alert>
+            </sw-card>
+            {% endblock %}
+
+            {% block sw_content_creator_settings_text %}
+            <sw-card :title="$tc('sw-content-creator.settings.textCard')" :isLoading="isLoading">
+                <sw-switch-field
+                    :label="$tc('sw-content-creator.settings.animalProfile')"
+                    :value="get('includeAnimalProfile')"
+                    @update:value="(v) => set('includeAnimalProfile', v)">
+                </sw-switch-field>
+                <sw-switch-field
+                    :label="$tc('sw-content-creator.settings.funFact')"
+                    :value="get('includeFunFact')"
+                    @update:value="(v) => set('includeFunFact', v)">
+                </sw-switch-field>
+                <sw-switch-field
+                    :label="$tc('sw-content-creator.settings.research')"
+                    :helpText="$tc('sw-content-creator.settings.researchHelp')"
+                    :value="get('researchEnabled')"
+                    @update:value="(v) => set('researchEnabled', v)">
+                </sw-switch-field>
+            </sw-card>
+            {% endblock %}
+        </sw-card-view>
+    </template>
+</sw-page>
+{% endblock %}

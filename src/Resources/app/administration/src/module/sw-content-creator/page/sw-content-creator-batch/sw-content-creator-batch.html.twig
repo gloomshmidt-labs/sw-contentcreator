@@ -1,0 +1,221 @@
+{% block sw_content_creator_batch %}
+<sw-page class="sw-content-creator-batch">
+    <template #smart-bar-actions>
+        <sw-button @click="$router.push({ name: 'sw.content.creator.settings' })">
+            {{ $tc('sw-content-creator.settings.navTitle') }}
+        </sw-button>
+        <sw-button @click="$router.push({ name: 'sw.content.creator.generator' })">
+            {{ $tc('sw-content-creator.batch.toGenerator') }}
+        </sw-button>
+    </template>
+
+    <template #content>
+        <sw-card-view>
+            <sw-card :title="$tc('sw-content-creator.batch.title')">
+                <div style="display:flex; gap:16px;">
+                    <sw-single-select
+                        :label="$tc('sw-content-creator.batch.entityType')"
+                        :options="entityTypeOptions"
+                        :value="entityType"
+                        @update:value="onEntityTypeChange">
+                    </sw-single-select>
+
+                    <sw-single-select
+                        :label="$tc('sw-content-creator.generator.language')"
+                        :options="langOptions"
+                        :value="lang"
+                        @update:value="onLangChange">
+                    </sw-single-select>
+
+                    <sw-single-select
+                        :label="$tc('sw-content-creator.generator.mode')"
+                        :helpText="$tc('sw-content-creator.batch.modeHelp')"
+                        :options="modeOptions"
+                        :value="mode"
+                        @update:value="(val) => { mode = val; }">
+                    </sw-single-select>
+                </div>
+
+                <sw-entity-multi-id-select
+                    class="sw-content-creator-batch__ids"
+                    :repository="repository"
+                    :context="languageContext"
+                    :label="$tc('sw-content-creator.batch.selectEntities')"
+                    :value="selectedIds"
+                    @update:value="onIdsChange">
+                </sw-entity-multi-id-select>
+
+                <div class="sw-content-creator-batch__types" style="margin-top:16px;">
+                    <label style="font-weight:600;">{{ $tc('sw-content-creator.batch.types') }}</label>
+                    <sw-checkbox-field
+                        v-for="t in typeOptions"
+                        :key="t"
+                        :label="typeLabel(t)"
+                        :value="selectedTypes.includes(t)"
+                        @update:value="(val) => setType(t, val)">
+                    </sw-checkbox-field>
+                </div>
+
+                <sw-switch-field
+                    style="margin-top:8px;"
+                    :label="$tc('sw-content-creator.batch.dryRun')"
+                    :helpText="$tc('sw-content-creator.batch.dryRunHelp')"
+                    :value="dryRun"
+                    @update:value="(v) => { dryRun = v; }">
+                </sw-switch-field>
+
+                <sw-button
+                    variant="primary"
+                    style="margin-top:8px;"
+                    :isLoading="isStarting"
+                    :disabled="isRunning"
+                    @click="startBatch">
+                    {{ dryRun ? $tc('sw-content-creator.batch.startDryRun') : $tc('sw-content-creator.batch.start') }}
+                </sw-button>
+
+                <sw-alert variant="info" style="margin-top:16px;">
+                    {{ $tc('sw-content-creator.batch.workerHint') }}
+                </sw-alert>
+            </sw-card>
+
+            <sw-card v-if="job" :title="$tc('sw-content-creator.batch.progress')">
+                <sw-progress-bar :value="progressDone" :maxValue="job.total"></sw-progress-bar>
+                <p style="margin-top:12px;">
+                    {{ progressDone }} / {{ job.total }} ({{ progressPercent }}%)
+                    – Status: {{ job.status }},
+                    {{ $tc('sw-content-creator.batch.written') }}: {{ job.processed }},
+                    {{ $tc('sw-content-creator.batch.rejected') }}: {{ job.rejected || 0 }},
+                    {{ $tc('sw-content-creator.batch.failed') }}: {{ job.failed }}
+                    <span v-if="job.inputTokens || job.outputTokens">
+                        – {{ (job.inputTokens || 0) + (job.outputTokens || 0) }} Tokens<span v-if="jobCost"> · {{ jobCost }}</span>
+                    </span>
+                </p>
+                <sw-alert v-if="(job.rejected || 0) > 0" variant="warning" style="margin-top:8px;">
+                    {{ $tc('sw-content-creator.batch.rejectedHint') }}
+                </sw-alert>
+                <template v-if="job.dryRun && !isRunning && !job.committed">
+                    <sw-alert variant="info" style="margin-top:8px;">
+                        {{ $tc('sw-content-creator.batch.dryRunDone', job.pendingResults || 0, { passed: job.pendingResults || 0 }) }}
+                    </sw-alert>
+                    <sw-button
+                        v-if="(job.pendingResults || 0) > 0"
+                        variant="primary"
+                        style="margin-top:8px;"
+                        :isLoading="isCommitting"
+                        @click="commitDryRun">
+                        {{ $tc('sw-content-creator.batch.commit', job.pendingResults || 0, { passed: job.pendingResults || 0 }) }}
+                    </sw-button>
+                </template>
+            </sw-card>
+
+            {% block sw_content_creator_batch_gaps %}
+            <sw-card :title="$tc('sw-content-creator.gaps.title')">
+                <p style="color:#758ca3; font-size:13px; margin-bottom:12px;">
+                    {{ $tc('sw-content-creator.gaps.hint') }}
+                </p>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    <sw-button :isLoading="gapBusy" @click="scanGaps">
+                        {{ $tc('sw-content-creator.gaps.scan') }}
+                    </sw-button>
+                    <sw-button :isLoading="reportBusy" @click="runQualityReport">
+                        {{ $tc('sw-content-creator.gaps.report') }}
+                    </sw-button>
+                    <sw-button :isLoading="cannibalBusy" @click="scanCannibalization">
+                        {{ $tc('sw-content-creator.cannibal.scan') }}
+                    </sw-button>
+                    <sw-button :isLoading="freshnessBusy" @click="scanFreshness">
+                        {{ $tc('sw-content-creator.freshness.scan') }}
+                    </sw-button>
+                </div>
+
+                <template v-if="freshnessResult">
+                    <p style="margin-top:12px; font-weight:600;">{{ $tc('sw-content-creator.freshness.changed') }} ({{ freshnessResult.changedSince.length }})</p>
+                    <div v-for="item in freshnessResult.changedSince.slice(0, 25)" :key="'f-' + item.id" style="font-size:13px; padding:1px 0;">
+                        {{ item.name }} <span style="color:#758ca3;">({{ $tc('sw-content-creator.freshness.generatedAt') }} {{ new Date(item.generatedAt).toLocaleDateString() }})</span>
+                    </div>
+                    <p style="margin-top:8px; font-weight:600;">{{ $tc('sw-content-creator.freshness.aging') }} ({{ freshnessResult.aging.length }})</p>
+                    <div v-for="item in freshnessResult.aging.slice(0, 25)" :key="'a-' + item.id" style="font-size:13px; padding:1px 0;">
+                        {{ item.name }} <span style="color:#758ca3;">({{ new Date(item.generatedAt).toLocaleDateString() }})</span>
+                    </div>
+                    <sw-button
+                        v-if="freshnessResult.changedSince.length || freshnessResult.aging.length"
+                        variant="primary"
+                        style="margin-top:8px;"
+                        @click="useFreshnessSelection">
+                        {{ $tc('sw-content-creator.freshness.use') }}
+                    </sw-button>
+                </template>
+
+                <template v-if="cannibalResult">
+                    <p style="margin-top:12px; font-weight:600;">{{ $tc('sw-content-creator.cannibal.keywords') }} ({{ cannibalResult.duplicateKeywords.length }})</p>
+                    <div v-for="g in cannibalResult.duplicateKeywords" :key="'kw-' + g.value" style="font-size:13px; padding:2px 0;">
+                        <strong>{{ g.count }}×</strong> „{{ g.value }}" — {{ g.names }}
+                    </div>
+                    <p style="margin-top:8px; font-weight:600;">{{ $tc('sw-content-creator.cannibal.titles') }} ({{ cannibalResult.duplicateTitles.length }})</p>
+                    <div v-for="g in cannibalResult.duplicateTitles" :key="'t-' + g.value" style="font-size:13px; padding:2px 0;">
+                        <strong>{{ g.count }}×</strong> „{{ g.value }}" — {{ g.names }}
+                    </div>
+                </template>
+
+                <template v-if="gapResult">
+                    <div v-for="(gap, key) in gapResult" :key="key" style="display:flex; gap:12px; align-items:center; padding:6px 0;">
+                        <span style="flex:1;">{{ gapLabel(key) }}: <strong>{{ gap.count }}</strong></span>
+                        <sw-button v-if="gap.count > 0" size="small" @click="useGapSelection(key)">
+                            {{ $tc('sw-content-creator.gaps.use') }}
+                        </sw-button>
+                    </div>
+                </template>
+
+                <template v-if="report">
+                    <p style="margin-top:12px; font-weight:600;">
+                        {{ $tc('sw-content-creator.gaps.reportResult', report.total, { total: report.total, scanned: report.scanned }) }}
+                    </p>
+                    <div v-for="item in report.items" :key="item.id" style="display:flex; gap:12px; padding:2px 0; font-size:13px; align-items:center;">
+                        <span style="width:60px; font-weight:600;">{{ item.score }}</span>
+                        <span style="flex:1;">{{ item.name }}</span>
+                        <span style="color:#758ca3;">{{ item.level }}</span>
+                        <sw-button size="small" @click="openInGenerator(item.id)">
+                            {{ $tc('sw-content-creator.gaps.fixNow') }}
+                        </sw-button>
+                    </div>
+                    <sw-button v-if="report.items.length" variant="primary" style="margin-top:8px;" @click="useWorstSelection">
+                        {{ $tc('sw-content-creator.gaps.useWorst') }}
+                    </sw-button>
+                </template>
+            </sw-card>
+            {% endblock %}
+
+            {% block sw_content_creator_batch_linebreaks %}
+            <sw-card :title="$tc('sw-content-creator.linebreaks.title')">
+                <p style="color:#758ca3; font-size:13px; margin-bottom:12px;">
+                    {{ $tc('sw-content-creator.linebreaks.hint') }}
+                </p>
+                <sw-button :isLoading="lbBusy" @click="scanLineBreaks">
+                    {{ $tc('sw-content-creator.linebreaks.scan') }}
+                </sw-button>
+
+                <template v-if="lbResult">
+                    <p style="margin-top:12px; font-weight:600;">
+                        {{ $tc('sw-content-creator.linebreaks.result', lbResult.affected.length, { affected: lbResult.affected.length, scanned: lbResult.scanned }) }}
+                    </p>
+                    <div v-for="entry in lbResult.affected" :key="entry.id" style="display:flex; gap:12px; align-items:center; padding:4px 0;">
+                        <span style="flex:1;">{{ entry.name }} ({{ entry.slots }} Slots)</span>
+                        <sw-button size="small" :disabled="lbBusy" @click="fixLineBreak(entry.id)">
+                            {{ $tc('sw-content-creator.linebreaks.fix') }}
+                        </sw-button>
+                    </div>
+                    <sw-button
+                        v-if="lbResult.affected.length > 1"
+                        variant="primary"
+                        style="margin-top:8px;"
+                        :isLoading="lbBusy"
+                        @click="fixAllLineBreaks">
+                        {{ $tc('sw-content-creator.linebreaks.fixAll') }}
+                    </sw-button>
+                </template>
+            </sw-card>
+            {% endblock %}
+        </sw-card-view>
+    </template>
+</sw-page>
+{% endblock %}

@@ -1,0 +1,1810 @@
+{
+ "stopwords": {
+  "transitions": [
+   "nichtsdestotrotz",
+   "diesbezüglich",
+   "infolgedessen",
+   "demzufolge"
+  ],
+  "emphasis": [
+   "es ist wichtig zu beachten",
+   "ist es wichtig zu beachten",
+   "es sei darauf hingewiesen",
+   "sei darauf hingewiesen",
+   "es ist erwähnenswert",
+   "ist erwähnenswert"
+  ],
+  "summary": [
+   "zusammenfassend lässt sich sagen",
+   "lässt sich zusammenfassen",
+   "abschließend lässt sich sagen",
+   "insgesamt lässt sich sagen"
+  ],
+  "fillers": [
+   "im Grunde genommen",
+   "gewissermaßen",
+   "grundsätzlich",
+   "sozusagen",
+   "schlussendlich",
+   "sicherlich",
+   "zweifellos"
+  ],
+  "boilerplate": [
+   "zögern Sie nicht",
+   "warten Sie nicht länger",
+   "worauf warten Sie noch",
+   "greifen Sie jetzt zu",
+   "sichern Sie sich jetzt"
+  ]
+ },
+ "aiPatterns": {
+  "strong": [
+   {
+    "pattern": "eine welt voller",
+    "score": 15
+   },
+   {
+    "pattern": "ein paradies für",
+    "score": 15
+   },
+   {
+    "pattern": "traumziel für",
+    "score": 15
+   },
+   {
+    "pattern": "sicher begeistern",
+    "score": 12
+   },
+   {
+    "pattern": "werden sicher begeistern",
+    "score": 15
+   },
+   {
+    "pattern": "Freude in Ihr Leben",
+    "score": 12
+   },
+   {
+    "pattern": "Freude in den Alltag",
+    "score": 12
+   },
+   {
+    "pattern": "bringen Sie Freude",
+    "score": 10
+   },
+   {
+    "pattern": "bringen Sie mit",
+    "score": 8,
+    "context": "Freude"
+   },
+   {
+    "pattern": "für Ihre Bedürfnisse",
+    "score": 12
+   },
+   {
+    "pattern": "wertvolles pädagogisches Werkzeug",
+    "score": 15
+   },
+   {
+    "pattern": "wertvolles Werkzeug",
+    "score": 12
+   },
+   {
+    "pattern": "in eine welt",
+    "score": 10,
+    "context": "entführen"
+   },
+   {
+    "pattern": "qualitativ hochwertig",
+    "score": 12
+   },
+   {
+    "pattern": "auf spielerische weise",
+    "score": 10
+   },
+   {
+    "pattern": "kreativität und fantasie",
+    "score": 12
+   },
+   {
+    "pattern": "kreativität und vorstellungskraft",
+    "score": 12
+   },
+   {
+    "pattern": "eignet sich hervorragend",
+    "score": 10
+   },
+   {
+    "pattern": "eine hervorragende wahl",
+    "score": 10
+   },
+   {
+    "pattern": "besticht durch",
+    "score": 10
+   },
+   {
+    "pattern": "nicht nur",
+    "score": 6,
+    "context": "sondern auch"
+   },
+   {
+    "pattern": "kreative möglichkeit",
+    "score": 10
+   },
+   {
+    "pattern": "entdecken Sie die Welt",
+    "score": 12
+   },
+   {
+    "pattern": "entdecken Sie die Vielfalt",
+    "score": 10
+   },
+   {
+    "pattern": "entdecken Sie unsere",
+    "score": 8
+   },
+   {
+    "pattern": "entdecken Sie heute",
+    "score": 10
+   },
+   {
+    "pattern": "erkunden Sie unsere",
+    "score": 8
+   },
+   {
+    "pattern": "ein führender hersteller",
+    "score": 10
+   },
+   {
+    "pattern": "steht für hochwertig",
+    "score": 8
+   },
+   {
+    "pattern": "voll auszuleben",
+    "score": 8
+   },
+   {
+    "pattern": "einen sicheren Raum",
+    "score": 10
+   },
+   {
+    "pattern": "kann eine Herausforderung sein",
+    "score": 10
+   },
+   {
+    "pattern": "berücksichtigen Sie diese Aspekte",
+    "score": 10
+   },
+   {
+    "pattern": "spielerisch lerninhalte",
+    "score": 10
+   },
+   {
+    "pattern": "komplexe themen kindgerecht",
+    "score": 10
+   },
+   {
+    "pattern": "regen die fantasie an",
+    "score": 8
+   },
+   {
+    "pattern": "effektiv die sprachentwicklung",
+    "score": 8
+   },
+   {
+    "pattern": "magische momente",
+    "score": 10
+   },
+   {
+    "pattern": "lassen sie sich verzaubern",
+    "score": 10
+   },
+   {
+    "pattern": "lassen sie sich von der magie",
+    "score": 12
+   },
+   {
+    "pattern": "zum leben erwecken",
+    "score": 10
+   },
+   {
+    "pattern": "geschichten zum leben",
+    "score": 8
+   },
+   {
+    "pattern": "groß und klein",
+    "score": 8
+   },
+   {
+    "pattern": "begeistern groß und klein",
+    "score": 10
+   },
+   {
+    "pattern": "begeistert groß und klein",
+    "score": 10
+   },
+   {
+    "pattern": "mit liebe zum detail",
+    "score": 10
+   },
+   {
+    "pattern": "zu einem echten erlebnis",
+    "score": 10
+   },
+   {
+    "pattern": "ein echtes erlebnis",
+    "score": 8
+   },
+   {
+    "pattern": "empathie und soziale",
+    "score": 8
+   },
+   {
+    "pattern": "eine vielzahl von",
+    "score": 10
+   },
+   {
+    "pattern": "synergien",
+    "score": 8
+   },
+   {
+    "pattern": "unvergleichlich",
+    "score": 10
+   },
+   {
+    "pattern": "unnachahmlich",
+    "score": 10
+   },
+   {
+    "pattern": "zum verlieben",
+    "score": 10
+   },
+   {
+    "pattern": "voller charme",
+    "score": 10
+   },
+   {
+    "pattern": "neue maßstäbe",
+    "score": 12
+   },
+   {
+    "pattern": "tauchen sie ein",
+    "score": 10
+   },
+   {
+    "pattern": "erleben sie",
+    "score": 8
+   },
+   {
+    "pattern": "unendliche möglichkeiten",
+    "score": 12
+   },
+   {
+    "pattern": "unendlichen möglichkeiten",
+    "score": 12
+   },
+   {
+    "pattern": "echten klassiker",
+    "score": 10
+   },
+   {
+    "pattern": "echter klassiker",
+    "score": 10
+   },
+   {
+    "pattern": "unvergessliche momente",
+    "score": 10
+   },
+   {
+    "pattern": "unvergesslich",
+    "score": 8
+   },
+   {
+    "pattern": "pädagogisch wertvoll",
+    "score": 10
+   },
+   {
+    "pattern": "aus hochwertigen materialien",
+    "score": 10
+   },
+   {
+    "pattern": "fantasie und kreativität",
+    "score": 12
+   },
+   {
+    "pattern": "die welt der",
+    "score": 8
+   },
+   {
+    "pattern": "liebevoll gestaltet",
+    "score": 8
+   },
+   {
+    "pattern": "zauberhafte welt",
+    "score": 10
+   },
+   {
+    "pattern": "wunderbare welt",
+    "score": 10
+   },
+   {
+    "pattern": "willkommen in der welt",
+    "score": 10
+   },
+   {
+    "pattern": "treuer begleiter",
+    "score": 8
+   },
+   {
+    "pattern": "treue begleiter",
+    "score": 8
+   },
+   {
+    "pattern": "kreativität und spielspaß",
+    "score": 10
+   },
+   {
+    "pattern": "für jeden geschmack",
+    "score": 8
+   },
+   {
+    "pattern": "lassen sie sich inspirieren",
+    "score": 8
+   },
+   {
+    "pattern": "seit seiner gründung",
+    "score": 8
+   },
+   {
+    "pattern": "seit der gründung",
+    "score": 8
+   },
+   {
+    "pattern": "für jeden anlass",
+    "score": 8
+   }
+  ],
+  "medium": [
+   {
+    "pattern": "ideal",
+    "score": 5
+   },
+   {
+    "pattern": "perfekt",
+    "score": 5
+   },
+   {
+    "pattern": "hervorragend",
+    "score": 5
+   },
+   {
+    "pattern": "einzigartig",
+    "score": 5
+   },
+   {
+    "pattern": "vielfältig",
+    "score": 5
+   },
+   {
+    "pattern": "unverzichtbar",
+    "score": 6
+   },
+   {
+    "pattern": "außergewöhnlich",
+    "score": 5
+   },
+   {
+    "pattern": "beeindruckend",
+    "score": 4
+   },
+   {
+    "pattern": "faszinierend",
+    "score": 4
+   },
+   {
+    "pattern": "exzellent",
+    "score": 5
+   },
+   {
+    "pattern": "makellos",
+    "score": 5
+   },
+   {
+    "pattern": "einwandfrei",
+    "score": 4
+   },
+   {
+    "pattern": "nahtlos",
+    "score": 5
+   },
+   {
+    "pattern": "reibungslos",
+    "score": 4
+   },
+   {
+    "pattern": "harmonisch",
+    "score": 4
+   },
+   {
+    "pattern": "umfangreich",
+    "score": 4
+   },
+   {
+    "pattern": "lebensecht",
+    "score": 4
+   },
+   {
+    "pattern": "ausdrucksstark",
+    "score": 4
+   },
+   {
+    "pattern": "fantasievoll",
+    "score": 4
+   },
+   {
+    "pattern": "große auswahl",
+    "score": 5
+   },
+   {
+    "pattern": "große vielfalt",
+    "score": 5
+   },
+   {
+    "pattern": "hohe qualität",
+    "score": 5
+   },
+   {
+    "pattern": "detailtreue",
+    "score": 4
+   },
+   {
+    "pattern": "bietet",
+    "score": 3
+   },
+   {
+    "pattern": "bieten",
+    "score": 3
+   },
+   {
+    "pattern": "ermöglicht",
+    "score": 4
+   },
+   {
+    "pattern": "ermöglichen",
+    "score": 4
+   },
+   {
+    "pattern": "fördert",
+    "score": 4
+   },
+   {
+    "pattern": "fördern",
+    "score": 4
+   },
+   {
+    "pattern": "unterstützt",
+    "score": 3
+   },
+   {
+    "pattern": "unterstützen",
+    "score": 3
+   },
+   {
+    "pattern": "bekannt für",
+    "score": 4
+   },
+   {
+    "pattern": "zeichnet sich aus",
+    "score": 5
+   },
+   {
+    "pattern": "präsentiert sich",
+    "score": 5
+   },
+   {
+    "pattern": "überzeugt durch",
+    "score": 5
+   },
+   {
+    "pattern": "verzaubern",
+    "score": 4
+   },
+   {
+    "pattern": "traditionsreich",
+    "score": 4
+   },
+   {
+    "pattern": "umweltfreundlich",
+    "score": 3
+   },
+   {
+    "pattern": "langlebig",
+    "score": 3
+   },
+   {
+    "pattern": "ganzheitlich",
+    "score": 5
+   },
+   {
+    "pattern": "maßgeschneidert",
+    "score": 5
+   },
+   {
+    "pattern": "innovativ",
+    "score": 5
+   },
+   {
+    "pattern": "nachhaltig",
+    "score": 4
+   },
+   {
+    "pattern": "ob als",
+    "score": 4,
+    "context": "oder"
+   },
+   {
+    "pattern": "von klassisch",
+    "score": 4,
+    "context": "bis"
+   },
+   {
+    "pattern": "von traditionell",
+    "score": 4,
+    "context": "bis"
+   },
+   {
+    "pattern": "wunderschön",
+    "score": 4
+   },
+   {
+    "pattern": "erstklassig",
+    "score": 5
+   },
+   {
+    "pattern": "bezaubernd",
+    "score": 5
+   },
+   {
+    "pattern": "zauberhaft",
+    "score": 5
+   },
+   {
+    "pattern": "unwiderstehlich",
+    "score": 5
+   },
+   {
+    "pattern": "detailverliebt",
+    "score": 5
+   },
+   {
+    "pattern": "atemberaubend",
+    "score": 5
+   },
+   {
+    "pattern": "zeitlos",
+    "score": 5
+   },
+   {
+    "pattern": "spielspaß",
+    "score": 5
+   },
+   {
+    "pattern": "spielvergnügen",
+    "score": 5
+   },
+   {
+    "pattern": "vielfalt an",
+    "score": 4
+   },
+   {
+    "pattern": "unser sortiment",
+    "score": 4
+   },
+   {
+    "pattern": "liebevoll",
+    "score": 4
+   },
+   {
+    "pattern": "hochwertig",
+    "score": 4
+   }
+  ],
+  "weak": [
+   {
+    "pattern": "zudem",
+    "score": 2
+   },
+   {
+    "pattern": "ebenfalls",
+    "score": 2
+   },
+   {
+    "pattern": "weiterhin",
+    "score": 2
+   },
+   {
+    "pattern": "außerdem",
+    "score": 2
+   },
+   {
+    "pattern": "darüber hinaus",
+    "score": 4
+   },
+   {
+    "pattern": "des weiteren",
+    "score": 4
+   },
+   {
+    "pattern": "nicht zuletzt",
+    "score": 4
+   },
+   {
+    "pattern": "sowie",
+    "score": 1
+   },
+   {
+    "pattern": "somit",
+    "score": 2
+   },
+   {
+    "pattern": "folglich",
+    "score": 2
+   },
+   {
+    "pattern": "jedoch",
+    "score": 2
+   },
+   {
+    "pattern": "allerdings",
+    "score": 2
+   },
+   {
+    "pattern": "gleichzeitig",
+    "score": 2
+   },
+   {
+    "pattern": "ebenso",
+    "score": 2
+   },
+   {
+    "pattern": "gleichermaßen",
+    "score": 3
+   },
+   {
+    "pattern": "letztendlich",
+    "score": 3
+   }
+  ]
+ },
+ "replacements": {
+  "natural": {
+   "beispielsweise": [
+    "zum Beispiel",
+    "etwa"
+   ],
+   "möglicherweise": [
+    "vielleicht",
+    "eventuell"
+   ]
+  }
+ },
+ "passiveToActive": [
+  {
+   "passive": "kann beobachtet werden",
+   "active": "sieht man"
+  },
+  {
+   "passive": "sollte berücksichtigt werden",
+   "active": "sollten Sie berücksichtigen"
+  },
+  {
+   "passive": "wird empfohlen",
+   "active": "Wir empfehlen"
+  },
+  {
+   "passive": "wird angeboten",
+   "active": "Wir bieten"
+  },
+  {
+   "passive": "werden angeboten",
+   "active": "bieten wir an"
+  },
+  {
+   "passive": "wird gewährleistet",
+   "active": "gewährleisten wir"
+  },
+  {
+   "passive": "wird sichergestellt",
+   "active": "stellen wir sicher"
+  },
+  {
+   "passive": "wurde entwickelt",
+   "active": "haben wir entwickelt"
+  },
+  {
+   "passive": "wurden entwickelt",
+   "active": "haben wir entwickelt"
+  },
+  {
+   "passive": "wird durchgeführt",
+   "active": "führen wir durch"
+  },
+  {
+   "passive": "werden durchgeführt",
+   "active": "führen wir durch"
+  },
+  {
+   "passive": "wird hergestellt",
+   "active": "stellen wir her"
+  },
+  {
+   "passive": "werden hergestellt",
+   "active": "stellen wir her"
+  },
+  {
+   "passive": "wird geprüft",
+   "active": "prüfen wir"
+  },
+  {
+   "passive": "wird bereitgestellt",
+   "active": "stellen wir bereit"
+  },
+  {
+   "passive": "wird mitgeliefert",
+   "active": "liefern wir mit"
+  },
+  {
+   "passive": "wurden gestickt",
+   "active": "haben wir gestickt"
+  }
+ ],
+ "naturalness": {
+  "colloquialFillers": {
+   "words": [
+    "naja",
+    "halt",
+    "irgendwie",
+    "quasi"
+   ],
+   "bonus": -8
+  },
+  "colloquialExpressions": {
+   "words": [
+    "krass",
+    "cool",
+    "mega",
+    "echt",
+    "ziemlich",
+    "richtig gut"
+   ],
+   "bonus": -5
+  },
+  "personalAnecdotes": {
+   "patterns": [
+    "ich erinnere mich",
+    "letzte woche",
+    "neulich",
+    "bei uns im laden"
+   ],
+   "bonus": -8
+  },
+  "directQuestions": {
+   "minCount": 2,
+   "bonus": -5
+  },
+  "specificDetails": {
+   "patterns": [
+    "cm",
+    "mm",
+    "gramm",
+    "ab \\d+ jahren",
+    "\\d+ cm",
+    "größe \\w"
+   ],
+   "bonus": -3
+  }
+ },
+ "alternatives": {
+  "strong": {
+   "eine welt voller": [
+    "viel",
+    "jede Menge"
+   ],
+   "ein paradies für": [
+    "der richtige Ort für",
+    "genau richtig für"
+   ],
+   "traumziel für": [
+    "die richtige Adresse für"
+   ],
+   "sicher begeistern": [
+    "gut ankommen",
+    "gefallen"
+   ],
+   "Freude in Ihr Leben": [
+    "Freude machen"
+   ],
+   "Freude in den Alltag": [
+    "den Alltag aufhellen"
+   ],
+   "für Ihre Bedürfnisse": [
+    "für Sie",
+    "für Ihren Zweck"
+   ],
+   "wertvolles pädagogisches Werkzeug": [
+    "hilfreich im Unterricht",
+    "praktisch im Kindergarten"
+   ],
+   "wertvolles Werkzeug": [
+    "hilfreich",
+    "nützlich"
+   ],
+   "qualitativ hochwertig": [
+    "gut verarbeitet",
+    "sorgfältig gemacht"
+   ],
+   "auf spielerische weise": [
+    "spielerisch",
+    "beim Spielen"
+   ],
+   "kreativität und fantasie": [
+    "Kreativität",
+    "Fantasie"
+   ],
+   "kreativität und vorstellungskraft": [
+    "Kreativität",
+    "Vorstellungskraft"
+   ],
+   "eignet sich hervorragend": [
+    "passt gut",
+    "ist gut geeignet"
+   ],
+   "eine hervorragende wahl": [
+    "eine gute Wahl",
+    "empfehlenswert"
+   ],
+   "besticht durch": [
+    "überzeugt mit",
+    "punktet mit"
+   ],
+   "kreative möglichkeit": [
+    "Möglichkeit",
+    "Gelegenheit"
+   ],
+   "ein führender hersteller": [
+    "einer der bekanntesten Hersteller"
+   ],
+   "einen sicheren Raum": [
+    "einen geschützten Rahmen",
+    "Raum"
+   ],
+   "kann eine Herausforderung sein": [
+    "ist nicht immer einfach",
+    "erfordert Überlegung"
+   ],
+   "berücksichtigen Sie diese Aspekte": [
+    "beachten Sie diese Punkte",
+    "denken Sie an diese Punkte"
+   ],
+   "spielerisch lerninhalte": [
+    "Lerninhalte beim Spielen",
+    "Lerninhalte im Spiel"
+   ],
+   "regen die fantasie an": [
+    "machen Lust aufs Spielen",
+    "wecken die Fantasie"
+   ],
+   "entdecken Sie unsere": [
+    "sehen Sie unsere",
+    "schauen Sie in unsere",
+    "stöbern Sie durch unsere"
+   ],
+   "entdecken Sie die Welt": [
+    "tauchen Sie ein in die Welt",
+    "lernen Sie die Welt kennen"
+   ],
+   "entdecken Sie die Vielfalt": [
+    "sehen Sie die Vielfalt",
+    "schauen Sie die Vielfalt"
+   ],
+   "entdecken Sie heute": [
+    "sehen Sie heute",
+    "schauen Sie heute"
+   ],
+   "erkunden Sie unsere": [
+    "sehen Sie unsere",
+    "schauen Sie in unsere"
+   ],
+   "steht für hochwertig": [
+    "ist bekannt für gute Qualität",
+    "liefert gute Qualität"
+   ],
+   "werden sicher begeistern": [
+    "kommen gut an",
+    "machen Freude"
+   ],
+   "bringen Sie Freude": [
+    "machen Ihnen Freude",
+    "bereiten Ihnen Freude"
+   ],
+   "voll auszuleben": [
+    "freien Lauf zu lassen",
+    "auszuleben"
+   ],
+   "magische momente": [
+    "schöne Momente",
+    "besondere Augenblicke",
+    "tolle Momente"
+   ],
+   "lassen sie sich verzaubern": [
+    "lassen Sie sich überraschen",
+    "sehen Sie selbst"
+   ],
+   "lassen sie sich von der magie": [
+    "lassen Sie sich überraschen von"
+   ],
+   "zum leben erwecken": [
+    "lebendig werden lassen",
+    "lebendig erzählen"
+   ],
+   "geschichten zum leben": [
+    "Geschichten lebendig werden"
+   ],
+   "groß und klein": [
+    "Kinder und Erwachsene",
+    "Jung und Alt",
+    "alle Altersgruppen"
+   ],
+   "begeistern groß und klein": [
+    "kommen bei Jung und Alt gut an",
+    "machen allen Freude"
+   ],
+   "begeistert groß und klein": [
+    "kommt bei Jung und Alt gut an",
+    "macht allen Freude"
+   ],
+   "mit liebe zum detail": [
+    "sorgfältig",
+    "mit viel Sorgfalt",
+    "detailgenau"
+   ],
+   "zu einem echten erlebnis": [
+    "zu richtig viel Spaß",
+    "zum Vergnügen"
+   ],
+   "ein echtes erlebnis": [
+    "richtig Spaß",
+    "ein tolles Erlebnis"
+   ],
+   "empathie und soziale": [
+    "Einfühlungsvermögen und soziale"
+   ],
+   "eine vielzahl von": [
+    "viele",
+    "zahlreiche",
+    "jede Menge"
+   ],
+   "synergien": [
+    "Zusammenwirken",
+    "Zusammenspiel"
+   ],
+   "komplexe themen kindgerecht": [
+    "schwierige Themen kindgerecht",
+    "Themen kindgerecht"
+   ],
+   "effektiv die sprachentwicklung": [
+    "die Sprachentwicklung gut",
+    "die Sprachentwicklung"
+   ],
+   "ob als": [
+    "zum Beispiel als",
+    "etwa als"
+   ],
+   "von klassisch": [
+    "von schlicht",
+    "von zeitlos"
+   ],
+   "von traditionell": [
+    "von bewährt",
+    "von klassisch"
+   ],
+   "unvergleichlich": [
+    "besonders",
+    "sehr"
+   ],
+   "unnachahmlich": [
+    "einzigartig",
+    "besonders"
+   ],
+   "zum verlieben": [
+    "sehr schön",
+    "toll",
+    "wunderbar"
+   ],
+   "voller charme": [
+    "charmant",
+    "ansprechend"
+   ],
+   "neue maßstäbe": [
+    "neue Standards",
+    "Akzente"
+   ],
+   "tauchen sie ein": [
+    "sehen Sie selbst",
+    "schauen Sie rein"
+   ],
+   "erleben sie": [
+    "sehen Sie",
+    "probieren Sie"
+   ],
+   "unendliche möglichkeiten": [
+    "viele Möglichkeiten",
+    "zahlreiche Optionen"
+   ],
+   "unendlichen möglichkeiten": [
+    "vielen Möglichkeiten",
+    "zahlreichen Optionen"
+   ],
+   "echten klassiker": [
+    "bewährten Favoriten",
+    "Dauerbrenner"
+   ],
+   "echter klassiker": [
+    "bewährter Favorit",
+    "Dauerbrenner"
+   ],
+   "unvergessliche momente": [
+    "schöne Momente",
+    "tolle Erinnerungen"
+   ],
+   "unvergesslich": [
+    "einprägsam",
+    "besonders schön"
+   ],
+   "pädagogisch wertvoll": [
+    "lehrreich",
+    "hilfreich beim Lernen"
+   ],
+   "aus hochwertigen materialien": [
+    "aus guten Materialien",
+    "gut verarbeitet"
+   ],
+   "fantasie und kreativität": [
+    "Fantasie",
+    "Kreativität"
+   ],
+   "die welt der": [
+    "unsere",
+    "alles rund um"
+   ],
+   "liebevoll gestaltet": [
+    "sorgfältig gestaltet",
+    "schön gemacht"
+   ],
+   "zauberhafte welt": [
+    "bunte Auswahl",
+    "schöne Kollektion"
+   ],
+   "wunderbare welt": [
+    "bunte Auswahl",
+    "schöne Kollektion"
+   ],
+   "willkommen in der welt": [
+    "hier finden Sie",
+    "alles rund um"
+   ],
+   "treuer begleiter": [
+    "zuverlässiger Spielfreund",
+    "Spielkamerad"
+   ],
+   "treue begleiter": [
+    "zuverlässige Spielfreunde",
+    "Spielkameraden"
+   ],
+   "kreativität und spielspaß": [
+    "Spielfreude und Kreativität"
+   ],
+   "für jeden geschmack": [
+    "für verschiedene Vorlieben",
+    "passend für alle"
+   ],
+   "lassen sie sich inspirieren": [
+    "schauen Sie selbst",
+    "stöbern Sie durch"
+   ],
+   "seit seiner gründung": [
+    "seit Gründung",
+    "seit"
+   ],
+   "seit der gründung": [
+    "seit Gründung",
+    "seit"
+   ],
+   "für jeden anlass": [
+    "für verschiedene Anlässe",
+    "vielseitig einsetzbar"
+   ]
+  },
+  "medium": {
+   "ideal": [
+    "passend",
+    "gut geeignet",
+    "bestens geeignet"
+   ],
+   "ideale": [
+    "passende",
+    "richtige",
+    "geeignete"
+   ],
+   "idealen": [
+    "passenden",
+    "richtigen",
+    "geeigneten"
+   ],
+   "idealer": [
+    "passender",
+    "richtiger",
+    "geeigneter"
+   ],
+   "idealem": [
+    "passendem",
+    "richtigem",
+    "geeignetem"
+   ],
+   "ideales": [
+    "passendes",
+    "richtiges",
+    "geeignetes"
+   ],
+   "perfekt": [
+    "richtig",
+    "passend",
+    "genau richtig"
+   ],
+   "perfekte": [
+    "richtige",
+    "passende",
+    "gute"
+   ],
+   "perfekten": [
+    "richtigen",
+    "passenden",
+    "guten"
+   ],
+   "perfekter": [
+    "richtiger",
+    "passender",
+    "guter"
+   ],
+   "perfektem": [
+    "richtigem",
+    "passendem",
+    "gutem"
+   ],
+   "perfektes": [
+    "richtiges",
+    "passendes",
+    "gutes"
+   ],
+   "hervorragend": [
+    "sehr gut",
+    "besonders gut"
+   ],
+   "hervorragende": [
+    "sehr gute",
+    "besonders gute"
+   ],
+   "hervorragenden": [
+    "sehr guten",
+    "besonders guten"
+   ],
+   "hervorragender": [
+    "sehr guter",
+    "besonders guter"
+   ],
+   "hervorragendem": [
+    "sehr gutem",
+    "besonders gutem"
+   ],
+   "hervorragendes": [
+    "sehr gutes",
+    "besonders gutes"
+   ],
+   "einzigartig": [
+    "besonders",
+    "speziell",
+    "unverwechselbar"
+   ],
+   "einzigartige": [
+    "besondere",
+    "spezielle"
+   ],
+   "einzigartigen": [
+    "besonderen",
+    "speziellen"
+   ],
+   "einzigartiger": [
+    "besonderer",
+    "spezieller"
+   ],
+   "vielfältig": [
+    "verschieden",
+    "abwechslungsreich",
+    "unterschiedlich"
+   ],
+   "vielfältige": [
+    "verschiedene",
+    "abwechslungsreiche",
+    "unterschiedliche"
+   ],
+   "vielfältigen": [
+    "verschiedenen",
+    "abwechslungsreichen",
+    "unterschiedlichen"
+   ],
+   "vielfältiger": [
+    "verschiedener",
+    "abwechslungsreicher"
+   ],
+   "vielfältiges": [
+    "verschiedenes",
+    "abwechslungsreiches"
+   ],
+   "unverzichtbar": [
+    "wichtig",
+    "praktisch",
+    "nötig"
+   ],
+   "unverzichtbare": [
+    "wichtige",
+    "praktische",
+    "nötige"
+   ],
+   "unverzichtbaren": [
+    "wichtigen",
+    "praktischen",
+    "nötigen"
+   ],
+   "unverzichtbarer": [
+    "wichtiger",
+    "praktischer",
+    "nötiger"
+   ],
+   "außergewöhnlich": [
+    "ungewöhnlich",
+    "besonders"
+   ],
+   "außergewöhnliche": [
+    "ungewöhnliche",
+    "besondere"
+   ],
+   "außergewöhnlichen": [
+    "ungewöhnlichen",
+    "besonderen"
+   ],
+   "außergewöhnlicher": [
+    "ungewöhnlicher",
+    "besonderer"
+   ],
+   "beeindruckend": [
+    "schön",
+    "toll",
+    "ansprechend"
+   ],
+   "beeindruckende": [
+    "schöne",
+    "tolle",
+    "ansprechende"
+   ],
+   "beeindruckenden": [
+    "schönen",
+    "tollen",
+    "ansprechenden"
+   ],
+   "beeindruckendem": [
+    "schönem",
+    "tollem",
+    "ansprechendem"
+   ],
+   "faszinierend": [
+    "spannend",
+    "interessant"
+   ],
+   "faszinierende": [
+    "spannende",
+    "interessante"
+   ],
+   "faszinierenden": [
+    "spannenden",
+    "interessanten"
+   ],
+   "faszinierendem": [
+    "spannendem",
+    "interessantem"
+   ],
+   "faszinierender": [
+    "spannender",
+    "interessanter"
+   ],
+   "nahtlos": [
+    "einfach",
+    "problemlos",
+    "unkompliziert"
+   ],
+   "nahtlose": [
+    "einfache",
+    "problemlose",
+    "unkomplizierte"
+   ],
+   "nahtlosen": [
+    "einfachen",
+    "problemlosen",
+    "unkomplizierten"
+   ],
+   "nahtloser": [
+    "einfacher",
+    "problemloser",
+    "unkomplizierter"
+   ],
+   "nahtloses": [
+    "einfaches",
+    "problemloses",
+    "unkompliziertes"
+   ],
+   "harmonisch": [
+    "stimmig",
+    "passend",
+    "abgestimmt"
+   ],
+   "harmonische": [
+    "stimmige",
+    "passende",
+    "abgestimmte"
+   ],
+   "harmonischen": [
+    "stimmigen",
+    "passenden",
+    "abgestimmten"
+   ],
+   "harmonischer": [
+    "stimmiger",
+    "passender",
+    "abgestimmter"
+   ],
+   "harmonisches": [
+    "stimmiges",
+    "passendes",
+    "abgestimmtes"
+   ],
+   "fantasievoll": [
+    "kreativ",
+    "einfallsreich"
+   ],
+   "fantasievolle": [
+    "kreative",
+    "einfallsreiche"
+   ],
+   "fantasievollen": [
+    "kreativen",
+    "einfallsreichen"
+   ],
+   "ausdrucksstark": [
+    "lebendig",
+    "ansprechend"
+   ],
+   "ausdrucksstarke": [
+    "lebendige",
+    "ansprechende"
+   ],
+   "ausdrucksstarken": [
+    "lebendigen",
+    "ansprechenden"
+   ],
+   "ausdrucksstarkem": [
+    "lebendigem",
+    "ansprechendem"
+   ],
+   "große auswahl": [
+    "breite Auswahl",
+    "viele Modelle",
+    "reichlich Auswahl"
+   ],
+   "große vielfalt": [
+    "viel Auswahl",
+    "reichlich Auswahl"
+   ],
+   "hohe qualität": [
+    "gute Qualität",
+    "solide Qualität"
+   ],
+   "bietet": [
+    "hat",
+    "bringt",
+    "liefert"
+   ],
+   "bieten": [
+    "haben",
+    "bringen",
+    "liefern"
+   ],
+   "ermöglicht": [
+    "erlaubt"
+   ],
+   "ermöglichen": [
+    "erlauben"
+   ],
+   "fördert": [
+    "stärkt",
+    "trainiert"
+   ],
+   "fördern": [
+    "stärken",
+    "trainieren"
+   ],
+   "zeichnet sich aus": [
+    "ist bekannt für",
+    "punktet mit",
+    "glänzt mit"
+   ],
+   "präsentiert sich": [
+    "zeigt sich",
+    "wirkt",
+    "erscheint"
+   ],
+   "überzeugt durch": [
+    "punktet mit",
+    "glänzt durch"
+   ],
+   "bekannt für": [
+    "geschätzt für",
+    "beliebt für"
+   ],
+   "unterstützen": [
+    "begleiten",
+    "helfen bei"
+   ],
+   "unterstützt": [
+    "begleitet",
+    "hilft bei"
+   ],
+   "umfangreich": [
+    "groß",
+    "breit gefächert"
+   ],
+   "exzellent": [
+    "sehr gut",
+    "erstklassig"
+   ],
+   "makellos": [
+    "tadellos",
+    "sauber"
+   ],
+   "einwandfrei": [
+    "problemlos",
+    "ohne Mängel"
+   ],
+   "reibungslos": [
+    "problemlos",
+    "ohne Probleme",
+    "glatt"
+   ],
+   "lebensecht": [
+    "realistisch",
+    "naturgetreu"
+   ],
+   "detailtreue": [
+    "Sorgfalt",
+    "Genauigkeit"
+   ],
+   "traditionsreich": [
+    "bewährt",
+    "seit langem bekannt"
+   ],
+   "verzaubern": [
+    "überraschen",
+    "freuen",
+    "begeistern"
+   ],
+   "langlebig": [
+    "haltbar",
+    "robust",
+    "strapazierfähig"
+   ],
+   "umweltfreundlich": [
+    "ökologisch",
+    "umweltschonend",
+    "ressourcenschonend"
+   ],
+   "ganzheitlich": [
+    "umfassend",
+    "vollständig",
+    "durchgängig"
+   ],
+   "ganzheitliche": [
+    "umfassende",
+    "vollständige",
+    "durchgängige"
+   ],
+   "ganzheitlichen": [
+    "umfassenden",
+    "vollständigen",
+    "durchgängigen"
+   ],
+   "ganzheitlicher": [
+    "umfassender",
+    "vollständiger",
+    "durchgängiger"
+   ],
+   "maßgeschneidert": [
+    "passgenau",
+    "individuell",
+    "auf Sie zugeschnitten"
+   ],
+   "maßgeschneiderte": [
+    "passgenaue",
+    "individuelle"
+   ],
+   "maßgeschneiderten": [
+    "passgenauen",
+    "individuellen"
+   ],
+   "maßgeschneiderter": [
+    "passgenauer",
+    "individueller"
+   ],
+   "maßgeschneidertes": [
+    "passgenaues",
+    "individuelles"
+   ],
+   "innovativ": [
+    "neu",
+    "modern",
+    "zeitgemäß"
+   ],
+   "innovative": [
+    "neue",
+    "moderne",
+    "zeitgemäße"
+   ],
+   "innovativen": [
+    "neuen",
+    "modernen",
+    "zeitgemäßen"
+   ],
+   "innovativer": [
+    "neuer",
+    "moderner",
+    "zeitgemäßer"
+   ],
+   "innovatives": [
+    "neues",
+    "modernes",
+    "zeitgemäßes"
+   ],
+   "nachhaltig": [
+    "dauerhaft",
+    "langfristig",
+    "beständig"
+   ],
+   "nachhaltige": [
+    "dauerhafte",
+    "langfristige",
+    "beständige"
+   ],
+   "nachhaltigen": [
+    "dauerhaften",
+    "langfristigen",
+    "beständigen"
+   ],
+   "nachhaltiger": [
+    "dauerhafter",
+    "langfristiger",
+    "beständiger"
+   ],
+   "wunderschön": [
+    "schön",
+    "hübsch",
+    "ansprechend"
+   ],
+   "wunderschöne": [
+    "schöne",
+    "hübsche",
+    "ansprechende"
+   ],
+   "wunderschönen": [
+    "schönen",
+    "hübschen",
+    "ansprechenden"
+   ],
+   "wunderschöner": [
+    "schöner",
+    "hübscher",
+    "ansprechender"
+   ],
+   "erstklassig": [
+    "sehr gut",
+    "top",
+    "prima"
+   ],
+   "erstklassige": [
+    "sehr gute",
+    "tolle",
+    "prima"
+   ],
+   "erstklassigen": [
+    "sehr guten",
+    "tollen"
+   ],
+   "erstklassiger": [
+    "sehr guter",
+    "toller"
+   ],
+   "bezaubernd": [
+    "hübsch",
+    "schön",
+    "reizend"
+   ],
+   "bezaubernde": [
+    "hübsche",
+    "schöne",
+    "reizende"
+   ],
+   "bezaubernden": [
+    "hübschen",
+    "schönen",
+    "reizenden"
+   ],
+   "zauberhaft": [
+    "hübsch",
+    "schön",
+    "niedlich"
+   ],
+   "zauberhafte": [
+    "hübsche",
+    "schöne",
+    "niedliche"
+   ],
+   "zauberhaften": [
+    "hübschen",
+    "schönen",
+    "niedlichen"
+   ],
+   "unwiderstehlich": [
+    "sehr",
+    "besonders"
+   ],
+   "detailverliebt": [
+    "sorgfältig",
+    "genau",
+    "mit Sorgfalt"
+   ],
+   "detailverliebte": [
+    "sorgfältige",
+    "genaue"
+   ],
+   "detailverliebten": [
+    "sorgfältigen",
+    "genauen"
+   ],
+   "atemberaubend": [
+    "eindrucksvoll",
+    "toll",
+    "bemerkenswert"
+   ],
+   "atemberaubende": [
+    "eindrucksvolle",
+    "tolle",
+    "bemerkenswerte"
+   ],
+   "atemberaubenden": [
+    "eindrucksvollen",
+    "tollen",
+    "bemerkenswerten"
+   ],
+   "zeitlos": [
+    "klassisch",
+    "bewährt",
+    "dauerhaft"
+   ],
+   "zeitlose": [
+    "klassische",
+    "bewährte",
+    "dauerhafte"
+   ],
+   "zeitlosen": [
+    "klassischen",
+    "bewährten",
+    "dauerhaften"
+   ],
+   "zeitloser": [
+    "klassischer",
+    "bewährter",
+    "dauerhafter"
+   ],
+   "spielspaß": [
+    "Spielfreude",
+    "Spaß beim Spielen"
+   ],
+   "spielvergnügen": [
+    "Spielfreude",
+    "Spaß"
+   ],
+   "vielfalt an": [
+    "Auswahl an",
+    "Bandbreite an"
+   ],
+   "unser sortiment": [
+    "unsere Auswahl",
+    "unser Angebot"
+   ],
+   "liebevoll": [
+    "sorgfältig",
+    "mit Sorgfalt"
+   ],
+   "hochwertig": [
+    "gut verarbeitet",
+    "solide",
+    "qualitativ gut"
+   ]
+  },
+  "weak": {
+   "zudem": [
+    "auch",
+    "und",
+    "dazu"
+   ],
+   "ebenfalls": [
+    "auch",
+    "genauso"
+   ],
+   "außerdem": [
+    "und",
+    "zusätzlich"
+   ],
+   "jedoch": [
+    "aber",
+    "doch"
+   ],
+   "allerdings": [
+    "aber",
+    "nur"
+   ],
+   "folglich": [
+    "also",
+    "daher"
+   ],
+   "somit": [
+    "also",
+    "damit"
+   ],
+   "des weiteren": [
+    "und",
+    "auch"
+   ],
+   "sowie": [
+    "und",
+    "und auch"
+   ],
+   "weiterhin": [
+    "auch",
+    "dazu"
+   ],
+   "darüber hinaus": [
+    "zusätzlich",
+    "und",
+    "dazu"
+   ],
+   "nicht zuletzt": [
+    "und",
+    "auch"
+   ],
+   "ebenso": [
+    "auch",
+    "genauso"
+   ],
+   "letztendlich": [
+    "am Ende",
+    "schließlich"
+   ]
+  }
+ }
+}

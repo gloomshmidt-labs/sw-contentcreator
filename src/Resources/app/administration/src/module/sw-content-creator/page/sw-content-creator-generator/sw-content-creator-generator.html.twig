@@ -1,0 +1,236 @@
+{% block sw_content_creator_generator %}
+<sw-page class="sw-content-creator-generator">
+    <template #smart-bar-actions>
+        <sw-button @click="$router.push({ name: 'sw.content.creator.settings' })">
+            {{ $tc('sw-content-creator.settings.navTitle') }}
+        </sw-button>
+        <sw-button @click="$router.push({ name: 'sw.content.creator.batch' })">
+            {{ $tc('sw-content-creator.generator.toBatch') }}
+        </sw-button>
+    </template>
+
+    <template #content>
+        <sw-card-view>
+            {% block sw_content_creator_generator_selection %}
+            <sw-card :title="$tc('sw-content-creator.generator.title')">
+                <div class="sw-content-creator-generator__row" style="display:flex; gap:16px;">
+                    <sw-single-select
+                        :label="$tc('sw-content-creator.generator.entityType')"
+                        :options="entityTypeOptions"
+                        :value="entityType"
+                        @update:value="onEntityTypeChange">
+                    </sw-single-select>
+
+                    <sw-single-select
+                        :label="$tc('sw-content-creator.generator.language')"
+                        :options="langOptions"
+                        :value="lang"
+                        @update:value="onLangChange">
+                    </sw-single-select>
+
+                    <sw-single-select
+                        :label="$tc('sw-content-creator.generator.mode')"
+                        :helpText="$tc('sw-content-creator.generator.modeHelp')"
+                        :options="modeOptions"
+                        :value="mode"
+                        @update:value="onModeChange">
+                    </sw-single-select>
+                </div>
+
+                <sw-entity-single-select
+                    :entity="entityDalName"
+                    :context="languageContext"
+                    :label="$tc('sw-content-creator.generator.selectEntity')"
+                    :value="selectedId"
+                    @update:value="onSelectEntity">
+                </sw-entity-single-select>
+
+                <sw-text-field
+                    v-if="['product', 'category', 'manufacturer'].includes(entityType)"
+                    :label="$tc('sw-content-creator.focus.label')"
+                    :helpText="$tc('sw-content-creator.focus.help')"
+                    :value="focusKeyword"
+                    @update:value="(v) => { focusKeyword = v || ''; }">
+                </sw-text-field>
+                <sw-alert v-if="cannibalWarning.length" variant="warning">
+                    {{ $tc('sw-content-creator.focus.cannibalWarning', cannibalWarning.length, { count: cannibalWarning.length }) }}
+                    {{ cannibalWarning.join(', ') }}
+                </sw-alert>
+
+                <div v-if="entityType === 'category'" style="display:flex; gap:16px; margin-top:8px;">
+                    <sw-single-select
+                        :label="$tc('sw-content-creator.variants.angle')"
+                        :helpText="$tc('sw-content-creator.variants.angleHelp')"
+                        :options="variantOptions"
+                        :value="variantAngle"
+                        @update:value="(v) => { variantAngle = v; }">
+                    </sw-single-select>
+
+                    <sw-entity-single-select
+                        entity="category"
+                        :context="languageContext"
+                        :label="$tc('sw-content-creator.variants.reference')"
+                        :helpText="$tc('sw-content-creator.variants.referenceHelp')"
+                        :value="referenceCategoryId"
+                        @update:value="(v) => { referenceCategoryId = v; }">
+                    </sw-entity-single-select>
+                </div>
+            </sw-card>
+            {% endblock %}
+
+            {% block sw_content_creator_generator_current %}
+            <sw-card v-if="entity" :title="$tc('sw-content-creator.generator.currentText')" :isLoading="isLoading">
+                <div v-if="currentScore" style="margin-bottom:12px; display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+                    <span :style="badgeStyle(currentScore)">
+                        {{ $tc('sw-content-creator.generator.score') }}: {{ currentScore.score }} – {{ currentScore.label }}
+                    </span>
+                    <span v-if="fleschOf(currentText)" :style="{ color: fleschOf(currentText).level.color, fontWeight: 600, fontSize: '12px' }">
+                        {{ $tc('sw-content-creator.generator.readability') }}: {{ fleschOf(currentText).score }} – {{ fleschOf(currentText).level.label }}
+                    </span>
+                    <span style="display:flex; gap:6px; margin-left:auto;">
+                        <button type="button" :style="tabStyle('current', 'preview')" @click="setViewTab('current', 'preview')">{{ $tc('sw-content-creator.generator.tabPreview') }}</button>
+                        <button type="button" :style="tabStyle('current', 'marked')" @click="setViewTab('current', 'marked')">{{ $tc('sw-content-creator.generator.tabMarked') }}</button>
+                    </span>
+                </div>
+                <div v-if="currentText && viewTab('current') === 'marked'" v-html="markedHtml(currentText)" style="white-space:pre-wrap;"></div>
+                <div v-else-if="currentText" v-html="currentText"></div>
+                <sw-alert v-else variant="info">{{ $tc('sw-content-creator.generator.noText') }}</sw-alert>
+            </sw-card>
+            {% endblock %}
+
+            {% block sw_content_creator_generator_types %}
+            <template v-if="entity">
+                <sw-card v-for="btn in typeButtons" :key="btn.type" :title="typeLabel(btn.type)">
+                    <div v-if="mode === 'optimize' && btn.kind === 'meta'" style="display:flex; gap:16px; margin-bottom:8px;">
+                        <sw-checkbox-field
+                            v-for="opt in metaFieldOptions"
+                            :key="opt.field"
+                            :label="opt.label"
+                            :value="metaFields[opt.field]"
+                            @update:value="(val) => setMetaField(opt.field, val)">
+                        </sw-checkbox-field>
+                    </div>
+
+                    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                        <sw-button
+                            variant="primary"
+                            :isLoading="generatingType === btn.type"
+                            :disabled="generatingType !== null"
+                            @click="generate(btn.type)">
+                            {{ mode === 'optimize' ? $tc('sw-content-creator.generator.optimize') : $tc('sw-content-creator.generator.generate') }}
+                        </sw-button>
+                        <sw-button v-if="backups[btn.type]" size="small" :disabled="isLoading" @click="restoreBackup(btn.type)">
+                            {{ $tc('sw-content-creator.generator.restore') }}
+                        </sw-button>
+                        <span v-if="backups[btn.type]" style="color:#758ca3; font-size:12px;">
+                            {{ $tc('sw-content-creator.generator.backupFrom') }} {{ new Date(backups[btn.type].createdAt).toLocaleString() }}
+                        </span>
+                    </div>
+
+                    <div v-if="generated[btn.type]" style="margin-top:16px;">
+                        <div v-if="qualityOf(btn.type)" style="margin-bottom:12px; display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+                            <span :style="qualityBadgeStyle(qualityOf(btn.type))">
+                                {{ $tc('sw-content-creator.generator.score') }}: {{ qualityOf(btn.type).score }} – {{ qualityLevelLabel(qualityOf(btn.type).level) }}
+                            </span>
+                            <span v-if="qualityOf(btn.type).originalScore !== null" style="color:#758ca3; font-size:12px;">
+                                {{ $tc('sw-content-creator.generator.beforeScore') }}: {{ qualityOf(btn.type).originalScore }}
+                            </span>
+                            <span v-if="qualityOf(btn.type).passed" style="color:#22c55e; font-weight:600;">
+                                ✓ {{ $tc('sw-content-creator.generator.gatePassed', qualityOf(btn.type).attempts, { attempts: qualityOf(btn.type).attempts }) }}
+                            </span>
+                            <span v-else style="color:#ef4444; font-weight:600;">
+                                ✗ {{ $tc('sw-content-creator.generator.gateFailed') }}
+                            </span>
+                            <span v-if="costOf(btn.type)" style="color:#758ca3; font-size:12px;">
+                                {{ generated[btn.type].usage.input + generated[btn.type].usage.output }} Tokens · {{ costOf(btn.type) }}
+                            </span>
+                            <span v-if="similarityOf(btn.type) !== null" :style="{ color: similarityColor(similarityOf(btn.type)), fontWeight: 600, fontSize: '12px' }">
+                                {{ $tc('sw-content-creator.variants.similarity') }}: {{ similarityOf(btn.type) }}%
+                            </span>
+                        </div>
+                        <div v-if="qualityOf(btn.type) && !qualityOf(btn.type).passed" style="margin-bottom:12px; font-size:12px; color:#758ca3;">
+                            <div v-for="issue in qualityOf(btn.type).lengthIssues" :key="issue.field">
+                                {{ issue.field }}: {{ issue.length }} {{ $tc('sw-content-creator.generator.chars') }} ({{ $tc('sw-content-creator.generator.target') }} {{ issue.min }}-{{ issue.max }})
+                            </div>
+                            <div v-if="qualityOf(btn.type).missingFacts.length">
+                                {{ $tc('sw-content-creator.generator.missingFacts') }}: {{ qualityOf(btn.type).missingFacts.join(', ') }}
+                            </div>
+                            <div v-for="f in qualityOf(btn.type).findings.slice(0, 5)" :key="f.pattern">
+                                „{{ f.pattern }}" ({{ f.count }}×)
+                            </div>
+                        </div>
+
+                        <div v-if="readabilityOf(btn.type)" style="margin-bottom:12px; font-size:13px;">
+                            <strong>{{ $tc('sw-content-creator.readability.title') }}:
+                                {{ readabilityOf(btn.type).passedCount }}/{{ readabilityOf(btn.type).total }}</strong>
+                            <div v-for="check in readabilityOf(btn.type).checks" :key="check.key" style="padding:1px 0;">
+                                <span :style="{ color: check.passed ? '#22c55e' : '#f97316', fontWeight: 600 }">{{ check.passed ? '✓' : '⚠' }}</span>
+                                {{ readabilityLabel(check.key) }}<span v-if="check.detail"> ({{ check.detail }})</span>
+                            </div>
+                        </div>
+
+                        <div v-if="focusChecksOf(btn.type)" style="margin-bottom:12px; font-size:13px;">
+                            <strong>{{ $tc('sw-content-creator.focus.checksTitle') }} „{{ focusChecksOf(btn.type).keyword }}":
+                                {{ focusChecksOf(btn.type).passedCount }}/{{ focusChecksOf(btn.type).total }}</strong>
+                            <div v-for="check in focusChecksOf(btn.type).checks" :key="check.key" style="padding:1px 0;">
+                                <span :style="{ color: check.passed ? '#22c55e' : '#ef4444', fontWeight: 600 }">{{ check.passed ? '✓' : '✗' }}</span>
+                                {{ focusCheckLabel(check.key) }}<span v-if="check.detail"> ({{ check.detail }})</span>
+                            </div>
+                        </div>
+
+                        <template v-if="btn.kind === 'meta'">
+                            <div v-if="serpPreview(btn.type)" style="border:1px solid #d1d9e0; border-radius:8px; padding:14px 16px; margin-bottom:12px; background:#fff; max-width:640px;">
+                                <div style="font-size:12px; color:#758ca3; margin-bottom:6px;">{{ $tc('sw-content-creator.serp.title') }}</div>
+                                <div style="color:#202124; font-size:12px;">{{ entity && entity.name ? entity.name : '' }}</div>
+                                <div style="color:#1a0dab; font-size:20px; font-family:Arial,sans-serif; line-height:1.3;">{{ serpPreview(btn.type).title }}</div>
+                                <div style="color:#4d5156; font-size:14px; font-family:Arial,sans-serif; line-height:1.5;">{{ serpPreview(btn.type).desc }}</div>
+                                <div style="margin-top:10px; font-size:11px; color:#758ca3;">
+                                    Title: {{ serpPreview(btn.type).titlePx }} / {{ serpPreview(btn.type).titleLimit }} px
+                                    <div style="height:4px; background:#eee; border-radius:2px; max-width:300px;">
+                                        <div :style="{ width: serpPreview(btn.type).titlePercent + '%', height: '4px', borderRadius: '2px', backgroundColor: serpPreview(btn.type).titleColor }"></div>
+                                    </div>
+                                    Description: {{ serpPreview(btn.type).descPx }} / {{ serpPreview(btn.type).descLimit }} px
+                                    <div style="height:4px; background:#eee; border-radius:2px; max-width:300px;">
+                                        <div :style="{ width: serpPreview(btn.type).descPercent + '%', height: '4px', borderRadius: '2px', backgroundColor: serpPreview(btn.type).descColor }"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <p><strong>Meta-Title ({{ generated[btn.type].meta.metaTitle.length }}):</strong> {{ generated[btn.type].meta.metaTitle }}</p>
+                            <p><strong>Meta-Description ({{ generated[btn.type].meta.metaDescription.length }}):</strong> {{ generated[btn.type].meta.metaDescription }}</p>
+                            <p><strong>Keywords:</strong> {{ generated[btn.type].meta.metaKeywords }}</p>
+                        </template>
+                        <template v-else>
+                            <div style="display:flex; gap:12px; align-items:center; margin-bottom:8px; flex-wrap:wrap;">
+                                <span v-if="fleschOf(generated[btn.type].content)" :style="{ color: fleschOf(generated[btn.type].content).level.color, fontWeight: 600, fontSize: '12px' }">
+                                    {{ $tc('sw-content-creator.generator.readability') }}: {{ fleschOf(generated[btn.type].content).score }} – {{ fleschOf(generated[btn.type].content).level.label }}
+                                </span>
+                                <span style="display:flex; gap:6px; margin-left:auto;">
+                                    <button type="button" :style="tabStyle(btn.type, 'preview')" @click="setViewTab(btn.type, 'preview')">{{ $tc('sw-content-creator.generator.tabPreview') }}</button>
+                                    <button type="button" :style="tabStyle(btn.type, 'marked')" @click="setViewTab(btn.type, 'marked')">{{ $tc('sw-content-creator.generator.tabMarked') }}</button>
+                                    <button v-if="canDiff(btn.type)" type="button" :style="tabStyle(btn.type, 'diff')" @click="setViewTab(btn.type, 'diff')">{{ $tc('sw-content-creator.generator.tabDiff') }}</button>
+                                </span>
+                            </div>
+                            <div v-if="viewTab(btn.type) === 'marked'" v-html="markedHtml(generated[btn.type].content)" style="white-space:pre-wrap;"></div>
+                            <div v-else-if="viewTab(btn.type) === 'diff' && canDiff(btn.type)" v-html="diffHtml(btn.type)"></div>
+                            <div v-else v-html="generated[btn.type].content"></div>
+                        </template>
+
+                        <div style="margin-top:16px; display:flex; gap:8px; align-items:center;">
+                            <sw-button v-if="canApply(btn.type)" variant="primary" @click="apply(btn.type)">
+                                {{ $tc('sw-content-creator.generator.apply') }}
+                            </sw-button>
+                            <sw-button @click="copyResult(btn)">
+                                {{ $tc('sw-content-creator.generator.copy') }}
+                            </sw-button>
+                            <span v-if="btn.type === 'category_teaser'" style="color:#758ca3; font-size:12px;">
+                                {{ $tc('sw-content-creator.generator.hint') }}
+                            </span>
+                        </div>
+                    </div>
+                </sw-card>
+            </template>
+            {% endblock %}
+        </sw-card-view>
+    </template>
+</sw-page>
+{% endblock %}

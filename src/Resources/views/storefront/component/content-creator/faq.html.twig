@@ -1,0 +1,28 @@
+{# FAQ-Block (ContentCreator): Anzeige + FAQPage-Rich-Snippet.
+   Erwartet die Variable faqHtml (Inhalt des customFields content_creator_faq). #}
+{% set faqItems = content_creator_faq_items(faqHtml) %}
+{% if faqItems|length > 0 %}
+    <div class="content-creator-faq" itemscope>
+        <h2 class="content-creator-faq-title h3">{{ 'contentCreator.faqTitle'|trans|sw_sanitize }}</h2>
+        {% for item in faqItems %}
+            <div class="content-creator-faq-item">
+                <h3 class="content-creator-faq-question h5">{{ item.question }}</h3>
+                <p class="content-creator-faq-answer">{{ item.answer }}</p>
+            </div>
+        {% endfor %}
+    </div>
+    <script type="application/ld+json">
+        {{ {
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            'mainEntity': faqItems|map(item => {
+                '@type': 'Question',
+                'name': item.question,
+                'acceptedAnswer': {
+                    '@type': 'Answer',
+                    'text': item.answer
+                }
+            })
+        }|json_encode()|raw }}
+    </script>
+{% endif %}

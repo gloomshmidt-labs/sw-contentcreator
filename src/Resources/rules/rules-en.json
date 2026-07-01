@@ -1,0 +1,1511 @@
+{
+ "stopwords": {
+  "transitions": [
+   "nevertheless",
+   "in this regard",
+   "as a consequence",
+   "henceforth"
+  ],
+  "emphasis": [
+   "it is important to note that",
+   "is important to note that",
+   "it is worth noting that",
+   "is worth noting that",
+   "it should be noted that",
+   "should be noted that",
+   "it is worth mentioning that",
+   "is worth mentioning that",
+   "it bears mentioning that",
+   "bears mentioning that",
+   "it goes without saying that"
+  ],
+  "summary": [
+   "in conclusion",
+   "to sum up",
+   "in summary",
+   "all things considered"
+  ],
+  "fillers": [
+   "as a matter of fact",
+   "in essence",
+   "essentially",
+   "fundamentally"
+  ],
+  "boilerplate": [
+   "do not hesitate to",
+   "look no further",
+   "wait no longer",
+   "what are you waiting for",
+   "grab yours now"
+  ]
+ },
+ "aiPatterns": {
+  "strong": [
+   {
+    "pattern": "a world of",
+    "score": 15
+   },
+   {
+    "pattern": "a paradise for",
+    "score": 15
+   },
+   {
+    "pattern": "a dream destination for",
+    "score": 15
+   },
+   {
+    "pattern": "a haven for",
+    "score": 12
+   },
+   {
+    "pattern": "sure to delight",
+    "score": 12
+   },
+   {
+    "pattern": "sure to impress",
+    "score": 12
+   },
+   {
+    "pattern": "bring joy to",
+    "score": 10
+   },
+   {
+    "pattern": "bring joy to your life",
+    "score": 12
+   },
+   {
+    "pattern": "bring joy to everyday",
+    "score": 12
+   },
+   {
+    "pattern": "brighten up your",
+    "score": 10
+   },
+   {
+    "pattern": "for your needs",
+    "score": 12
+   },
+   {
+    "pattern": "for all your needs",
+    "score": 15
+   },
+   {
+    "pattern": "valuable educational tool",
+    "score": 15
+   },
+   {
+    "pattern": "invaluable tool",
+    "score": 12
+   },
+   {
+    "pattern": "creativity and imagination",
+    "score": 12
+   },
+   {
+    "pattern": "perfect for any",
+    "score": 10
+   },
+   {
+    "pattern": "ideal for any",
+    "score": 10
+   },
+   {
+    "pattern": "explore our",
+    "score": 8
+   },
+   {
+    "pattern": "discover our",
+    "score": 8
+   },
+   {
+    "pattern": "discover the world",
+    "score": 12
+   },
+   {
+    "pattern": "explore the world",
+    "score": 12
+   },
+   {
+    "pattern": "discover the variety",
+    "score": 10
+   },
+   {
+    "pattern": "explore the variety",
+    "score": 10
+   },
+   {
+    "pattern": "a leading manufacturer",
+    "score": 10
+   },
+   {
+    "pattern": "an excellent choice",
+    "score": 10
+   },
+   {
+    "pattern": "stands out for",
+    "score": 10
+   },
+   {
+    "pattern": "not only",
+    "score": 6,
+    "context": "but also"
+   },
+   {
+    "pattern": "can be a challenge",
+    "score": 10
+   },
+   {
+    "pattern": "high-quality and affordable",
+    "score": 10
+   },
+   {
+    "pattern": "encourage creativity",
+    "score": 8
+   },
+   {
+    "pattern": "foster creativity",
+    "score": 8
+   },
+   {
+    "pattern": "spark imagination",
+    "score": 8
+   },
+   {
+    "pattern": "stimulate the imagination",
+    "score": 8
+   },
+   {
+    "pattern": "safe space",
+    "score": 8
+   },
+   {
+    "pattern": "in a playful way",
+    "score": 10
+   },
+   {
+    "pattern": "lends itself perfectly",
+    "score": 10
+   },
+   {
+    "pattern": "stands for quality",
+    "score": 8
+   },
+   {
+    "pattern": "consider these aspects",
+    "score": 10
+   },
+   {
+    "pattern": "take it to the next level",
+    "score": 12
+   },
+   {
+    "pattern": "the perfect addition to",
+    "score": 10
+   },
+   {
+    "pattern": "designed to meet",
+    "score": 10
+   },
+   {
+    "pattern": "curated selection",
+    "score": 10
+   },
+   {
+    "pattern": "unparalleled quality",
+    "score": 12
+   },
+   {
+    "pattern": "testament to",
+    "score": 8
+   },
+   {
+    "pattern": "in today's fast-paced world",
+    "score": 15
+   },
+   {
+    "pattern": "game-changer",
+    "score": 12
+   },
+   {
+    "pattern": "paradigm shift",
+    "score": 12
+   },
+   {
+    "pattern": "perfect companion",
+    "score": 10
+   },
+   {
+    "pattern": "perfect gift",
+    "score": 10
+   },
+   {
+    "pattern": "ideal gift",
+    "score": 10
+   },
+   {
+    "pattern": "more than just",
+    "score": 8
+   },
+   {
+    "pattern": "comes to life",
+    "score": 10
+   },
+   {
+    "pattern": "come to life",
+    "score": 10
+   },
+   {
+    "pattern": "bring to life",
+    "score": 10
+   },
+   {
+    "pattern": "the world of",
+    "score": 8
+   },
+   {
+    "pattern": "welcome to the world",
+    "score": 10
+   },
+   {
+    "pattern": "immerse yourself",
+    "score": 10
+   },
+   {
+    "pattern": "unforgettable moments",
+    "score": 10
+   },
+   {
+    "pattern": "sets new standards",
+    "score": 12
+   },
+   {
+    "pattern": "since its founding",
+    "score": 8
+   },
+   {
+    "pattern": "for every occasion",
+    "score": 8
+   },
+   {
+    "pattern": "for every taste",
+    "score": 8
+   },
+   {
+    "pattern": "let yourself be inspired",
+    "score": 8
+   },
+   {
+    "pattern": "true classic",
+    "score": 10
+   },
+   {
+    "pattern": "full of charm",
+    "score": 10
+   },
+   {
+    "pattern": "endless possibilities",
+    "score": 12
+   }
+  ],
+  "medium": [
+   {
+    "pattern": "ideal",
+    "score": 5
+   },
+   {
+    "pattern": "perfect",
+    "score": 5
+   },
+   {
+    "pattern": "excellent",
+    "score": 5
+   },
+   {
+    "pattern": "unique",
+    "score": 5
+   },
+   {
+    "pattern": "diverse",
+    "score": 5
+   },
+   {
+    "pattern": "versatile",
+    "score": 5
+   },
+   {
+    "pattern": "indispensable",
+    "score": 6
+   },
+   {
+    "pattern": "exceptional",
+    "score": 5
+   },
+   {
+    "pattern": "stunning",
+    "score": 5
+   },
+   {
+    "pattern": "remarkable",
+    "score": 5
+   },
+   {
+    "pattern": "outstanding",
+    "score": 5
+   },
+   {
+    "pattern": "exquisite",
+    "score": 5
+   },
+   {
+    "pattern": "seamless",
+    "score": 5
+   },
+   {
+    "pattern": "flawless",
+    "score": 5
+   },
+   {
+    "pattern": "impeccable",
+    "score": 5
+   },
+   {
+    "pattern": "meticulous",
+    "score": 5
+   },
+   {
+    "pattern": "craftsmanship",
+    "score": 4
+   },
+   {
+    "pattern": "excellence",
+    "score": 5
+   },
+   {
+    "pattern": "encompasses",
+    "score": 4
+   },
+   {
+    "pattern": "effectively",
+    "score": 3
+   },
+   {
+    "pattern": "meaningfully",
+    "score": 4
+   },
+   {
+    "pattern": "fascinating",
+    "score": 4
+   },
+   {
+    "pattern": "comprehensive",
+    "score": 4
+   },
+   {
+    "pattern": "curated",
+    "score": 5
+   },
+   {
+    "pattern": "innovative",
+    "score": 4
+   },
+   {
+    "pattern": "delightful",
+    "score": 5
+   },
+   {
+    "pattern": "harmonious",
+    "score": 4
+   },
+   {
+    "pattern": "imaginative",
+    "score": 4
+   },
+   {
+    "pattern": "wide range",
+    "score": 5
+   },
+   {
+    "pattern": "wide selection",
+    "score": 5
+   },
+   {
+    "pattern": "vast selection",
+    "score": 5
+   },
+   {
+    "pattern": "high quality",
+    "score": 5
+   },
+   {
+    "pattern": "premium quality",
+    "score": 5
+   },
+   {
+    "pattern": "attention to detail",
+    "score": 4
+   },
+   {
+    "pattern": "offers",
+    "score": 3
+   },
+   {
+    "pattern": "enables",
+    "score": 4
+   },
+   {
+    "pattern": "promotes",
+    "score": 4
+   },
+   {
+    "pattern": "supports",
+    "score": 3
+   },
+   {
+    "pattern": "enhances",
+    "score": 4
+   },
+   {
+    "pattern": "ensuring",
+    "score": 3
+   },
+   {
+    "pattern": "whether",
+    "score": 3,
+    "context": "or"
+   },
+   {
+    "pattern": "elevate your",
+    "score": 6
+   },
+   {
+    "pattern": "transform your",
+    "score": 6
+   },
+   {
+    "pattern": "works of art",
+    "score": 5
+   },
+   {
+    "pattern": "contributing",
+    "score": 3
+   },
+   {
+    "pattern": "eco-friendly",
+    "score": 3
+   },
+   {
+    "pattern": "durable",
+    "score": 3
+   },
+   {
+    "pattern": "leverage",
+    "score": 5
+   },
+   {
+    "pattern": "holistic",
+    "score": 5
+   },
+   {
+    "pattern": "synergy",
+    "score": 5
+   },
+   {
+    "pattern": "navigate",
+    "score": 4
+   },
+   {
+    "pattern": "from classic",
+    "score": 4,
+    "context": "to"
+   },
+   {
+    "pattern": "from traditional",
+    "score": 4,
+    "context": "to"
+   },
+   {
+    "pattern": "wonderfully",
+    "score": 5
+   },
+   {
+    "pattern": "incredibly",
+    "score": 4
+   },
+   {
+    "pattern": "irresistibly",
+    "score": 5
+   },
+   {
+    "pattern": "lovingly",
+    "score": 5
+   },
+   {
+    "pattern": "timeless",
+    "score": 4
+   },
+   {
+    "pattern": "endearing",
+    "score": 5
+   },
+   {
+    "pattern": "enchanting",
+    "score": 5
+   },
+   {
+    "pattern": "captivating",
+    "score": 5
+   },
+   {
+    "pattern": "whimsical",
+    "score": 5
+   },
+   {
+    "pattern": "must-have",
+    "score": 5
+   },
+   {
+    "pattern": "first-class",
+    "score": 4
+   },
+   {
+    "pattern": "guaranteed to",
+    "score": 5
+   },
+   {
+    "pattern": "a touch of",
+    "score": 4
+   },
+   {
+    "pattern": "particularly suitable",
+    "score": 5
+   },
+   {
+    "pattern": "especially suitable",
+    "score": 5
+   },
+   {
+    "pattern": "charming",
+    "score": 3
+   },
+   {
+    "pattern": "our range",
+    "score": 4
+   }
+  ],
+  "weak": [
+   {
+    "pattern": "additionally",
+    "score": 2
+   },
+   {
+    "pattern": "furthermore",
+    "score": 3
+   },
+   {
+    "pattern": "moreover",
+    "score": 3
+   },
+   {
+    "pattern": "however",
+    "score": 2
+   },
+   {
+    "pattern": "likewise",
+    "score": 3
+   },
+   {
+    "pattern": "ultimately",
+    "score": 3
+   },
+   {
+    "pattern": "in addition",
+    "score": 2
+   },
+   {
+    "pattern": "beyond that",
+    "score": 4
+   },
+   {
+    "pattern": "what is more",
+    "score": 4
+   },
+   {
+    "pattern": "not least",
+    "score": 4
+   },
+   {
+    "pattern": "as well as",
+    "score": 1
+   },
+   {
+    "pattern": "thus",
+    "score": 2
+   },
+   {
+    "pattern": "consequently",
+    "score": 2
+   },
+   {
+    "pattern": "at the same time",
+    "score": 2
+   },
+   {
+    "pattern": "equally",
+    "score": 3
+   }
+  ]
+ },
+ "replacements": {
+  "natural": {
+   "utilise": [
+    "use"
+   ],
+   "utilize": [
+    "use"
+   ],
+   "purchase": [
+    "buy",
+    "get"
+   ],
+   "commence": [
+    "start",
+    "begin"
+   ],
+   "facilitate": [
+    "help",
+    "make easier"
+   ],
+   "endeavour": [
+    "try",
+    "aim"
+   ],
+   "endeavor": [
+    "try",
+    "aim"
+   ],
+   "excellently suited": [
+    "great",
+    "well suited"
+   ],
+   "scope of delivery": [
+    "what's included",
+    "included in the box"
+   ],
+   "in the delivery": [
+    "included"
+   ],
+   "wall tattoo": [
+    "wall decal"
+   ],
+   "wall tattoos": [
+    "wall decals"
+   ],
+   "convinces with": [
+    "features",
+    "has"
+   ],
+   "inspires with": [
+    "features",
+    "stands out with"
+   ],
+   "scores with": [
+    "features",
+    "offers"
+   ]
+  }
+ },
+ "passiveToActive": [
+  {
+   "passive": "can be observed",
+   "active": "you can see"
+  },
+  {
+   "passive": "should be considered",
+   "active": "you should consider"
+  },
+  {
+   "passive": "is recommended",
+   "active": "we recommend"
+  },
+  {
+   "passive": "is offered",
+   "active": "we offer"
+  },
+  {
+   "passive": "are offered",
+   "active": "we offer"
+  },
+  {
+   "passive": "is ensured",
+   "active": "we ensure"
+  },
+  {
+   "passive": "is guaranteed",
+   "active": "we guarantee"
+  },
+  {
+   "passive": "was developed",
+   "active": "we developed"
+  },
+  {
+   "passive": "were developed",
+   "active": "we developed"
+  },
+  {
+   "passive": "is designed",
+   "active": "we designed"
+  },
+  {
+   "passive": "are designed",
+   "active": "we designed"
+  },
+  {
+   "passive": "was created",
+   "active": "we created"
+  },
+  {
+   "passive": "were created",
+   "active": "we created"
+  },
+  {
+   "passive": "is made",
+   "active": "we make"
+  },
+  {
+   "passive": "are made",
+   "active": "we make"
+  },
+  {
+   "passive": "should be noted",
+   "active": "note that"
+  },
+  {
+   "passive": "can be moved",
+   "active": "you can move"
+  },
+  {
+   "passive": "can be played",
+   "active": "you can play"
+  },
+  {
+   "passive": "can be washed",
+   "active": "you can wash"
+  },
+  {
+   "passive": "can be used",
+   "active": "you can use"
+  },
+  {
+   "passive": "can be taken",
+   "active": "you can take"
+  },
+  {
+   "passive": "is included",
+   "active": "we include"
+  },
+  {
+   "passive": "are included",
+   "active": "we include"
+  },
+  {
+   "passive": "is supplied",
+   "active": "we supply"
+  },
+  {
+   "passive": "is certified",
+   "active": "has certification"
+  }
+ ],
+ "naturalness": {
+  "colloquialFillers": {
+   "words": [
+    "honestly",
+    "basically",
+    "literally"
+   ],
+   "bonus": -5
+  },
+  "colloquialExpressions": {
+   "words": [
+    "awesome",
+    "cool",
+    "brilliant",
+    "proper",
+    "dead good",
+    "spot on"
+   ],
+   "bonus": -5
+  },
+  "personalAnecdotes": {
+   "patterns": [
+    "i remember",
+    "last week",
+    "the other day",
+    "in our shop"
+   ],
+   "bonus": -8
+  },
+  "directQuestions": {
+   "minCount": 2,
+   "bonus": -5
+  },
+  "specificDetails": {
+   "patterns": [
+    "cm",
+    "mm",
+    "grams",
+    "inches",
+    "ages \\d+",
+    "\\d+ cm"
+   ],
+   "bonus": -3
+  }
+ },
+ "alternatives": {
+  "strong": {
+   "a world of": [
+    "lots of",
+    "plenty of"
+   ],
+   "a paradise for": [
+    "great for",
+    "the right place for"
+   ],
+   "a dream destination for": [
+    "the right place for",
+    "great for"
+   ],
+   "sure to delight": [
+    "delightful",
+    "enjoyable",
+    "a joy"
+   ],
+   "sure to impress": [
+    "impressive",
+    "eye-catching",
+    "remarkable"
+   ],
+   "for your needs": [
+    "for you",
+    "for your purpose"
+   ],
+   "for all your needs": [
+    "for everything you need"
+   ],
+   "valuable educational tool": [
+    "helpful in the classroom",
+    "great for learning"
+   ],
+   "invaluable tool": [
+    "really useful",
+    "very helpful"
+   ],
+   "creativity and imagination": [
+    "creativity",
+    "imagination"
+   ],
+   "explore our": [
+    "have a look at our",
+    "browse our"
+   ],
+   "discover our": [
+    "see our",
+    "browse our"
+   ],
+   "discover the world": [
+    "browse through",
+    "take a look at"
+   ],
+   "explore the world": [
+    "browse through",
+    "take a look at",
+    "dive into"
+   ],
+   "discover the variety": [
+    "see the range",
+    "browse the selection"
+   ],
+   "explore the variety": [
+    "see the range",
+    "browse the selection"
+   ],
+   "an excellent choice": [
+    "a good choice",
+    "recommended"
+   ],
+   "stands out for": [
+    "is known for",
+    "excels at",
+    "is noted for"
+   ],
+   "can be a challenge": [
+    "isn't always easy",
+    "takes some thought"
+   ],
+   "spark imagination": [
+    "get creative",
+    "inspire play"
+   ],
+   "stimulate the imagination": [
+    "inspire creativity",
+    "spark ideas"
+   ],
+   "safe space": [
+    "comfortable setting",
+    "relaxed environment"
+   ],
+   "encourage creativity": [
+    "boost creativity",
+    "inspire creative play"
+   ],
+   "foster creativity": [
+    "support creativity",
+    "build creativity"
+   ],
+   "attention to detail": [
+    "careful work",
+    "fine details"
+   ],
+   "a haven for": [
+    "great for",
+    "a favourite for"
+   ],
+   "bring joy to": [
+    "delight",
+    "please"
+   ],
+   "bring joy to your life": [
+    "brighten your day",
+    "make you happy"
+   ],
+   "bring joy to everyday": [
+    "brighten daily life",
+    "make every day better"
+   ],
+   "brighten up your": [
+    "add colour to your",
+    "enliven your"
+   ],
+   "perfect for any": [
+    "great for any",
+    "suitable for any"
+   ],
+   "ideal for any": [
+    "great for any",
+    "fitting for any"
+   ],
+   "a leading manufacturer": [
+    "a well-known maker",
+    "an established brand"
+   ],
+   "high-quality and affordable": [
+    "quality at good prices",
+    "well-made and affordable"
+   ],
+   "in a playful way": [
+    "playfully",
+    "through play"
+   ],
+   "lends itself perfectly": [
+    "works well",
+    "is well-suited"
+   ],
+   "stands for quality": [
+    "is known for quality",
+    "delivers quality"
+   ],
+   "consider these aspects": [
+    "keep these points in mind",
+    "think about these points"
+   ],
+   "take it to the next level": [
+    "improve",
+    "step up",
+    "go further"
+   ],
+   "the perfect addition to": [
+    "a great addition to",
+    "a fine complement to"
+   ],
+   "designed to meet": [
+    "made for",
+    "built for"
+   ],
+   "curated selection": [
+    "hand-picked range",
+    "selected range"
+   ],
+   "unparalleled quality": [
+    "top quality",
+    "outstanding quality"
+   ],
+   "testament to": [
+    "proof of",
+    "sign of"
+   ],
+   "in today's fast-paced world": [
+    "today",
+    "these days",
+    "now"
+   ],
+   "game-changer": [
+    "breakthrough",
+    "big improvement",
+    "major step"
+   ],
+   "paradigm shift": [
+    "major change",
+    "big shift",
+    "new approach"
+   ],
+   "perfect companion": [
+    "great friend",
+    "lovely cuddle buddy"
+   ],
+   "perfect gift": [
+    "great gift",
+    "lovely present"
+   ],
+   "ideal gift": [
+    "great gift",
+    "nice present"
+   ],
+   "more than just": [
+    "not just",
+    "beyond"
+   ],
+   "comes to life": [
+    "becomes real",
+    "starts moving"
+   ],
+   "come to life": [
+    "become real",
+    "start moving"
+   ],
+   "bring to life": [
+    "animate",
+    "make real"
+   ],
+   "the world of": [
+    "our",
+    "everything about"
+   ],
+   "welcome to the world": [
+    "here you find",
+    "everything about"
+   ],
+   "immerse yourself": [
+    "take a closer look",
+    "have a look"
+   ],
+   "unforgettable moments": [
+    "great moments",
+    "lovely memories"
+   ],
+   "sets new standards": [
+    "raises the bar",
+    "leads the way"
+   ],
+   "since its founding": [
+    "since it started",
+    "since"
+   ],
+   "for every occasion": [
+    "for many occasions",
+    "versatile"
+   ],
+   "for every taste": [
+    "for different tastes",
+    "for all preferences"
+   ],
+   "let yourself be inspired": [
+    "have a look",
+    "browse through"
+   ],
+   "true classic": [
+    "proven favourite",
+    "long-time favourite"
+   ],
+   "full of charm": [
+    "charming",
+    "appealing"
+   ],
+   "endless possibilities": [
+    "many possibilities",
+    "lots of options"
+   ]
+  },
+  "medium": {
+   "ideal": [
+    "well-suited",
+    "great",
+    "wonderful"
+   ],
+   "perfect": [
+    "great",
+    "wonderful"
+   ],
+   "excellent": [
+    "very good",
+    "great",
+    "top-notch"
+   ],
+   "unique": [
+    "special",
+    "distinctive",
+    "one-of-a-kind"
+   ],
+   "diverse": [
+    "varied",
+    "different",
+    "mixed"
+   ],
+   "versatile": [
+    "flexible",
+    "multi-purpose",
+    "adaptable"
+   ],
+   "indispensable": [
+    "important",
+    "really useful",
+    "essential"
+   ],
+   "exceptional": [
+    "special",
+    "unusual",
+    "notable"
+   ],
+   "remarkable": [
+    "notable",
+    "impressive",
+    "striking"
+   ],
+   "stunning": [
+    "beautiful",
+    "lovely",
+    "eye-catching"
+   ],
+   "seamless": [
+    "smooth",
+    "easy",
+    "effortless"
+   ],
+   "meticulous": [
+    "careful",
+    "detailed",
+    "thorough"
+   ],
+   "craftsmanship": [
+    "quality",
+    "workmanship",
+    "skill"
+   ],
+   "fascinating": [
+    "interesting",
+    "intriguing",
+    "captivating"
+   ],
+   "comprehensive": [
+    "full",
+    "complete",
+    "detailed"
+   ],
+   "curated": [
+    "selected",
+    "chosen",
+    "hand-picked"
+   ],
+   "innovative": [
+    "new",
+    "fresh",
+    "modern"
+   ],
+   "delightful": [
+    "lovely",
+    "charming",
+    "enjoyable"
+   ],
+   "harmonious": [
+    "well-matched",
+    "balanced",
+    "coordinated"
+   ],
+   "imaginative": [
+    "creative",
+    "inventive",
+    "original"
+   ],
+   "wide range of": [
+    "many",
+    "lots of",
+    "large selection of"
+   ],
+   "wide range": [
+    "many options",
+    "varied selection",
+    "broad selection"
+   ],
+   "a wide selection of": [
+    "many",
+    "lots of",
+    "a large variety of"
+   ],
+   "wide selection of": [
+    "many",
+    "lots of",
+    "large variety of"
+   ],
+   "a wide selection": [
+    "many choices",
+    "lots to choose from"
+   ],
+   "wide selection": [
+    "broad selection",
+    "large choice"
+   ],
+   "high quality": [
+    "quality",
+    "good quality",
+    "fine quality"
+   ],
+   "offers": [
+    "has",
+    "includes",
+    "provides"
+   ],
+   "enables": [
+    "lets",
+    "allows",
+    "helps"
+   ],
+   "promotes": [
+    "helps with",
+    "backs",
+    "encourages"
+   ],
+   "enhances": [
+    "improves",
+    "boosts",
+    "adds to"
+   ],
+   "ensuring": [
+    "making sure",
+    "so that"
+   ],
+   "supports": [
+    "helps",
+    "backs",
+    "aids"
+   ],
+   "whether": [
+    "if"
+   ],
+   "elevate your": [
+    "improve your",
+    "enhance your"
+   ],
+   "transform your": [
+    "change your",
+    "upgrade your"
+   ],
+   "vast selection": [
+    "large selection",
+    "big choice",
+    "many options"
+   ],
+   "premium quality": [
+    "top quality",
+    "fine quality",
+    "excellent quality"
+   ],
+   "works of art": [
+    "artistic pieces",
+    "beautiful pieces"
+   ],
+   "outstanding": [
+    "impressive",
+    "first-rate",
+    "top-notch"
+   ],
+   "exquisite": [
+    "beautiful",
+    "fine",
+    "elegant"
+   ],
+   "flawless": [
+    "spotless",
+    "without defects"
+   ],
+   "impeccable": [
+    "faultless",
+    "without defects"
+   ],
+   "excellence": [
+    "quality",
+    "high standard"
+   ],
+   "eco-friendly": [
+    "green",
+    "sustainable",
+    "environmentally sound"
+   ],
+   "durable": [
+    "long-lasting",
+    "hard-wearing",
+    "tough"
+   ],
+   "leverage": [
+    "use",
+    "apply",
+    "make use of"
+   ],
+   "holistic": [
+    "complete",
+    "whole",
+    "full"
+   ],
+   "synergy": [
+    "teamwork",
+    "cooperation",
+    "combined effort"
+   ],
+   "navigate": [
+    "find your way",
+    "work through",
+    "handle"
+   ],
+   "wonderfully": [
+    "very",
+    "really"
+   ],
+   "incredibly": [
+    "very",
+    "really",
+    "so"
+   ],
+   "irresistibly": [
+    "very",
+    "really"
+   ],
+   "lovingly": [
+    "carefully",
+    "with care"
+   ],
+   "timeless": [
+    "classic",
+    "lasting"
+   ],
+   "endearing": [
+    "lovely",
+    "sweet",
+    "appealing"
+   ],
+   "enchanting": [
+    "lovely",
+    "beautiful"
+   ],
+   "captivating": [
+    "engaging",
+    "appealing"
+   ],
+   "whimsical": [
+    "playful",
+    "fun"
+   ],
+   "must-have": [
+    "essential",
+    "important"
+   ],
+   "first-class": [
+    "top",
+    "excellent",
+    "very good"
+   ],
+   "guaranteed to": [
+    "sure to",
+    "bound to"
+   ],
+   "a touch of": [
+    "a bit of",
+    "some"
+   ],
+   "particularly suitable": [
+    "well suited",
+    "great"
+   ],
+   "especially suitable": [
+    "well suited",
+    "great"
+   ],
+   "charming": [
+    "lovely",
+    "nice",
+    "pleasant"
+   ],
+   "our range": [
+    "our selection",
+    "what we offer"
+   ]
+  },
+  "weak": {
+   "additionally": [
+    "and",
+    "plus"
+   ],
+   "furthermore": [
+    "and",
+    "plus"
+   ],
+   "moreover": [
+    "and",
+    "plus",
+    "what is more"
+   ],
+   "however": [
+    "but",
+    "though",
+    "yet"
+   ],
+   "likewise": [
+    "too",
+    "as well"
+   ],
+   "ultimately": [
+    "in the end",
+    "finally"
+   ],
+   "in addition": [
+    "also",
+    "and"
+   ],
+   "beyond that": [
+    "also",
+    "and"
+   ],
+   "what is more": [
+    "and",
+    "also"
+   ],
+   "not least": [
+    "also",
+    "especially"
+   ],
+   "thus": [
+    "so",
+    "therefore"
+   ],
+   "consequently": [
+    "so",
+    "therefore"
+   ],
+   "at the same time": [
+    "also",
+    "meanwhile"
+   ],
+   "equally": [
+    "just as",
+    "as much"
+   ]
+  }
+ }
+}
