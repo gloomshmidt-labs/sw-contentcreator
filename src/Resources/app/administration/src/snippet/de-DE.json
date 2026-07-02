@@ -77,7 +77,7 @@
             "restored": "Vorheriger Stand wiederhergestellt",
             "backupFrom": "Backup vom",
             "tabPreview": "Vorschau",
-            "tabMarked": "Markiert",
+            "tabMarked": "KI-Muster",
             "tabDiff": "Diff",
             "apply": "Übernehmen & speichern",
             "copy": "Kopieren",
@@ -86,7 +86,8 @@
             "result": "Ergebnis",
             "toBatch": "Zur Stapelverarbeitung",
             "hint": "Der Teaser wird beim Übernehmen in den Text-Slot des Kategorie-Layouts geschrieben (erster Text-Slot vor dem Produkt-Listing).",
-            "channelFirst": "Bitte zuerst einen Verkaufskanal wählen — dann erscheint der Kategoriebaum dieses Shops."
+            "channelFirst": "Bitte zuerst einen Verkaufskanal wählen — dann erscheint der Kategoriebaum dieses Shops.",
+            "currentMeta": "Aktuelle Meta-Angaben"
         },
         "levels": {
             "excellent": "Ausgezeichnet",

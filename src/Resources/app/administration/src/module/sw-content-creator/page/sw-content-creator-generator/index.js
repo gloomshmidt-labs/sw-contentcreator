@@ -45,6 +45,8 @@ Component.register('sw-content-creator-generator', {
             focusKeyword: '',
             cannibalWarning: [],
             serverText: null,
+            serverTeaser: '',
+            serverMeta: null,
         };
     },
 
@@ -339,6 +341,8 @@ Component.register('sw-content-creator-generator', {
             this.selectedId = null;
             this.entity = null;
             this.serverText = null;
+            this.serverTeaser = '';
+            this.serverMeta = null;
             this.generated = {};
         },
 
@@ -387,8 +391,20 @@ Component.register('sw-content-creator-generator', {
                 id,
                 languageId: this.languageId || Shopware.Context.api.languageId,
             })
-                .then((res) => { this.serverText = res.text || ''; })
-                .catch(() => { this.serverText = null; });
+                .then((res) => {
+                    this.serverText = res.text || '';
+                    this.serverTeaser = res.teaser || '';
+                    this.serverMeta = {
+                        metaTitle: res.metaTitle || '',
+                        metaDescription: res.metaDescription || '',
+                        keywords: res.keywords || '',
+                    };
+                })
+                .catch(() => {
+                    this.serverText = null;
+                    this.serverTeaser = '';
+                    this.serverMeta = null;
+                });
         },
 
         // Fokus-Keyword an der Entity persistieren (translatable customField)

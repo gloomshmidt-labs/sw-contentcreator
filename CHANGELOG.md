@@ -3,6 +3,14 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.17.0] - 2026-07-02
+
+### Fixed / Changed (User-Feedback zur Anzeige)
+- **„Vorschau" zeigt jetzt echtes HTML mit Absätzen**: Der Server liefert für die Anzeige das Roh-HTML (`existingHtml`), tag-bereinigt bleibt nur die Prompt-Variante — vorher erschien der Kategorien-/Produkttext als zusammenhängender Klumpen.
+- **Tab „Markiert" heißt jetzt „KI-Muster"** — er hebt erkannte KI-Formulierungen farblich hervor (das ist der Unterschied zur Vorschau).
+- **Teaser sauber getrennt**: Der Teaser-Slot wird nicht mehr in den Detailtext gemischt (weder in der Anzeige noch in der Bestand-Kaskade) und kann nie mehr fälschlich als Detail-Slot beschrieben werden. Er erscheint separat unter dem aktuellen Text.
+- **IST-Meta-Angaben werden angezeigt**: Meta-Title, Meta-Description (je mit Zeichenzahl) und Keywords des aktuellen Objekts stehen jetzt in der „Aktueller Text"-Karte.
+
 ## [0.16.0] - 2026-07-02
 
 ### Changed (User-Feedback)

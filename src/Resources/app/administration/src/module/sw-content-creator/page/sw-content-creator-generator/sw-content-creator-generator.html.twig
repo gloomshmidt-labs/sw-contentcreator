@@ -120,6 +120,17 @@
                 </div>
                 <div v-if="currentText && viewTab('current') === 'marked'" v-html="markedHtml(currentText)" style="white-space:pre-wrap;"></div>
                 <div v-else-if="currentText" v-html="currentText"></div>
+
+                <div v-if="serverTeaser" style="margin-top:12px; border-top:1px solid #e5e9f0; padding-top:8px; font-size:13px;">
+                    <strong>{{ $tc('sw-content-creator.types.category_teaser') }}:</strong> {{ serverTeaser }}
+                </div>
+
+                <div v-if="serverMeta" style="margin-top:12px; border-top:1px solid #e5e9f0; padding-top:8px; font-size:13px;">
+                    <p style="font-weight:600; margin-bottom:4px;">{{ $tc('sw-content-creator.generator.currentMeta') }}</p>
+                    <p><strong>Meta-Title:</strong> {{ serverMeta.metaTitle || '—' }} <span v-if="serverMeta.metaTitle" style="color:#758ca3;">({{ serverMeta.metaTitle.length }} {{ $tc('sw-content-creator.generator.chars') }})</span></p>
+                    <p><strong>Meta-Description:</strong> {{ serverMeta.metaDescription || '—' }} <span v-if="serverMeta.metaDescription" style="color:#758ca3;">({{ serverMeta.metaDescription.length }} {{ $tc('sw-content-creator.generator.chars') }})</span></p>
+                    <p><strong>Keywords:</strong> {{ serverMeta.keywords || '—' }}</p>
+                </div>
                 <sw-alert v-else variant="info">{{ $tc('sw-content-creator.generator.noText') }}</sw-alert>
             </sw-card>
             {% endblock %}

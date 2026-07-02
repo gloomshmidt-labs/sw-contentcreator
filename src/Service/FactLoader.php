@@ -44,6 +44,7 @@ class FactLoader
             'manufacturer' => (string) ($manufacturer->getTranslation('name') ?? ''),
             'focusKeyword' => $this->focusKeyword($manufacturer),
             'existingText' => trim(strip_tags($description)),
+            'existingHtml' => trim($description),
             '_hasDescription' => trim($description) !== '',
         ];
     }
@@ -100,6 +101,7 @@ class FactLoader
             'existingMetaTitle' => (string) ($product->getMetaTitle() ?? ''),
             'existingMetaDescription' => (string) ($product->getMetaDescription() ?? ''),
             'existingText' => trim(strip_tags($description)),
+            'existingHtml' => trim($description),
             'existingFaq' => $this->existingFaq($product),
             '_hasDescription' => trim($description) !== '',
         ];
@@ -141,22 +143,29 @@ class FactLoader
         }
 
         // Bestandstext-Kaskade (Tool-Lösung): description → statische Text-Slots
-        // im Kategorie-Layout (slotConfig) → Text-Slots der Erlebniswelt selbst.
-        $existingText = trim(strip_tags($description));
-        if ($existingText === '') {
+        // im Kategorie-Layout (slotConfig, OHNE den Teaser-Slot — der ist ein
+        // eigener Texttyp) → Text-Slots der Erlebniswelt selbst.
+        // existingHtml = Roh-HTML für die Admin-Anzeige, existingText = tag-
+        // bereinigt für die Prompts.
+        $existingHtml = trim($description);
+        if (trim(strip_tags($existingHtml)) === '') {
             $slotTexts = [];
-            foreach ($slotConfig as $config) {
+            foreach ($slotConfig as $slotId => $config) {
+                if ((string) $slotId === (string) $teaserSlotId) {
+                    continue;
+                }
                 $content = $config['content'] ?? [];
                 $value = (string) ($content['value'] ?? '');
                 if (($content['source'] ?? '') === 'static' && mb_strlen(trim(strip_tags($value))) > 10) {
                     $slotTexts[] = trim($value);
                 }
             }
-            $existingText = trim(strip_tags(implode("\n\n", $slotTexts)));
+            $existingHtml = implode("\n\n", $slotTexts);
         }
-        if ($existingText === '' && $category->getCmsPageId() !== null) {
-            $existingText = trim(strip_tags($this->slotResolver->pageText($category->getCmsPageId(), $context)));
+        if (trim(strip_tags($existingHtml)) === '' && $category->getCmsPageId() !== null) {
+            $existingHtml = $this->slotResolver->pageText($category->getCmsPageId(), $context);
         }
+        $existingText = trim(strip_tags($existingHtml));
 
         return [
             'name' => (string) ($category->getName() ?? ''),
@@ -166,6 +175,7 @@ class FactLoader
             'existingMetaTitle' => (string) ($category->getMetaTitle() ?? ''),
             'existingMetaDescription' => (string) ($category->getMetaDescription() ?? ''),
             'existingText' => $existingText,
+            'existingHtml' => trim($existingHtml),
             'existingTeaser' => $teaser,
             'existingFaq' => $this->existingFaq($category),
             '_hasDescription' => $existingText !== '',

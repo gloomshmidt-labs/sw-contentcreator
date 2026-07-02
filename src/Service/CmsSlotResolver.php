@@ -91,7 +91,13 @@ class CmsSlotResolver
             return null;
         }
 
+        // Teaser-Slot ist ein eigener Texttyp — nie als Detail-Slot behandeln
+        $teaserSlotId = $this->categoryTeaserSlotId($categoryId, $context);
+
         foreach ($category->getTranslation('slotConfig') ?? [] as $slotId => $config) {
+            if ((string) $slotId === (string) $teaserSlotId) {
+                continue;
+            }
             $content = $config['content'] ?? [];
             $value = (string) ($content['value'] ?? '');
             if (($content['source'] ?? '') === 'static' && mb_strlen(trim(strip_tags($value))) > 10) {

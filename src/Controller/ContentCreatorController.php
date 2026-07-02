@@ -74,8 +74,11 @@ class ContentCreatorController extends AbstractController
 
             return new JsonResponse([
                 'success' => true,
-                'text' => (string) ($facts['existingText'] ?? ''),
+                'text' => (string) ($facts['existingHtml'] ?? $facts['existingText'] ?? ''),
                 'teaser' => (string) ($facts['existingTeaser'] ?? ''),
+                'metaTitle' => (string) ($facts['existingMetaTitle'] ?? ''),
+                'metaDescription' => (string) ($facts['existingMetaDescription'] ?? ''),
+                'keywords' => (string) ($facts['keywords'] ?? ''),
             ]);
         } catch (\Throwable $e) {
             return new JsonResponse(['success' => false, 'error' => $e->getMessage()], 400);

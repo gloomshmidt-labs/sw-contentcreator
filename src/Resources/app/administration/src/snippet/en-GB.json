@@ -77,7 +77,7 @@
             "restored": "Previous state restored",
             "backupFrom": "Backup from",
             "tabPreview": "Preview",
-            "tabMarked": "Marked",
+            "tabMarked": "AI patterns",
             "tabDiff": "Diff",
             "apply": "Apply & save",
             "copy": "Copy",
@@ -86,7 +86,8 @@
             "result": "Result",
             "toBatch": "Go to batch processing",
             "hint": "When applied, the teaser is written into the text slot of the category layout (first text slot before the product listing).",
-            "channelFirst": "Please select a sales channel first — the category tree of that shop will then appear."
+            "channelFirst": "Please select a sales channel first — the category tree of that shop will then appear.",
+            "currentMeta": "Current meta data"
         },
         "levels": {
             "excellent": "Excellent",
