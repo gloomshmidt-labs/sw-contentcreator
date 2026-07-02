@@ -3,6 +3,12 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.18.0] - 2026-07-02
+
+### Added (User-Wunsch: Nachbearbeitung vor dem Übernehmen)
+- **„Bearbeiten"-Tab** für alle generierten Texte (Beschreibung, Teaser, Detailtext, FAQ, Portrait): HTML-Quelltext im Monospace-Editor direkt nachbearbeiten — Änderungen fließen sofort in Vorschau, KI-Muster-Ansicht, Diff und „Übernehmen & speichern" ein.
+- **Meta-Angaben editierbar**: Generierte Meta-Title/-Description/Keywords sind jetzt Eingabefelder mit Live-Zeichenzähler (inkl. Zielbereich) — die pixelgenaue Google-Vorschau aktualisiert sich beim Tippen (E2E verifiziert: Zähler + Pixel-Balken reagieren live).
+
 ## [0.17.0] - 2026-07-02
 
 ### Fixed / Changed (User-Feedback zur Anzeige)

@@ -232,9 +232,21 @@
                                     </div>
                                 </div>
                             </div>
-                            <p><strong>Meta-Title ({{ generated[btn.type].meta.metaTitle.length }}):</strong> {{ generated[btn.type].meta.metaTitle }}</p>
-                            <p><strong>Meta-Description ({{ generated[btn.type].meta.metaDescription.length }}):</strong> {{ generated[btn.type].meta.metaDescription }}</p>
-                            <p><strong>Keywords:</strong> {{ generated[btn.type].meta.metaKeywords }}</p>
+                            <sw-text-field
+                                :label="'Meta-Title (' + generated[btn.type].meta.metaTitle.length + ' ' + $tc('sw-content-creator.generator.chars') + ', Ziel 50-60)'"
+                                :value="generated[btn.type].meta.metaTitle"
+                                @update:value="(v) => onEditMeta(btn.type, 'metaTitle', v)">
+                            </sw-text-field>
+                            <sw-textarea-field
+                                :label="'Meta-Description (' + generated[btn.type].meta.metaDescription.length + ' ' + $tc('sw-content-creator.generator.chars') + ', Ziel 140-155)'"
+                                :value="generated[btn.type].meta.metaDescription"
+                                @update:value="(v) => onEditMeta(btn.type, 'metaDescription', v)">
+                            </sw-textarea-field>
+                            <sw-text-field
+                                label="Keywords"
+                                :value="generated[btn.type].meta.metaKeywords"
+                                @update:value="(v) => onEditMeta(btn.type, 'metaKeywords', v)">
+                            </sw-text-field>
                         </template>
                         <template v-else>
                             <div style="display:flex; gap:12px; align-items:center; margin-bottom:8px; flex-wrap:wrap;">
@@ -245,10 +257,18 @@
                                     <button type="button" :style="tabStyle(btn.type, 'preview')" @click="setViewTab(btn.type, 'preview')">{{ $tc('sw-content-creator.generator.tabPreview') }}</button>
                                     <button type="button" :style="tabStyle(btn.type, 'marked')" @click="setViewTab(btn.type, 'marked')">{{ $tc('sw-content-creator.generator.tabMarked') }}</button>
                                     <button v-if="canDiff(btn.type)" type="button" :style="tabStyle(btn.type, 'diff')" @click="setViewTab(btn.type, 'diff')">{{ $tc('sw-content-creator.generator.tabDiff') }}</button>
+                                    <button type="button" :style="tabStyle(btn.type, 'edit')" @click="setViewTab(btn.type, 'edit')">{{ $tc('sw-content-creator.generator.tabEdit') }}</button>
                                 </span>
                             </div>
                             <div v-if="viewTab(btn.type) === 'marked'" v-html="markedHtml(generated[btn.type].content)" style="white-space:pre-wrap;"></div>
                             <div v-else-if="viewTab(btn.type) === 'diff' && canDiff(btn.type)" v-html="diffHtml(btn.type)"></div>
+                            <template v-else-if="viewTab(btn.type) === 'edit'">
+                                <textarea
+                                    :value="generated[btn.type].content"
+                                    @input="(e) => onEditContent(btn.type, e.target.value)"
+                                    style="width:100%; min-height:280px; font-family:monospace; font-size:12px; padding:8px; border:1px solid #d1d9e0; border-radius:4px;"></textarea>
+                                <p style="color:#758ca3; font-size:12px; margin-top:4px;">{{ $tc('sw-content-creator.generator.editHint') }}</p>
+                            </template>
                             <div v-else v-html="generated[btn.type].content"></div>
                         </template>
 

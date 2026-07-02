@@ -87,7 +87,9 @@
             "toBatch": "Zur Stapelverarbeitung",
             "hint": "Der Teaser wird beim Übernehmen in den Text-Slot des Kategorie-Layouts geschrieben (erster Text-Slot vor dem Produkt-Listing).",
             "channelFirst": "Bitte zuerst einen Verkaufskanal wählen — dann erscheint der Kategoriebaum dieses Shops.",
-            "currentMeta": "Aktuelle Meta-Angaben"
+            "currentMeta": "Aktuelle Meta-Angaben",
+            "tabEdit": "Bearbeiten",
+            "editHint": "HTML-Quelltext direkt bearbeiten — Änderungen fließen sofort in Vorschau, Diff und „Übernehmen & speichern“ ein."
         },
         "levels": {
             "excellent": "Ausgezeichnet",

@@ -421,6 +421,23 @@ Component.register('sw-content-creator-generator', {
             return this.repository.save(this.entity, this.languageContext).catch(() => {});
         },
 
+        // Nachbearbeitung: Änderungen fließen direkt in Vorschau/Diff/Übernehmen,
+        // denn alle lesen generated[type]
+        onEditContent(type, value) {
+            if (this.generated[type]) {
+                this.generated[type] = { ...this.generated[type], content: value };
+            }
+        },
+
+        onEditMeta(type, field, value) {
+            if (this.generated[type]?.meta) {
+                this.generated[type] = {
+                    ...this.generated[type],
+                    meta: { ...this.generated[type].meta, [field]: value || '' },
+                };
+            }
+        },
+
         typeLabel(type) {
             return this.$tc(`sw-content-creator.types.${type}`);
         },

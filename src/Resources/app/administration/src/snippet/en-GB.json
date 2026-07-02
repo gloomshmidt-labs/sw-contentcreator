@@ -87,7 +87,9 @@
             "toBatch": "Go to batch processing",
             "hint": "When applied, the teaser is written into the text slot of the category layout (first text slot before the product listing).",
             "channelFirst": "Please select a sales channel first — the category tree of that shop will then appear.",
-            "currentMeta": "Current meta data"
+            "currentMeta": "Current meta data",
+            "tabEdit": "Edit",
+            "editHint": "Edit the HTML source directly — changes flow immediately into preview, diff and “Apply & save”."
         },
         "levels": {
             "excellent": "Excellent",
