@@ -147,7 +147,7 @@
         },
         "rename": {
             "title": "SEO file names (product images)",
-            "hint": "Finds product images with article-number/hash file names (e.g. 15601a.jpg) and suggests descriptive names from product name + alt text. Every rename is logged — the export generates the nginx 301 redirects for Plesk.",
+            "hint": "Finds product images with article-number/hash file names (e.g. 15601a.jpg) and suggests descriptive names from product name + alt text (no AI, deterministic). TIP: Generate alt texts first (gap scan → vision batch) — without descriptive alts only number suffixes (-2, -3) remain. Every rename is logged — the export generates the nginx 301 redirects for Plesk.",
             "scan": "Scan file names",
             "export": "Download nginx redirects",
             "found": "{count} image(s) with non-descriptive file names (max 50 shown)",

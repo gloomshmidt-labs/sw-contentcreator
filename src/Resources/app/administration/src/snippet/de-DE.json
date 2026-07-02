@@ -147,7 +147,7 @@
         },
         "rename": {
             "title": "SEO-Dateinamen (Produktbilder)",
-            "hint": "Findet Produktbilder mit Artikelnummer-/Hash-Dateinamen (z.B. 15601a.jpg) und schlägt beschreibende Namen aus Produktname + Alt-Text vor. Jede Umbenennung wird protokolliert — der Export erzeugt daraus die nginx-301-Redirects für Plesk.",
+            "hint": "Findet Produktbilder mit Artikelnummer-/Hash-Dateinamen (z.B. 15601a.jpg) und schlägt beschreibende Namen aus Produktname + Alt-Text vor (ohne KI, deterministisch). TIPP: Erst Alt-Texte generieren (Lücken-Scan → Vision-Batch) — ohne beschreibende Alts bleiben nur Nummern-Suffixe (-2, -3). Jede Umbenennung wird protokolliert — der Export erzeugt daraus die nginx-301-Redirects für Plesk.",
             "scan": "Dateinamen scannen",
             "export": "nginx-Redirects herunterladen",
             "found": "{count} Bild(er) mit nicht-beschreibendem Dateinamen (max. 50 angezeigt)",
