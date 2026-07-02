@@ -11,6 +11,7 @@ use ContentCreator\Service\FactLoader;
 use ContentCreator\Service\FreshnessScanner;
 use ContentCreator\Service\GapScanner;
 use ContentCreator\Service\LineBreakScanner;
+use ContentCreator\Service\MediaRenamer;
 use ContentCreator\Service\Provider\AiRequest;
 use ContentCreator\Service\ProviderRegistry;
 use ContentCreator\Service\QualityChecker;
@@ -23,6 +24,7 @@ use Shopware\Core\System\SystemConfig\SystemConfigService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route(defaults: ['_routeScope' => ['api']])]
@@ -42,6 +44,7 @@ class ContentCreatorController extends AbstractController
         private readonly QualityReport $qualityReport,
         private readonly CannibalizationScanner $cannibalizationScanner,
         private readonly FreshnessScanner $freshnessScanner,
+        private readonly MediaRenamer $mediaRenamer,
         private readonly Connection $connection
     ) {
     }
@@ -352,6 +355,54 @@ class ContentCreatorController extends AbstractController
         } catch (\Throwable $e) {
             return new JsonResponse(['success' => false, 'error' => $e->getMessage()], 400);
         }
+    }
+
+    #[Route(path: '/api/content-creator/media-rename/scan', name: 'api.content-creator.media-rename.scan', defaults: ['_acl' => ['content_creator.viewer']], methods: ['POST'])]
+    public function mediaRenameScan(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true) ?: [];
+        $languageId = (string) ($data['languageId'] ?? '');
+        if ($languageId === '') {
+            return new JsonResponse(['success' => false, 'error' => 'languageId ist erforderlich.'], 400);
+        }
+
+        try {
+            return new JsonResponse(['success' => true, 'items' => $this->mediaRenamer->scan($languageId)]);
+        } catch (\Throwable $e) {
+            return new JsonResponse(['success' => false, 'error' => $e->getMessage()], 400);
+        }
+    }
+
+    #[Route(path: '/api/content-creator/media-rename/apply', name: 'api.content-creator.media-rename.apply', defaults: ['_acl' => ['content_creator.editor']], methods: ['POST'])]
+    public function mediaRenameApply(Request $request, Context $context): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true) ?: [];
+        $items = \is_array($data['items'] ?? null) ? $data['items'] : [];
+        if ($items === []) {
+            return new JsonResponse(['success' => false, 'error' => 'items sind erforderlich.'], 400);
+        }
+
+        $renamed = 0;
+        $errors = [];
+        foreach ($items as $item) {
+            try {
+                $this->mediaRenamer->rename((string) ($item['mediaId'] ?? ''), (string) ($item['newName'] ?? ''), $context);
+                $renamed++;
+            } catch (\Throwable $e) {
+                $errors[] = ($item['currentName'] ?? $item['mediaId'] ?? '?') . ': ' . $e->getMessage();
+            }
+        }
+
+        return new JsonResponse(['success' => true, 'renamed' => $renamed, 'errors' => \array_slice($errors, 0, 10)]);
+    }
+
+    #[Route(path: '/api/content-creator/media-rename/export', name: 'api.content-creator.media-rename.export', defaults: ['_acl' => ['content_creator.viewer']], methods: ['GET'])]
+    public function mediaRenameExport(): Response
+    {
+        return new Response($this->mediaRenamer->exportNginx(), 200, [
+            'Content-Type' => 'text/plain; charset=utf-8',
+            'Content-Disposition' => 'attachment; filename="contentcreator-media-redirects.conf"',
+        ]);
     }
 
     #[Route(path: '/api/content-creator/freshness', name: 'api.content-creator.freshness', defaults: ['_acl' => ['content_creator.viewer']], methods: ['POST'])]

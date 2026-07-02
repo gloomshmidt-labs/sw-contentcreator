@@ -145,6 +145,16 @@
             "paragraphLength": "Paragraph length",
             "headingDensity": "Subheading density"
         },
+        "rename": {
+            "title": "SEO file names (product images)",
+            "hint": "Finds product images with article-number/hash file names (e.g. 15601a.jpg) and suggests descriptive names from product name + alt text. Every rename is logged — the export generates the nginx 301 redirects for Plesk.",
+            "scan": "Scan file names",
+            "export": "Download nginx redirects",
+            "found": "{count} image(s) with non-descriptive file names (max 50 shown)",
+            "warning": "Renaming changes the image URLs. Afterwards download the redirect file and include it in Plesk (Apache & nginx settings → Additional nginx directives) so old URLs redirect via 301.",
+            "apply": "Rename {count} image(s) now",
+            "done": "{renamed} image(s) renamed ({errors} errors) — update the redirect file!"
+        },
         "freshness": {
             "scan": "Check freshness",
             "changed": "Data changed since generation",

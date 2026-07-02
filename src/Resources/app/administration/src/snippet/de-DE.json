@@ -145,6 +145,16 @@
             "paragraphLength": "Absatzlänge",
             "headingDensity": "Zwischenüberschriften-Dichte"
         },
+        "rename": {
+            "title": "SEO-Dateinamen (Produktbilder)",
+            "hint": "Findet Produktbilder mit Artikelnummer-/Hash-Dateinamen (z.B. 15601a.jpg) und schlägt beschreibende Namen aus Produktname + Alt-Text vor. Jede Umbenennung wird protokolliert — der Export erzeugt daraus die nginx-301-Redirects für Plesk.",
+            "scan": "Dateinamen scannen",
+            "export": "nginx-Redirects herunterladen",
+            "found": "{count} Bild(er) mit nicht-beschreibendem Dateinamen (max. 50 angezeigt)",
+            "warning": "Beim Umbenennen ändern sich die Bild-URLs. Danach die Redirect-Datei herunterladen und in Plesk einbinden (Apache & nginx Einstellungen → Zusätzliche nginx-Anweisungen), damit alte URLs per 301 weiterleiten.",
+            "apply": "{count} Bild(er) jetzt umbenennen",
+            "done": "{renamed} Bild(er) umbenannt ({errors} Fehler) — Redirect-Datei aktualisieren!"
+        },
         "freshness": {
             "scan": "Freshness prüfen",
             "changed": "Daten seit Generierung geändert",

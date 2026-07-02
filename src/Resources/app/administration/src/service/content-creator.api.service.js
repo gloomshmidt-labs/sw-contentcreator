@@ -72,6 +72,24 @@ export default class ContentCreatorApiService extends ApiService {
             .then((response) => ApiService.handleResponse(response));
     }
 
+    mediaRenameScan(payload) {
+        return this.httpClient
+            .post('/content-creator/media-rename/scan', payload, { headers: this.getBasicHeaders() })
+            .then((response) => ApiService.handleResponse(response));
+    }
+
+    mediaRenameApply(items) {
+        return this.httpClient
+            .post('/content-creator/media-rename/apply', { items }, { headers: this.getBasicHeaders() })
+            .then((response) => ApiService.handleResponse(response));
+    }
+
+    mediaRenameExport() {
+        return this.httpClient
+            .get('/content-creator/media-rename/export', { headers: this.getBasicHeaders(), responseType: 'text' })
+            .then((response) => response.data);
+    }
+
     freshness(payload) {
         return this.httpClient
             .post('/content-creator/freshness', payload, { headers: this.getBasicHeaders() })

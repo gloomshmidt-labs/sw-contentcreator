@@ -3,6 +3,14 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.13.0] - 2026-07-02
+
+### Added
+- **SEO-Dateinamen für Produktbilder** (Batch-Seite): Scan findet Artikelnummer-/Hash-Dateinamen (`15601a.jpg`), schlägt beschreibende Namen aus Produktname + Alt-Text vor (Dry-Run-Vorschau) und benennt per Core-FileSaver um (inkl. Thumbnails). Jede Umbenennung wird protokolliert (`content_creator_media_rename`).
+- **nginx-301-Export**: Aus dem Protokoll wird eine Redirect-Datei generiert (exakte `location`-Blöcke inkl. ALLER Thumbnail-Größen, verkettete Umbenennungen aufgelöst) — zum Einbinden in Plesk („Zusätzliche nginx-Anweisungen"), damit alte Bild-URLs per 301 erhalten bleiben (Google Bilder, externe Links). Routen: `POST /api/content-creator/media-rename/scan|apply`, `GET …/export`.
+- Hintergrund (Live-Analyse): Beim Umbenennen ändert sich die KOMPLETTE Media-URL (auch die Hash-Verzeichnisse, da Shopware den physischen Dateinamen hasht) — ohne Redirects wären alte URLs tot. Statischer nginx-Export statt PHP-404-Fallback: kein Kernel-Boot für Bot-Misses, passt zum bestehenden Plesk-Include-Workflow.
+- Hinweis: Bilder, die an mehreren Produkten hängen, erhalten den Namen des zuerst gefundenen Produkts.
+
 ## [0.12.0] - 2026-07-02
 
 ### Added (Bilder-SEO, aus Live-Shop-Analyse)

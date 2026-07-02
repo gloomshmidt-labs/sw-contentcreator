@@ -185,6 +185,44 @@
             </sw-card>
             {% endblock %}
 
+            {% block sw_content_creator_batch_media_rename %}
+            <sw-card :title="$tc('sw-content-creator.rename.title')">
+                <p style="color:#758ca3; font-size:13px; margin-bottom:12px;">
+                    {{ $tc('sw-content-creator.rename.hint') }}
+                </p>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    <sw-button :isLoading="renameBusy" @click="scanMediaRenames">
+                        {{ $tc('sw-content-creator.rename.scan') }}
+                    </sw-button>
+                    <sw-button @click="downloadRedirects">
+                        {{ $tc('sw-content-creator.rename.export') }}
+                    </sw-button>
+                </div>
+
+                <template v-if="renameItems">
+                    <p style="margin-top:12px; font-weight:600;">
+                        {{ $tc('sw-content-creator.rename.found', renameItems.length, { count: renameItems.length }) }}
+                    </p>
+                    <div v-for="item in renameItems.slice(0, 50)" :key="item.mediaId" style="font-size:13px; padding:2px 0; display:flex; gap:8px;">
+                        <span style="color:#758ca3; min-width:180px;">{{ item.currentName }}</span>
+                        <span>→ <strong>{{ item.suggestedName }}</strong></span>
+                        <span style="color:#758ca3;">({{ item.productName }})</span>
+                    </div>
+                    <sw-alert v-if="renameItems.length" variant="warning" style="margin-top:8px;">
+                        {{ $tc('sw-content-creator.rename.warning') }}
+                    </sw-alert>
+                    <sw-button
+                        v-if="renameItems.length"
+                        variant="primary"
+                        style="margin-top:8px;"
+                        :isLoading="renameBusy"
+                        @click="applyMediaRenames">
+                        {{ $tc('sw-content-creator.rename.apply', renameItems.length, { count: renameItems.length }) }}
+                    </sw-button>
+                </template>
+            </sw-card>
+            {% endblock %}
+
             {% block sw_content_creator_batch_linebreaks %}
             <sw-card :title="$tc('sw-content-creator.linebreaks.title')">
                 <p style="color:#758ca3; font-size:13px; margin-bottom:12px;">

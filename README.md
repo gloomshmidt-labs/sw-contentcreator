@@ -69,6 +69,16 @@ Produkte sind kanalneutral: In Produkt-Texten und -Meta erscheint nie der Shopna
 
 > Für die Stapelverarbeitung muss ein Message-Worker laufen (Admin-Worker oder `bin/console messenger:consume`).
 
+## SEO-Dateinamen & Bild-Redirects (Plesk)
+
+Die Batch-Seite kann Produktbilder mit Artikelnummer-/Hash-Dateinamen auf beschreibende Namen umbenennen. **Wichtig:** Dabei ändert sich die komplette Bild-URL — damit alte URLs (Google Bilder, externe Links) erhalten bleiben:
+
+1. Nach jedem Umbenennungs-Lauf **„nginx-Redirects herunterladen"** klicken.
+2. Den Inhalt der Datei in Plesk unter **Apache & nginx Einstellungen → Zusätzliche nginx-Anweisungen** der Domain einfügen (oder als `include`-Datei ablegen) und übernehmen.
+3. Die Datei enthält immer ALLE bisherigen Redirects (inkl. Thumbnails) — bestehende Einträge einfach komplett ersetzen.
+
+Bilder, die an mehreren Produkten hängen, erhalten den Namen des zuerst gefundenen Produkts.
+
 ## CLI (Test)
 
 ```

@@ -30,6 +30,8 @@ Component.register('sw-content-creator-batch', {
             cannibalBusy: false,
             freshnessResult: null,
             freshnessBusy: false,
+            renameItems: null,
+            renameBusy: false,
             report: null,
             reportBusy: false,
         };
@@ -215,6 +217,56 @@ Component.register('sw-content-creator-batch', {
 
         gapLabel(key) {
             return this.$tc(`sw-content-creator.gaps.${key}`);
+        },
+
+        scanMediaRenames() {
+            this.renameBusy = true;
+            this.contentCreatorApiService.mediaRenameScan({
+                languageId: this.languageId || Shopware.Context.api.languageId,
+            })
+                .then((res) => { this.renameItems = res.items || []; })
+                .catch((err) => {
+                    this.createNotificationError({ message: err?.response?.data?.error || err.message });
+                })
+                .finally(() => { this.renameBusy = false; });
+        },
+
+        applyMediaRenames() {
+            const items = (this.renameItems || []).map((i) => ({
+                mediaId: i.mediaId,
+                newName: i.suggestedName,
+                currentName: i.currentName,
+            }));
+            if (!items.length) {
+                return;
+            }
+            this.renameBusy = true;
+            this.contentCreatorApiService.mediaRenameApply(items)
+                .then((res) => {
+                    this.createNotificationSuccess({
+                        message: this.$tc('sw-content-creator.rename.done', res.renamed, { renamed: res.renamed, errors: (res.errors || []).length }),
+                    });
+                    this.renameItems = null;
+                })
+                .catch((err) => {
+                    this.createNotificationError({ message: err?.response?.data?.error || err.message });
+                })
+                .finally(() => { this.renameBusy = false; });
+        },
+
+        downloadRedirects() {
+            this.contentCreatorApiService.mediaRenameExport()
+                .then((content) => {
+                    const blob = new Blob([content], { type: 'text/plain' });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = 'contentcreator-media-redirects.conf';
+                    link.click();
+                    URL.revokeObjectURL(link.href);
+                })
+                .catch((err) => {
+                    this.createNotificationError({ message: err?.response?.data?.error || err.message });
+                });
         },
 
         scanFreshness() {
