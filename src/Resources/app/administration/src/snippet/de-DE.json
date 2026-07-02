@@ -114,7 +114,10 @@
             "finished": "Stapelverarbeitung abgeschlossen",
             "toGenerator": "Zum Generator",
             "needSelection": "Bitte Objekte und mindestens einen Texttyp auswählen.",
-            "workerHint": "Ein laufender Message-Worker verarbeitet die Aufträge im Hintergrund.",
+            "workerHint": "Ein laufender Message-Worker verarbeitet die Aufträge im Hintergrund. Ohne Worker bleiben Jobs dauerhaft auf „running“ stehen.",
+            "workerStalled": "Seit 30 Sekunden kein Fortschritt — läuft ein Message-Worker (Admin-Worker aktiv oder bin/console messenger:consume)? Ohne Worker bleibt der Job hängen.",
+            "startCard": "Auswahl & Start",
+            "languageHelp": "Gilt für Auswahl, Generierung und alle Scans. Zweisprachige Shops: je Sprache einen Lauf durchführen.",
             "modeHelp": "Bestand optimieren: vorhandene Texte werden überarbeitet (Fakten bleiben erhalten); Objekte OHNE Bestandstext werden automatisch neu erstellt (Lücken füllen).",
             "dryRun": "Dry-Run (erst prüfen, dann übernehmen)",
             "dryRunHelp": "Es wird generiert und geprüft, aber NICHTS in den Shop geschrieben. Nach Abschluss können alle Gate-bestandenen Ergebnisse gesammelt übernommen werden.",
@@ -145,6 +148,15 @@
             "paragraphLength": "Absatzlänge",
             "headingDensity": "Zwischenüberschriften-Dichte"
         },
+        "tools": {
+            "navTitle": "SEO-Werkzeuge",
+            "title": "SEO-Werkzeuge",
+            "hint": "Eigenständige Wartungs- und Diagnose-Werkzeuge — unabhängig von der Stapelverarbeitung. Die gewählte Sprache gilt für alle Werkzeuge dieser Seite; zweisprachige Shops bitte je Sprache einmal durchlaufen.",
+            "cancel": "Abbrechen",
+            "renameClean": "Keine Bilder mit nicht-beschreibenden Dateinamen gefunden — alles sauber.",
+            "linebreaksClean": "Keine Zeilenumbrüche gefunden ({scanned} Kategorien geprüft) — alles sauber.",
+            "cannibalClean": "Keine Kannibalisierung gefunden — keine doppelten Fokus-Keywords oder identischen Meta-Titles."
+        },
         "rename": {
             "title": "SEO-Dateinamen (Produktbilder)",
             "hint": "Findet Produktbilder mit Artikelnummer-/Hash-Dateinamen (z.B. 15601a.jpg) und schlägt beschreibende Namen aus Produktname + Alt-Text vor (ohne KI, deterministisch). TIPP: Erst Alt-Texte generieren (Lücken-Scan → Vision-Batch) — ohne beschreibende Alts bleiben nur Nummern-Suffixe (-2, -3). Jede Umbenennung wird protokolliert — der Export erzeugt daraus die nginx-301-Redirects für Plesk.",
@@ -153,16 +165,23 @@
             "found": "{total} Bild(er) gesamt — dieser Lauf verarbeitet {batch} (Wellen-Prinzip: nach dem Umbenennen erneut scannen für die nächsten)",
             "warning": "Beim Umbenennen ändern sich die Bild-URLs. Danach die Redirect-Datei herunterladen und in Plesk einbinden (Apache & nginx Einstellungen → Zusätzliche nginx-Anweisungen), damit alte URLs per 301 weiterleiten.",
             "apply": "{count} Bild(er) jetzt umbenennen",
+            "altFirst": "Empfehlung: {count} der gefundenen Bilder haben noch KEINEN Alt-Text — erst Alt-Texte generieren (Stapelverarbeitung → Medien → Lücken-Scan), dann umbenennen. Sonst bleiben nur Nummern-Suffixe.",
+            "confirmTitle": "Bilder wirklich umbenennen?",
+            "confirmText": "{count} Bild(er) werden unwiderruflich umbenannt — die Bild-URLs im Shop ändern sich sofort.",
+            "confirmButton": "Ja, umbenennen",
             "done": "{renamed} Bild(er) umbenannt ({errors} Fehler) — Redirect-Datei aktualisieren!"
         },
         "freshness": {
-            "scan": "Freshness prüfen",
+            "scan": "Aktualität prüfen",
             "changed": "Daten seit Generierung geändert",
             "aging": "Text älter als 6 Monate",
             "generatedAt": "generiert am",
-            "use": "Alle als Auswahl übernehmen (Optimieren)"
+            "clean": "Alle Texte aktuell — keine Daten-Änderungen seit der Generierung, nichts älter als 6 Monate.",
+            "use": "Alle als Auswahl übernehmen (wechselt auf Modus „Bestand optimieren“)"
         },
         "cannibal": {
+            "title": "Keyword-Kannibalisierung",
+            "hint": "Findet Objekte, die mit demselben Fokus-Keyword oder identischen Meta-Titles gegeneinander um dasselbe Google-Ranking konkurrieren.",
             "scan": "Kannibalisierung prüfen",
             "keywords": "Mehrfach vergebene Fokus-Keywords",
             "titles": "Identische Meta-Titles"
@@ -175,9 +194,12 @@
             "hint": "Findet Objekte OHNE Inhalte (Lücken füllen) bzw. die schlechtesten Bestandstexte (Arbeitsvorrat zum Optimieren) — bezogen auf Objekt-Typ und Sprache oben.",
             "scan": "Lücken scannen",
             "report": "Qualitäts-Report (Bestandstexte)",
-            "use": "Als Auswahl übernehmen",
-            "useWorst": "Schlechteste 25 als Auswahl übernehmen (Optimieren)",
+            "use": "Als Auswahl übernehmen (wechselt auf Modus „Neu erstellen“)",
+            "useWorst": "Schlechteste 25 als Auswahl übernehmen (wechselt auf Modus „Bestand optimieren“)",
             "selected": "{count} Objekt(e) in die Auswahl übernommen",
+            "clean": "Keine Lücken gefunden — alle Inhalte sind vollständig.",
+            "reportProgress": "{scanned} Texte geprüft …",
+            "reportClean": "Keine KI-Muster gefunden ({scanned} Texte geprüft) — alle Bestandstexte sauber.",
             "reportResult": "{total} Texte mit KI-Mustern von {scanned} geprüften (Top 50 angezeigt)",
             "missingDescription": "Ohne Beschreibung",
             "missingMeta": "Ohne Meta-Title/-Description",

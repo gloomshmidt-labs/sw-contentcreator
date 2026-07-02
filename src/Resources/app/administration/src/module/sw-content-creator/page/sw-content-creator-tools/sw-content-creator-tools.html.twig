@@ -1,0 +1,171 @@
+{% block sw_content_creator_tools %}
+<sw-page class="sw-content-creator-tools">
+    <template #smart-bar-actions>
+        <sw-button @click="$router.push({ name: 'sw.content.creator.generator' })">
+            {{ $tc('sw-content-creator.settings.toGenerator') }}
+        </sw-button>
+        <sw-button @click="$router.push({ name: 'sw.content.creator.batch' })">
+            {{ $tc('sw-content-creator.generator.toBatch') }}
+        </sw-button>
+        <sw-button @click="$router.push({ name: 'sw.content.creator.settings' })">
+            {{ $tc('sw-content-creator.settings.navTitle') }}
+        </sw-button>
+    </template>
+
+    <template #content>
+        <sw-card-view>
+            {% block sw_content_creator_tools_config %}
+            <sw-card :title="$tc('sw-content-creator.tools.title')">
+                <p style="color:#758ca3; font-size:13px; margin-bottom:12px;">
+                    {{ $tc('sw-content-creator.tools.hint') }}
+                </p>
+                <div style="display:flex; gap:16px;">
+                    <sw-single-select
+                        :label="$tc('sw-content-creator.generator.language')"
+                        :options="langOptions"
+                        :value="lang"
+                        @update:value="onLangChange">
+                    </sw-single-select>
+                </div>
+            </sw-card>
+            {% endblock %}
+
+            {% block sw_content_creator_tools_rename %}
+            <sw-card :title="$tc('sw-content-creator.rename.title')">
+                <p style="color:#758ca3; font-size:13px; margin-bottom:12px;">
+                    {{ $tc('sw-content-creator.rename.hint') }}
+                </p>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    <sw-button :isLoading="renameBusy" @click="scanMediaRenames">
+                        {{ $tc('sw-content-creator.rename.scan') }}
+                    </sw-button>
+                    <sw-button @click="downloadRedirects">
+                        {{ $tc('sw-content-creator.rename.export') }}
+                    </sw-button>
+                </div>
+
+                <template v-if="renameItems !== null">
+                    <sw-alert v-if="!renameItems.length" variant="success" style="margin-top:12px;">
+                        {{ $tc('sw-content-creator.tools.renameClean') }}
+                    </sw-alert>
+                    <template v-else>
+                        <sw-alert v-if="renameWithoutAlt > 0" variant="warning" style="margin-top:12px;">
+                            {{ $tc('sw-content-creator.rename.altFirst', { count: renameWithoutAlt }, renameWithoutAlt) }}
+                        </sw-alert>
+                        <p style="margin-top:12px; font-weight:600;">
+                            {{ $tc('sw-content-creator.rename.found', { total: renameTotal, batch: renameItems.length }, renameTotal) }}
+                        </p>
+                        <div v-for="item in renameItems.slice(0, 50)" :key="item.mediaId" style="font-size:13px; padding:2px 0; display:flex; gap:8px;">
+                            <span style="color:#758ca3; min-width:180px;">{{ item.currentName }}</span>
+                            <span>→ <strong>{{ item.suggestedName }}</strong></span>
+                            <span style="color:#758ca3;">({{ item.productName }})</span>
+                        </div>
+                        <sw-button
+                            variant="primary"
+                            style="margin-top:8px;"
+                            :isLoading="renameBusy"
+                            @click="confirmRename">
+                            {{ $tc('sw-content-creator.rename.apply', { count: renameItems.length }, renameItems.length) }}
+                        </sw-button>
+                    </template>
+                </template>
+
+                <sw-modal
+                    v-if="showRenameConfirm"
+                    :title="$tc('sw-content-creator.rename.confirmTitle')"
+                    variant="small"
+                    @modal-close="showRenameConfirm = false">
+                    <p>{{ $tc('sw-content-creator.rename.confirmText', { count: renameItems ? renameItems.length : 0 }, renameItems ? renameItems.length : 0) }}</p>
+                    <p style="margin-top:8px;">{{ $tc('sw-content-creator.rename.warning') }}</p>
+                    <template #modal-footer>
+                        <sw-button size="small" @click="showRenameConfirm = false">
+                            {{ $tc('sw-content-creator.tools.cancel') }}
+                        </sw-button>
+                        <sw-button variant="danger" size="small" @click="applyMediaRenames">
+                            {{ $tc('sw-content-creator.rename.confirmButton') }}
+                        </sw-button>
+                    </template>
+                </sw-modal>
+            </sw-card>
+            {% endblock %}
+
+            {% block sw_content_creator_tools_linebreaks %}
+            <sw-card :title="$tc('sw-content-creator.linebreaks.title')">
+                <p style="color:#758ca3; font-size:13px; margin-bottom:12px;">
+                    {{ $tc('sw-content-creator.linebreaks.hint') }}
+                </p>
+                <sw-button :isLoading="lbBusy" @click="scanLineBreaks">
+                    {{ $tc('sw-content-creator.linebreaks.scan') }}
+                </sw-button>
+
+                <template v-if="lbResult">
+                    <sw-alert v-if="!lbResult.affected.length" variant="success" style="margin-top:12px;">
+                        {{ $tc('sw-content-creator.tools.linebreaksClean', { scanned: lbResult.scanned }, lbResult.scanned) }}
+                    </sw-alert>
+                    <template v-else>
+                        <p style="margin-top:12px; font-weight:600;">
+                            {{ $tc('sw-content-creator.linebreaks.result', { affected: lbResult.affected.length, scanned: lbResult.scanned }, lbResult.affected.length) }}
+                        </p>
+                        <div v-for="entry in lbResult.affected" :key="entry.id" style="display:flex; gap:12px; align-items:center; padding:4px 0;">
+                            <span style="flex:1;">{{ entry.name }} ({{ entry.slots }} Slots)</span>
+                            <sw-button size="small" :disabled="lbBusy" @click="fixLineBreak(entry.id)">
+                                {{ $tc('sw-content-creator.linebreaks.fix') }}
+                            </sw-button>
+                        </div>
+                        <p v-if="lbProgress" style="margin-top:8px; color:#758ca3;">
+                            {{ lbProgress.done }} / {{ lbProgress.total }} …
+                        </p>
+                        <sw-button
+                            v-if="lbResult.affected.length > 1"
+                            variant="primary"
+                            style="margin-top:8px;"
+                            :isLoading="lbBusy"
+                            @click="fixAllLineBreaks">
+                            {{ $tc('sw-content-creator.linebreaks.fixAll') }}
+                        </sw-button>
+                    </template>
+                </template>
+            </sw-card>
+            {% endblock %}
+
+            {% block sw_content_creator_tools_cannibalization %}
+            <sw-card :title="$tc('sw-content-creator.cannibal.title')">
+                <p style="color:#758ca3; font-size:13px; margin-bottom:12px;">
+                    {{ $tc('sw-content-creator.cannibal.hint') }}
+                </p>
+                <div style="display:flex; gap:16px; align-items:flex-end;">
+                    <sw-single-select
+                        :label="$tc('sw-content-creator.batch.entityType')"
+                        :options="entityTypeOptions"
+                        :value="entityType"
+                        @update:value="(v) => { entityType = v; }">
+                    </sw-single-select>
+                    <sw-button :isLoading="cannibalBusy" @click="scanCannibalization">
+                        {{ $tc('sw-content-creator.cannibal.scan') }}
+                    </sw-button>
+                </div>
+
+                <template v-if="cannibalResult">
+                    <sw-alert
+                        v-if="!cannibalResult.duplicateKeywords.length && !cannibalResult.duplicateTitles.length"
+                        variant="success"
+                        style="margin-top:12px;">
+                        {{ $tc('sw-content-creator.tools.cannibalClean') }}
+                    </sw-alert>
+                    <template v-else>
+                        <p style="margin-top:12px; font-weight:600;">{{ $tc('sw-content-creator.cannibal.keywords') }} ({{ cannibalResult.duplicateKeywords.length }})</p>
+                        <div v-for="g in cannibalResult.duplicateKeywords" :key="'kw-' + g.value" style="font-size:13px; padding:2px 0;">
+                            <strong>{{ g.count }}×</strong> „{{ g.value }}" — {{ g.names }}
+                        </div>
+                        <p style="margin-top:8px; font-weight:600;">{{ $tc('sw-content-creator.cannibal.titles') }} ({{ cannibalResult.duplicateTitles.length }})</p>
+                        <div v-for="g in cannibalResult.duplicateTitles" :key="'t-' + g.value" style="font-size:13px; padding:2px 0;">
+                            <strong>{{ g.count }}×</strong> „{{ g.value }}" — {{ g.names }}
+                        </div>
+                    </template>
+                </template>
+            </sw-card>
+            {% endblock %}
+        </sw-card-view>
+    </template>
+</sw-page>
+{% endblock %}

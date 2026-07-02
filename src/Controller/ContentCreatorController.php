@@ -52,33 +52,27 @@ class ContentCreatorController extends AbstractController
     #[Route(path: '/api/content-creator/backup/latest', name: 'api.content-creator.backup.latest', defaults: ['_acl' => ['content_creator.viewer']], methods: ['POST'])]
     public function latestBackup(Request $request, Context $context): JsonResponse
     {
-        $data = json_decode($request->getContent(), true) ?: [];
-        $entityType = (string) ($data['entityType'] ?? '');
-        $id = (string) ($data['id'] ?? '');
-        $type = (string) ($data['type'] ?? '');
-        $languageId = (string) ($data['languageId'] ?? '');
-
-        if ($entityType === '' || $id === '' || $type === '' || $languageId === '') {
-            return new JsonResponse(['success' => false, 'error' => 'entityType, id, type und languageId sind erforderlich.'], 400);
+        $fields = $this->requireFields($this->jsonBody($request), ['entityType', 'id', 'type', 'languageId']);
+        if ($fields instanceof JsonResponse) {
+            return $fields;
         }
 
         return new JsonResponse([
             'success' => true,
-            'backup' => $this->backupService->latest($entityType, $id, $languageId, $type, $context),
+            'backup' => $this->backupService->latest($fields['entityType'], $fields['id'], $fields['languageId'], $fields['type'], $context),
         ]);
     }
 
     #[Route(path: '/api/content-creator/backup/restore', name: 'api.content-creator.backup.restore', defaults: ['_acl' => ['content_creator.editor']], methods: ['POST'])]
     public function restoreBackup(Request $request, Context $context): JsonResponse
     {
-        $data = json_decode($request->getContent(), true) ?: [];
-        $backupId = (string) ($data['backupId'] ?? '');
-        if ($backupId === '') {
-            return new JsonResponse(['success' => false, 'error' => 'backupId ist erforderlich.'], 400);
+        $fields = $this->requireFields($this->jsonBody($request), ['backupId']);
+        if ($fields instanceof JsonResponse) {
+            return $fields;
         }
 
         try {
-            $this->backupService->restore($backupId, $context);
+            $this->backupService->restore($fields['backupId'], $context);
 
             return new JsonResponse(['success' => true]);
         } catch (\Throwable $e) {
@@ -89,14 +83,13 @@ class ContentCreatorController extends AbstractController
     #[Route(path: '/api/content-creator/linebreaks/scan', name: 'api.content-creator.linebreaks.scan', defaults: ['_acl' => ['content_creator.viewer']], methods: ['POST'])]
     public function scanLineBreaks(Request $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true) ?: [];
-        $languageId = (string) ($data['languageId'] ?? '');
-        if ($languageId === '') {
-            return new JsonResponse(['success' => false, 'error' => 'languageId ist erforderlich.'], 400);
+        $fields = $this->requireFields($this->jsonBody($request), ['languageId']);
+        if ($fields instanceof JsonResponse) {
+            return $fields;
         }
 
         try {
-            $result = $this->lineBreakScanner->scan($languageId, $this->factLoader->context($languageId));
+            $result = $this->lineBreakScanner->scan($fields['languageId'], $this->factLoader->context($fields['languageId']));
 
             return new JsonResponse(['success' => true] + $result);
         } catch (\Throwable $e) {
@@ -107,15 +100,13 @@ class ContentCreatorController extends AbstractController
     #[Route(path: '/api/content-creator/linebreaks/fix', name: 'api.content-creator.linebreaks.fix', defaults: ['_acl' => ['content_creator.editor']], methods: ['POST'])]
     public function fixLineBreaks(Request $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true) ?: [];
-        $categoryId = (string) ($data['categoryId'] ?? '');
-        $languageId = (string) ($data['languageId'] ?? '');
-        if ($categoryId === '' || $languageId === '') {
-            return new JsonResponse(['success' => false, 'error' => 'categoryId und languageId sind erforderlich.'], 400);
+        $fields = $this->requireFields($this->jsonBody($request), ['categoryId', 'languageId']);
+        if ($fields instanceof JsonResponse) {
+            return $fields;
         }
 
         try {
-            $fixed = $this->lineBreakScanner->fix($categoryId, $languageId, $this->factLoader->context($languageId));
+            $fixed = $this->lineBreakScanner->fix($fields['categoryId'], $fields['languageId'], $this->factLoader->context($fields['languageId']));
 
             return new JsonResponse(['success' => true, 'fixed' => $fixed]);
         } catch (\Throwable $e) {
@@ -130,20 +121,16 @@ class ContentCreatorController extends AbstractController
     #[Route(path: '/api/content-creator/apply', name: 'api.content-creator.apply', defaults: ['_acl' => ['content_creator.editor']], methods: ['POST'])]
     public function apply(Request $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true) ?: [];
-        $entityType = (string) ($data['entityType'] ?? '');
-        $id = (string) ($data['id'] ?? '');
-        $type = (string) ($data['type'] ?? '');
-        $languageId = (string) ($data['languageId'] ?? '');
+        $data = $this->jsonBody($request);
+        $fields = $this->requireFields($data, ['entityType', 'id', 'type', 'languageId']);
+        if ($fields instanceof JsonResponse) {
+            return $fields;
+        }
         $result = \is_array($data['result'] ?? null) ? $data['result'] : [];
 
-        if ($entityType === '' || $id === '' || $type === '' || $languageId === '') {
-            return new JsonResponse(['success' => false, 'error' => 'entityType, id, type und languageId sind erforderlich.'], 400);
-        }
-
         try {
-            $langContext = $this->factLoader->context($languageId);
-            $this->contentWriter->apply($entityType, $id, $languageId, $type, $result, $langContext);
+            $langContext = $this->factLoader->context($fields['languageId']);
+            $this->contentWriter->apply($fields['entityType'], $fields['id'], $fields['languageId'], $fields['type'], $result, $langContext);
 
             return new JsonResponse(['success' => true]);
         } catch (\Throwable $e) {
@@ -154,7 +141,7 @@ class ContentCreatorController extends AbstractController
     #[Route(path: '/api/content-creator/generate', name: 'api.content-creator.generate', defaults: ['_acl' => ['content_creator.viewer']], methods: ['POST'])]
     public function generate(Request $request, Context $context): JsonResponse
     {
-        $data = json_decode($request->getContent(), true) ?: [];
+        $data = $this->jsonBody($request);
         $type = (string) ($data['type'] ?? '');
         $entityType = $data['entityType'] ?? null;
         $id = $data['id'] ?? null;
@@ -183,17 +170,14 @@ class ContentCreatorController extends AbstractController
                     ? (str_starts_with(strtolower((string) $data['lang']), 'en') ? 'en' : 'de')
                     : $this->factLoader->langCode($context->getLanguageId()));
 
-            $mode = \in_array($data['mode'] ?? null, ['create', 'optimize'], true) ? $data['mode'] : 'create';
-            $metaFields = \is_array($data['metaFields'] ?? null) ? array_values(array_filter($data['metaFields'])) : null;
-
             $result = $this->generator->generate(
                 $type,
                 $langCode,
                 $ctx,
                 $data['provider'] ?? null,
                 $data['model'] ?? null,
-                $mode,
-                $metaFields
+                $this->modeFrom($data),
+                $this->metaFieldsFrom($data)
             );
 
             return new JsonResponse(['success' => true, 'result' => $result]);
@@ -205,7 +189,7 @@ class ContentCreatorController extends AbstractController
     #[Route(path: '/api/content-creator/test-connection', name: 'api.content-creator.test-connection', defaults: ['_acl' => ['content_creator.viewer']], methods: ['POST'])]
     public function testConnection(Request $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true) ?: [];
+        $data = $this->jsonBody($request);
 
         try {
             $provider = $this->providerRegistry->get($data['provider'] ?? null);
@@ -229,13 +213,13 @@ class ContentCreatorController extends AbstractController
     #[Route(path: '/api/content-creator/batch', name: 'api.content-creator.batch', defaults: ['_acl' => ['content_creator.editor']], methods: ['POST'])]
     public function batch(Request $request, Context $context): JsonResponse
     {
-        $data = json_decode($request->getContent(), true) ?: [];
+        $data = $this->jsonBody($request);
         $entityType = (string) ($data['entityType'] ?? '');
         $ids = array_values(array_filter((array) ($data['ids'] ?? [])));
         $types = array_values(array_filter((array) ($data['types'] ?? [])));
 
         if ($entityType === '' || $ids === [] || $types === []) {
-            return new JsonResponse(['success' => false, 'error' => 'entityType, ids und types sind erforderlich.'], 400);
+            return $this->missingFieldsResponse(['entityType', 'ids', 'types']);
         }
 
         // Das Batch-Modell ist Claude-spezifisch – nur anwenden, wenn der aktive
@@ -247,9 +231,6 @@ class ContentCreatorController extends AbstractController
             $model = $configuredBatchModel !== '' ? $configuredBatchModel : null;
         }
 
-        $mode = \in_array($data['mode'] ?? null, ['create', 'optimize'], true) ? $data['mode'] : 'create';
-        $metaFields = \is_array($data['metaFields'] ?? null) ? array_values(array_filter($data['metaFields'])) : null;
-
         $jobId = $this->batchDispatcher->dispatch(
             $entityType,
             $ids,
@@ -258,8 +239,8 @@ class ContentCreatorController extends AbstractController
             $data['provider'] ?? null,
             $model,
             $context,
-            $mode,
-            $metaFields,
+            $this->modeFrom($data),
+            $this->metaFieldsFrom($data),
             (bool) ($data['dryRun'] ?? false)
         );
 
@@ -343,15 +324,13 @@ class ContentCreatorController extends AbstractController
     #[Route(path: '/api/content-creator/gaps', name: 'api.content-creator.gaps', defaults: ['_acl' => ['content_creator.viewer']], methods: ['POST'])]
     public function gaps(Request $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true) ?: [];
-        $entityType = (string) ($data['entityType'] ?? '');
-        $languageId = (string) ($data['languageId'] ?? '');
-        if ($entityType === '' || $languageId === '') {
-            return new JsonResponse(['success' => false, 'error' => 'entityType und languageId sind erforderlich.'], 400);
+        $fields = $this->requireFields($this->jsonBody($request), ['entityType', 'languageId']);
+        if ($fields instanceof JsonResponse) {
+            return $fields;
         }
 
         try {
-            return new JsonResponse(['success' => true, 'gaps' => $this->gapScanner->scan($languageId, $entityType)]);
+            return new JsonResponse(['success' => true, 'gaps' => $this->gapScanner->scan($fields['languageId'], $fields['entityType'])]);
         } catch (\Throwable $e) {
             return new JsonResponse(['success' => false, 'error' => $e->getMessage()], 400);
         }
@@ -360,14 +339,13 @@ class ContentCreatorController extends AbstractController
     #[Route(path: '/api/content-creator/media-rename/scan', name: 'api.content-creator.media-rename.scan', defaults: ['_acl' => ['content_creator.viewer']], methods: ['POST'])]
     public function mediaRenameScan(Request $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true) ?: [];
-        $languageId = (string) ($data['languageId'] ?? '');
-        if ($languageId === '') {
-            return new JsonResponse(['success' => false, 'error' => 'languageId ist erforderlich.'], 400);
+        $fields = $this->requireFields($this->jsonBody($request), ['languageId']);
+        if ($fields instanceof JsonResponse) {
+            return $fields;
         }
 
         try {
-            return new JsonResponse(['success' => true] + $this->mediaRenamer->scan($languageId));
+            return new JsonResponse(['success' => true] + $this->mediaRenamer->scan($fields['languageId']));
         } catch (\Throwable $e) {
             return new JsonResponse(['success' => false, 'error' => $e->getMessage()], 400);
         }
@@ -376,7 +354,7 @@ class ContentCreatorController extends AbstractController
     #[Route(path: '/api/content-creator/media-rename/apply', name: 'api.content-creator.media-rename.apply', defaults: ['_acl' => ['content_creator.editor']], methods: ['POST'])]
     public function mediaRenameApply(Request $request, Context $context): JsonResponse
     {
-        $data = json_decode($request->getContent(), true) ?: [];
+        $data = $this->jsonBody($request);
         $items = \is_array($data['items'] ?? null) ? $data['items'] : [];
         if ($items === []) {
             return new JsonResponse(['success' => false, 'error' => 'items sind erforderlich.'], 400);
@@ -408,15 +386,13 @@ class ContentCreatorController extends AbstractController
     #[Route(path: '/api/content-creator/freshness', name: 'api.content-creator.freshness', defaults: ['_acl' => ['content_creator.viewer']], methods: ['POST'])]
     public function freshness(Request $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true) ?: [];
-        $entityType = (string) ($data['entityType'] ?? '');
-        $languageId = (string) ($data['languageId'] ?? '');
-        if ($entityType === '' || $languageId === '') {
-            return new JsonResponse(['success' => false, 'error' => 'entityType und languageId sind erforderlich.'], 400);
+        $fields = $this->requireFields($this->jsonBody($request), ['entityType', 'languageId']);
+        if ($fields instanceof JsonResponse) {
+            return $fields;
         }
 
         try {
-            return new JsonResponse(['success' => true] + $this->freshnessScanner->scan($entityType, $languageId));
+            return new JsonResponse(['success' => true] + $this->freshnessScanner->scan($fields['entityType'], $fields['languageId']));
         } catch (\Throwable $e) {
             return new JsonResponse(['success' => false, 'error' => $e->getMessage()], 400);
         }
@@ -425,24 +401,23 @@ class ContentCreatorController extends AbstractController
     #[Route(path: '/api/content-creator/cannibalization', name: 'api.content-creator.cannibalization', defaults: ['_acl' => ['content_creator.viewer']], methods: ['POST'])]
     public function cannibalization(Request $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true) ?: [];
-        $entityType = (string) ($data['entityType'] ?? '');
-        $languageId = (string) ($data['languageId'] ?? '');
-        if ($entityType === '' || $languageId === '') {
-            return new JsonResponse(['success' => false, 'error' => 'entityType und languageId sind erforderlich.'], 400);
+        $data = $this->jsonBody($request);
+        $fields = $this->requireFields($data, ['entityType', 'languageId']);
+        if ($fields instanceof JsonResponse) {
+            return $fields;
         }
 
         try {
             if (\is_string($data['keyword'] ?? null) && trim($data['keyword']) !== '') {
                 return new JsonResponse(['success' => true, 'usedBy' => $this->cannibalizationScanner->keywordUsage(
-                    $entityType,
-                    $languageId,
+                    $fields['entityType'],
+                    $fields['languageId'],
                     $data['keyword'],
                     \is_string($data['excludeId'] ?? null) ? $data['excludeId'] : null
                 )]);
             }
 
-            return new JsonResponse(['success' => true] + $this->cannibalizationScanner->scan($entityType, $languageId));
+            return new JsonResponse(['success' => true] + $this->cannibalizationScanner->scan($fields['entityType'], $fields['languageId']));
         } catch (\Throwable $e) {
             return new JsonResponse(['success' => false, 'error' => $e->getMessage()], 400);
         }
@@ -451,12 +426,10 @@ class ContentCreatorController extends AbstractController
     #[Route(path: '/api/content-creator/quality-report', name: 'api.content-creator.quality-report', defaults: ['_acl' => ['content_creator.viewer']], methods: ['POST'])]
     public function qualityReport(Request $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true) ?: [];
-        $entityType = (string) ($data['entityType'] ?? '');
-        $languageId = (string) ($data['languageId'] ?? '');
-        $offset = max(0, (int) ($data['offset'] ?? 0));
-        if ($entityType === '' || $languageId === '') {
-            return new JsonResponse(['success' => false, 'error' => 'entityType und languageId sind erforderlich.'], 400);
+        $data = $this->jsonBody($request);
+        $fields = $this->requireFields($data, ['entityType', 'languageId']);
+        if ($fields instanceof JsonResponse) {
+            return $fields;
         }
 
         $whitelist = QualityChecker::parseWhitelist(
@@ -465,10 +438,10 @@ class ContentCreatorController extends AbstractController
 
         try {
             $page = $this->qualityReport->page(
-                $entityType,
-                $languageId,
-                $this->factLoader->langCode($languageId),
-                $offset,
+                $fields['entityType'],
+                $fields['languageId'],
+                $this->factLoader->langCode($fields['languageId']),
+                max(0, (int) ($data['offset'] ?? 0)),
                 $whitelist
             );
 
@@ -476,5 +449,66 @@ class ContentCreatorController extends AbstractController
         } catch (\Throwable $e) {
             return new JsonResponse(['success' => false, 'error' => $e->getMessage()], 400);
         }
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function jsonBody(Request $request): array
+    {
+        return json_decode($request->getContent(), true) ?: [];
+    }
+
+    /**
+     * Pflichtfelder als nicht-leere Strings einsammeln; fehlt eines, kommt die
+     * fertige 400-Antwort zurück (Wortlaut identisch zu den bisherigen Meldungen).
+     *
+     * @param array<string, mixed> $data
+     * @param list<string> $fields
+     *
+     * @return array<string, string>|JsonResponse
+     */
+    private function requireFields(array $data, array $fields): array|JsonResponse
+    {
+        $values = [];
+        foreach ($fields as $field) {
+            $value = (string) ($data[$field] ?? '');
+            if ($value === '') {
+                return $this->missingFieldsResponse($fields);
+            }
+            $values[$field] = $value;
+        }
+
+        return $values;
+    }
+
+    /**
+     * @param list<string> $fields
+     */
+    private function missingFieldsResponse(array $fields): JsonResponse
+    {
+        $message = \count($fields) === 1
+            ? $fields[0] . ' ist erforderlich.'
+            : implode(', ', \array_slice($fields, 0, -1)) . ' und ' . $fields[\count($fields) - 1] . ' sind erforderlich.';
+
+        return new JsonResponse(['success' => false, 'error' => $message], 400);
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    private function modeFrom(array $data): string
+    {
+        return \in_array($data['mode'] ?? null, ['create', 'optimize'], true) ? $data['mode'] : 'create';
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     *
+     * @return list<mixed>|null
+     */
+    private function metaFieldsFrom(array $data): ?array
+    {
+        return \is_array($data['metaFields'] ?? null) ? array_values(array_filter($data['metaFields'])) : null;
     }
 }

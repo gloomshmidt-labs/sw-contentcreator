@@ -25,7 +25,7 @@ class CannibalizationScanner
      */
     public function scan(string $entityType, string $languageId): array
     {
-        [$table, $fk, $versionCondition] = $this->tableFor($entityType);
+        [$table, , $versionCondition] = $this->tableFor($entityType);
 
         $duplicateKeywords = $this->connection->fetchAllAssociative(
             "SELECT LOWER(TRIM(JSON_UNQUOTE(JSON_EXTRACT(t.custom_fields, '$.content_creator_focus_keyword')))) AS value,

@@ -20,27 +20,27 @@ Component.register('sw-content-creator-batch', {
             job: null,
             polling: null,
             isStarting: false,
-            lbResult: null,
-            lbBusy: false,
-            dryRun: false,
+            dryRun: true,
             isCommitting: false,
             gapResult: null,
             gapBusy: false,
-            cannibalResult: null,
-            cannibalBusy: false,
             freshnessResult: null,
             freshnessBusy: false,
-            renameItems: null,
-            renameTotal: 0,
-            renameBusy: false,
             report: null,
             reportBusy: false,
+            reportProgress: null,
+            workerStalled: false,
+            stalledPolls: 0,
         };
     },
 
     computed: {
         repository() {
             return this.repositoryFactory.create(this.entityType === 'manufacturer' ? 'product_manufacturer' : this.entityType);
+        },
+        // Aufgelöste Sprach-ID mit Admin-Kontext als Fallback (für alle API-Calls)
+        effectiveLanguageId() {
+            return this.languageId || Shopware.Context.api.languageId;
         },
         entityTypeOptions() {
             return [
@@ -107,6 +107,21 @@ Component.register('sw-content-creator-batch', {
     },
 
     methods: {
+        notifyApiError(err) {
+            this.createNotificationError({ message: err?.response?.data?.error || err.message });
+        },
+
+        // Gemeinsames Muster aller Scan-/Aktions-Buttons: Busy-Flag setzen,
+        // Arbeit ausführen, Fehler als Notification, Flag immer zurücksetzen.
+        runBusy(busyProp, work) {
+            this[busyProp] = true;
+
+            return Promise.resolve()
+                .then(work)
+                .catch((err) => this.notifyApiError(err))
+                .finally(() => { this[busyProp] = false; });
+        },
+
         onLangChange(value) {
             this.lang = value;
             this.selectedIds = [];
@@ -141,36 +156,39 @@ Component.register('sw-content-creator-batch', {
                 this.createNotificationWarning({ message: this.$tc('sw-content-creator.batch.needSelection') });
                 return;
             }
-            this.isStarting = true;
-            this.contentCreatorApiService.startBatch({
+            this.runBusy('isStarting', () => this.contentCreatorApiService.startBatch({
                 entityType: this.entityType,
                 ids: this.selectedIds,
                 types: this.selectedTypes,
-                languageId: this.languageId || Shopware.Context.api.languageId,
+                languageId: this.effectiveLanguageId,
                 mode: this.mode,
                 dryRun: this.dryRun,
             })
                 .then((res) => {
                     this.job = { id: res.jobId, total: res.total, processed: 0, failed: 0, rejected: 0, status: 'running', dryRun: this.dryRun };
                     this.startPolling();
-                })
-                .catch((err) => {
-                    this.createNotificationError({ message: err?.response?.data?.error || err.message });
-                })
-                .finally(() => { this.isStarting = false; });
+                }));
         },
 
         startPolling() {
             this.stopPolling();
+            this.workerStalled = false;
+            this.stalledPolls = 0;
             this.polling = setInterval(() => {
                 if (!this.job) {
                     return;
                 }
                 this.contentCreatorApiService.batchStatus(this.job.id)
                     .then((res) => {
+                        // Worker-Sackgasse erkennen: 30s ohne jeden Fortschritt
+                        const done = res.job.processed + res.job.failed + (res.job.rejected || 0);
+                        this.stalledPolls = done === 0 ? this.stalledPolls + 1 : 0;
+                        this.workerStalled = res.job.status === 'running' && this.stalledPolls >= 15;
+
                         this.job = res.job;
                         if (['done', 'failed', 'done_with_errors'].includes(res.job.status)) {
                             this.stopPolling();
+                            this.workerStalled = false;
                             this.createNotificationSuccess({ message: this.$tc('sw-content-creator.batch.finished') });
                         }
                     })
@@ -189,101 +207,33 @@ Component.register('sw-content-creator-batch', {
             if (!this.job?.id) {
                 return;
             }
-            this.isCommitting = true;
-            this.contentCreatorApiService.commitBatch(this.job.id)
+            this.runBusy('isCommitting', () => this.contentCreatorApiService.commitBatch(this.job.id)
                 .then((res) => {
                     this.createNotificationSuccess({
-                        message: this.$tc('sw-content-creator.batch.committed', res.applied, { applied: res.applied, errors: res.errors }),
+                        message: this.$tc('sw-content-creator.batch.committed', { applied: res.applied, errors: res.errors }, res.applied),
                     });
                     this.job = { ...this.job, committed: true };
-                })
-                .catch((err) => {
-                    this.createNotificationError({ message: err?.response?.data?.error || err.message });
-                })
-                .finally(() => { this.isCommitting = false; });
+                }));
         },
 
         scanGaps() {
-            this.gapBusy = true;
-            this.contentCreatorApiService.gaps({
+            this.runBusy('gapBusy', () => this.contentCreatorApiService.gaps({
                 entityType: this.entityType,
-                languageId: this.languageId || Shopware.Context.api.languageId,
+                languageId: this.effectiveLanguageId,
             })
-                .then((res) => { this.gapResult = res.gaps; })
-                .catch((err) => {
-                    this.createNotificationError({ message: err?.response?.data?.error || err.message });
-                })
-                .finally(() => { this.gapBusy = false; });
+                .then((res) => { this.gapResult = res.gaps; }));
         },
 
         gapLabel(key) {
             return this.$tc(`sw-content-creator.gaps.${key}`);
         },
 
-        scanMediaRenames() {
-            this.renameBusy = true;
-            this.contentCreatorApiService.mediaRenameScan({
-                languageId: this.languageId || Shopware.Context.api.languageId,
-            })
-                .then((res) => {
-                    this.renameItems = res.items || [];
-                    this.renameTotal = res.total || this.renameItems.length;
-                })
-                .catch((err) => {
-                    this.createNotificationError({ message: err?.response?.data?.error || err.message });
-                })
-                .finally(() => { this.renameBusy = false; });
-        },
-
-        applyMediaRenames() {
-            const items = (this.renameItems || []).map((i) => ({
-                mediaId: i.mediaId,
-                newName: i.suggestedName,
-                currentName: i.currentName,
-            }));
-            if (!items.length) {
-                return;
-            }
-            this.renameBusy = true;
-            this.contentCreatorApiService.mediaRenameApply(items)
-                .then((res) => {
-                    this.createNotificationSuccess({
-                        message: this.$tc('sw-content-creator.rename.done', res.renamed, { renamed: res.renamed, errors: (res.errors || []).length }),
-                    });
-                    this.renameItems = null;
-                })
-                .catch((err) => {
-                    this.createNotificationError({ message: err?.response?.data?.error || err.message });
-                })
-                .finally(() => { this.renameBusy = false; });
-        },
-
-        downloadRedirects() {
-            this.contentCreatorApiService.mediaRenameExport()
-                .then((content) => {
-                    const blob = new Blob([content], { type: 'text/plain' });
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(blob);
-                    link.download = 'contentcreator-media-redirects.conf';
-                    link.click();
-                    URL.revokeObjectURL(link.href);
-                })
-                .catch((err) => {
-                    this.createNotificationError({ message: err?.response?.data?.error || err.message });
-                });
-        },
-
         scanFreshness() {
-            this.freshnessBusy = true;
-            this.contentCreatorApiService.freshness({
+            this.runBusy('freshnessBusy', () => this.contentCreatorApiService.freshness({
                 entityType: ['product', 'category', 'manufacturer'].includes(this.entityType) ? this.entityType : 'product',
-                languageId: this.languageId || Shopware.Context.api.languageId,
+                languageId: this.effectiveLanguageId,
             })
-                .then((res) => { this.freshnessResult = res; })
-                .catch((err) => {
-                    this.createNotificationError({ message: err?.response?.data?.error || err.message });
-                })
-                .finally(() => { this.freshnessBusy = false; });
+                .then((res) => { this.freshnessResult = res; }));
         },
 
         useFreshnessSelection() {
@@ -297,21 +247,8 @@ Component.register('sw-content-creator-batch', {
             this.selectedIds = [...new Set(ids)];
             this.mode = 'optimize';
             this.createNotificationSuccess({
-                message: this.$tc('sw-content-creator.gaps.selected', ids.length, { count: ids.length }),
+                message: this.$tc('sw-content-creator.gaps.selected', { count: ids.length }, ids.length),
             });
-        },
-
-        scanCannibalization() {
-            this.cannibalBusy = true;
-            this.contentCreatorApiService.cannibalization({
-                entityType: this.entityType === 'category' ? 'category' : 'product',
-                languageId: this.languageId || Shopware.Context.api.languageId,
-            })
-                .then((res) => { this.cannibalResult = res; })
-                .catch((err) => {
-                    this.createNotificationError({ message: err?.response?.data?.error || err.message });
-                })
-                .finally(() => { this.cannibalBusy = false; });
         },
 
         // Lücken-Ergebnis direkt als Batch-Auswahl übernehmen (Modus: Neu erstellen)
@@ -323,37 +260,35 @@ Component.register('sw-content-creator-batch', {
             this.selectedIds = [...gap.ids];
             this.mode = 'create';
             this.createNotificationSuccess({
-                message: this.$tc('sw-content-creator.gaps.selected', gap.ids.length, { count: gap.ids.length }),
+                message: this.$tc('sw-content-creator.gaps.selected', { count: gap.ids.length }, gap.ids.length),
             });
         },
 
-        async runQualityReport() {
-            this.reportBusy = true;
-            const items = [];
-            let offset = 0;
-            let scanned = 0;
-            try {
+        runQualityReport() {
+            this.runBusy('reportBusy', async () => {
+                const items = [];
+                let offset = 0;
+                let scanned = 0;
+                this.reportProgress = { scanned: 0 };
                 for (;;) {
                     // eslint-disable-next-line no-await-in-loop
                     const page = await this.contentCreatorApiService.qualityReport({
                         entityType: this.entityType === 'category' ? 'category' : 'product',
-                        languageId: this.languageId || Shopware.Context.api.languageId,
+                        languageId: this.effectiveLanguageId,
                         offset,
                     });
                     items.push(...page.items);
                     scanned += page.scanned;
                     offset += page.scanned;
+                    this.reportProgress = { scanned };
                     if (page.done) {
                         break;
                     }
                 }
+                this.reportProgress = null;
                 items.sort((a, b) => b.score - a.score);
                 this.report = { items: items.slice(0, 50), total: items.length, scanned };
-            } catch (err) {
-                this.createNotificationError({ message: err?.response?.data?.error || err.message });
-            } finally {
-                this.reportBusy = false;
-            }
+            });
         },
 
         // 1-Klick-Fix: Report-Eintrag direkt im Generator öffnen (Modus: Optimieren)
@@ -378,62 +313,10 @@ Component.register('sw-content-creator-batch', {
             this.selectedIds = ids;
             this.mode = 'optimize';
             this.createNotificationSuccess({
-                message: this.$tc('sw-content-creator.gaps.selected', ids.length, { count: ids.length }),
+                message: this.$tc('sw-content-creator.gaps.selected', { count: ids.length }, ids.length),
             });
         },
 
-        scanLineBreaks() {
-            this.lbBusy = true;
-            this.contentCreatorApiService.scanLineBreaks(this.languageId || Shopware.Context.api.languageId)
-                .then((res) => { this.lbResult = res; })
-                .catch((err) => {
-                    this.createNotificationError({ message: err?.response?.data?.error || err.message });
-                })
-                .finally(() => { this.lbBusy = false; });
-        },
-
-        fixLineBreak(categoryId) {
-            this.lbBusy = true;
-            this.contentCreatorApiService.fixLineBreaks(categoryId, this.languageId || Shopware.Context.api.languageId)
-                .then((res) => {
-                    this.createNotificationSuccess({
-                        message: this.$tc('sw-content-creator.linebreaks.fixed', res.fixed, { fixed: res.fixed }),
-                    });
-                    this.lbResult = {
-                        ...this.lbResult,
-                        affected: (this.lbResult?.affected || []).filter((a) => a.id !== categoryId),
-                    };
-                })
-                .catch((err) => {
-                    this.createNotificationError({ message: err?.response?.data?.error || err.message });
-                })
-                .finally(() => { this.lbBusy = false; });
-        },
-
-        async fixAllLineBreaks() {
-            const affected = [...(this.lbResult?.affected || [])];
-            this.lbBusy = true;
-            let total = 0;
-            try {
-                for (const entry of affected) {
-                    // sequenziell, um die API nicht zu fluten
-                    // eslint-disable-next-line no-await-in-loop
-                    const res = await this.contentCreatorApiService.fixLineBreaks(entry.id, this.languageId || Shopware.Context.api.languageId);
-                    total += res.fixed || 0;
-                    this.lbResult = {
-                        ...this.lbResult,
-                        affected: (this.lbResult?.affected || []).filter((a) => a.id !== entry.id),
-                    };
-                }
-                this.createNotificationSuccess({
-                    message: this.$tc('sw-content-creator.linebreaks.fixed', total, { fixed: total }),
-                });
-            } catch (err) {
-                this.createNotificationError({ message: err?.response?.data?.error || err.message });
-            } finally {
-                this.lbBusy = false;
-            }
-        },
     },
 
     beforeDestroy() {

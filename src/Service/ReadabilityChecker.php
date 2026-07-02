@@ -38,7 +38,7 @@ class ReadabilityChecker
         $checks = [];
 
         // Satzlängen: Anteil Sätze über 25 Wörter
-        $longCount = \count(array_filter($sentences, static fn (string $s) => \count(preg_split('/\s+/u', trim($s)) ?: []) > self::LONG_SENTENCE_WORDS));
+        $longCount = \count(array_filter($sentences, fn (string $s) => $this->wordCount(trim($s)) > self::LONG_SENTENCE_WORDS));
         $longShare = round(($longCount / \count($sentences)) * 100, 1);
         $checks[] = ['key' => 'sentenceLength', 'passed' => $longShare <= self::LONG_SENTENCE_MAX_SHARE, 'detail' => $longShare . '% > ' . self::LONG_SENTENCE_WORDS . ' ' . ($isEnglish ? 'words' : 'Wörter')];
 
@@ -54,15 +54,14 @@ class ReadabilityChecker
         preg_match_all('/<p[^>]*>(.*?)<\/p>/is', (string) $html, $paragraphs);
         $maxParagraphWords = 0;
         foreach ($paragraphs[1] ?? [] as $paragraph) {
-            $words = \count(preg_split('/\s+/u', trim(strip_tags($paragraph))) ?: []);
-            $maxParagraphWords = max($maxParagraphWords, $words);
+            $maxParagraphWords = max($maxParagraphWords, $this->wordCount(trim(strip_tags($paragraph))));
         }
         if ($maxParagraphWords > 0) {
             $checks[] = ['key' => 'paragraphLength', 'passed' => $maxParagraphWords <= self::PARAGRAPH_MAX_WORDS, 'detail' => 'max. ' . $maxParagraphWords . ' ' . ($isEnglish ? 'words' : 'Wörter')];
         }
 
         // Überschriften-Dichte bei Langtexten
-        $wordCount = \count(preg_split('/\s+/u', $plain) ?: []);
+        $wordCount = $this->wordCount($plain);
         if ($wordCount > self::WORDS_PER_HEADING) {
             $headingCount = preg_match_all('/<h[1-6][^>]*>/i', (string) $html);
             $checks[] = [
@@ -77,5 +76,10 @@ class ReadabilityChecker
             'passedCount' => \count(array_filter($checks, static fn (array $c) => $c['passed'])),
             'total' => \count($checks),
         ];
+    }
+
+    private function wordCount(string $text): int
+    {
+        return \count(preg_split('/\s+/u', $text) ?: []);
     }
 }

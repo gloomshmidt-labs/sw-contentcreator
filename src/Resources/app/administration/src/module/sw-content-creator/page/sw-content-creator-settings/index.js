@@ -102,10 +102,10 @@ Component.register('sw-content-creator-settings', {
             this.contentCreatorApiService.testConnection(this.get('provider'))
                 .then((res) => {
                     this.createNotificationSuccess({
-                        message: this.$tc('sw-content-creator.settings.testSuccess', 0, {
+                        message: this.$tc('sw-content-creator.settings.testSuccess', {
                             provider: res.provider,
                             model: res.model,
-                        }),
+                        }, 0),
                     });
                 })
                 .catch((err) => {

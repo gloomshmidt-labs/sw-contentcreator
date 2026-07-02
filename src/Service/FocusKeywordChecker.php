@@ -39,8 +39,7 @@ class FocusKeywordChecker
 
             // Überschriften-Struktur (H1-H3)
             preg_match_all('/<(h[1-3])[^>]*>(.*?)<\/\1>/is', (string) $html, $headings, \PREG_SET_ORDER);
-            $headings = [1 => array_map(static fn (array $m) => $m[2], $headings)];
-            $headingText = mb_strtolower(strip_tags(implode(' ', $headings[1] ?? [])));
+            $headingText = mb_strtolower(strip_tags(implode(' ', array_map(static fn (array $m) => $m[2], $headings))));
             if ($headingText !== '') {
                 $checks[] = $this->result('headings', str_contains($headingText, $needle), '');
             }

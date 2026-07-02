@@ -1,6 +1,9 @@
 {% block sw_content_creator_generator %}
 <sw-page class="sw-content-creator-generator">
     <template #smart-bar-actions>
+        <sw-button @click="$router.push({ name: 'sw.content.creator.tools' })">
+            {{ $tc('sw-content-creator.tools.navTitle') }}
+        </sw-button>
         <sw-button @click="$router.push({ name: 'sw.content.creator.settings' })">
             {{ $tc('sw-content-creator.settings.navTitle') }}
         </sw-button>
@@ -53,7 +56,7 @@
                     @update:value="(v) => { focusKeyword = v || ''; }">
                 </sw-text-field>
                 <sw-alert v-if="cannibalWarning.length" variant="warning">
-                    {{ $tc('sw-content-creator.focus.cannibalWarning', cannibalWarning.length, { count: cannibalWarning.length }) }}
+                    {{ $tc('sw-content-creator.focus.cannibalWarning', { count: cannibalWarning.length }, cannibalWarning.length) }}
                     {{ cannibalWarning.join(', ') }}
                 </sw-alert>
 
@@ -136,7 +139,7 @@
                                 {{ $tc('sw-content-creator.generator.beforeScore') }}: {{ qualityOf(btn.type).originalScore }}
                             </span>
                             <span v-if="qualityOf(btn.type).passed" style="color:#22c55e; font-weight:600;">
-                                ✓ {{ $tc('sw-content-creator.generator.gatePassed', qualityOf(btn.type).attempts, { attempts: qualityOf(btn.type).attempts }) }}
+                                ✓ {{ $tc('sw-content-creator.generator.gatePassed', { attempts: qualityOf(btn.type).attempts }, qualityOf(btn.type).attempts) }}
                             </span>
                             <span v-else style="color:#ef4444; font-weight:600;">
                                 ✗ {{ $tc('sw-content-creator.generator.gateFailed') }}

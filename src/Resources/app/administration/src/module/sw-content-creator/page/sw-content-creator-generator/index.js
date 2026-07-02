@@ -3,11 +3,11 @@ import { TextOptimiser } from '../../../content-creator/engine/engine';
 import { highlightText, generateHtmlDiff, calculateFleschIndex, similarity } from '../../../content-creator/engine/analysis-view';
 import { estimateCost, formatCost } from '../../../content-creator/engine/pricing';
 import { titlePx, descPx, truncateTitle, truncateDesc, barColor, TITLE_LIMIT_PX, DESC_LIMIT_PX } from '../../../content-creator/engine/serp-preview';
-
-const FOCUS_KEYWORD_FIELD = 'content_creator_focus_keyword';
 import languageResolveMixin from '../../mixin/language-resolve.mixin';
 
 const { Component, Mixin } = Shopware;
+
+const FOCUS_KEYWORD_FIELD = 'content_creator_focus_keyword';
 
 // Farben der Server-Score-Bänder (identisch zur Engine-_getRating-Palette)
 const LEVEL_COLORS = {
@@ -141,6 +141,10 @@ Component.register('sw-content-creator-generator', {
     },
 
     methods: {
+        notifyApiError(err) {
+            this.createNotificationError({ message: err?.response?.data?.error || err.message });
+        },
+
         onLangChange(value) {
             this.lang = value;
             this.selectedId = null;
@@ -192,7 +196,7 @@ Component.register('sw-content-creator-generator', {
                 const rating = r.rating || this.buildOptimiser()._getRating(r.aiScore);
 
                 return { score: r.aiScore, level: rating.level, label: rating.label, color: rating.color };
-            } catch (e) {
+            } catch {
                 return null;
             }
         },
@@ -200,7 +204,7 @@ Component.register('sw-content-creator-generator', {
         markedHtml(text) {
             try {
                 return highlightText(this.analyseText(text));
-            } catch (e) {
+            } catch {
                 return '';
             }
         },
@@ -211,7 +215,7 @@ Component.register('sw-content-creator-generator', {
             }
             try {
                 return calculateFleschIndex(text, this.lang);
-            } catch (e) {
+            } catch {
                 return null;
             }
         },
@@ -223,7 +227,7 @@ Component.register('sw-content-creator-generator', {
             }
             try {
                 return generateHtmlDiff(this.currentText, res.content, this.lang);
-            } catch (e) {
+            } catch {
                 return '';
             }
         },
@@ -280,15 +284,20 @@ Component.register('sw-content-creator-generator', {
             };
         },
 
-        badgeStyle(score) {
+        // Gemeinsame Pill-Optik für Score- und Qualitäts-Badges
+        pillStyle(backgroundColor) {
             return {
-                backgroundColor: score.color,
+                backgroundColor,
                 color: '#fff',
                 padding: '2px 10px',
                 borderRadius: '12px',
                 fontWeight: 600,
                 display: 'inline-block',
             };
+        },
+
+        badgeStyle(score) {
+            return this.pillStyle(score.color);
         },
 
         onEntityTypeChange(value) {
@@ -333,7 +342,7 @@ Component.register('sw-content-creator-generator', {
                     this.focusKeyword = customFields[FOCUS_KEYWORD_FIELD] || '';
                     this.typeButtons.forEach((btn) => this.loadBackupInfo(btn.type));
                 })
-                .catch((err) => { this.createNotificationError({ message: err.message }); })
+                .catch((err) => this.notifyApiError(err))
                 .finally(() => { this.isLoading = false; });
         },
 
@@ -452,9 +461,7 @@ Component.register('sw-content-creator-generator', {
                 .then((res) => {
                     this.generated = { ...this.generated, [type]: res.result };
                 })
-                .catch((err) => {
-                    this.createNotificationError({ message: err?.response?.data?.error || err.message });
-                })
+                .catch((err) => this.notifyApiError(err))
                 .finally(() => { this.generatingType = null; });
         },
 
@@ -472,14 +479,7 @@ Component.register('sw-content-creator-generator', {
         },
 
         qualityBadgeStyle(quality) {
-            return {
-                backgroundColor: LEVEL_COLORS[quality.level] || '#758ca3',
-                color: '#fff',
-                padding: '2px 10px',
-                borderRadius: '12px',
-                fontWeight: 600,
-                display: 'inline-block',
-            };
+            return this.pillStyle(LEVEL_COLORS[quality.level] || '#758ca3');
         },
 
         qualityLevelLabel(level) {
@@ -560,9 +560,7 @@ Component.register('sw-content-creator-generator', {
                     // Nur Bestandstext + Score aktualisieren – bereits generierte Ergebnisse bleiben erhalten.
                     return this.reloadEntity();
                 })
-                .catch((err) => {
-                    this.createNotificationError({ message: err?.response?.data?.error || err.message });
-                })
+                .catch((err) => this.notifyApiError(err))
                 .finally(() => { this.isLoading = false; });
         },
 
@@ -594,9 +592,7 @@ Component.register('sw-content-creator-generator', {
                     this.loadBackupInfo(type);
                     return this.reloadEntity();
                 })
-                .catch((err) => {
-                    this.createNotificationError({ message: err?.response?.data?.error || err.message });
-                })
+                .catch((err) => this.notifyApiError(err))
                 .finally(() => { this.isLoading = false; });
         },
 

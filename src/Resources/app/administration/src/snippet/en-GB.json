@@ -114,7 +114,10 @@
             "finished": "Batch processing finished",
             "toGenerator": "Go to generator",
             "needSelection": "Please select entities and at least one text type.",
-            "workerHint": "A running message worker processes the jobs in the background.",
+            "workerHint": "A running message worker processes the jobs in the background. Without a worker, jobs stay on \"running\" forever.",
+            "workerStalled": "No progress for 30 seconds — is a message worker running (admin worker active or bin/console messenger:consume)? Without a worker the job hangs.",
+            "startCard": "Selection & start",
+            "languageHelp": "Applies to selection, generation and all scans. Bilingual shops: run once per language.",
             "modeHelp": "Optimise existing: current texts are reworked (facts preserved); entities WITHOUT an existing text are created from scratch automatically (gap filling).",
             "dryRun": "Dry run (check first, apply later)",
             "dryRunHelp": "Content is generated and checked, but NOTHING is written to the shop. After completion, all gate-passing results can be applied in one go.",
@@ -145,6 +148,15 @@
             "paragraphLength": "Paragraph length",
             "headingDensity": "Subheading density"
         },
+        "tools": {
+            "navTitle": "SEO tools",
+            "title": "SEO tools",
+            "hint": "Standalone maintenance and diagnostics tools — independent of batch processing. The selected language applies to all tools on this page; bilingual shops should run each language once.",
+            "cancel": "Cancel",
+            "renameClean": "No images with non-descriptive file names found — all clean.",
+            "linebreaksClean": "No line breaks found ({scanned} categories checked) — all clean.",
+            "cannibalClean": "No cannibalisation found — no duplicate focus keywords or identical meta titles."
+        },
         "rename": {
             "title": "SEO file names (product images)",
             "hint": "Finds product images with article-number/hash file names (e.g. 15601a.jpg) and suggests descriptive names from product name + alt text (no AI, deterministic). TIP: Generate alt texts first (gap scan → vision batch) — without descriptive alts only number suffixes (-2, -3) remain. Every rename is logged — the export generates the nginx 301 redirects for Plesk.",
@@ -153,6 +165,10 @@
             "found": "{total} image(s) in total — this run processes {batch} (wave principle: rescan after renaming for the next batch)",
             "warning": "Renaming changes the image URLs. Afterwards download the redirect file and include it in Plesk (Apache & nginx settings → Additional nginx directives) so old URLs redirect via 301.",
             "apply": "Rename {count} image(s) now",
+            "altFirst": "Recommendation: {count} of the found images have NO alt text yet — generate alt texts first (batch → media → gap scan), then rename. Otherwise only number suffixes remain.",
+            "confirmTitle": "Really rename images?",
+            "confirmText": "{count} image(s) will be renamed irreversibly — the image URLs in the shop change immediately.",
+            "confirmButton": "Yes, rename",
             "done": "{renamed} image(s) renamed ({errors} errors) — update the redirect file!"
         },
         "freshness": {
@@ -160,9 +176,12 @@
             "changed": "Data changed since generation",
             "aging": "Text older than 6 months",
             "generatedAt": "generated on",
-            "use": "Use all as selection (optimise)"
+            "clean": "All texts up to date — no data changes since generation, nothing older than 6 months.",
+            "use": "Use all as selection (switches to \"optimise existing\" mode)"
         },
         "cannibal": {
+            "title": "Keyword cannibalisation",
+            "hint": "Finds entities competing for the same Google ranking with the same focus keyword or identical meta titles.",
             "scan": "Check cannibalisation",
             "keywords": "Focus keywords assigned multiple times",
             "titles": "Identical meta titles"
@@ -175,9 +194,12 @@
             "hint": "Finds entities WITHOUT content (gap filling) or the worst existing texts (work queue for optimising) — based on entity type and language above.",
             "scan": "Scan gaps",
             "report": "Quality report (existing texts)",
-            "use": "Use as selection",
-            "useWorst": "Use worst 25 as selection (optimise)",
+            "use": "Use as selection (switches to \"create new\" mode)",
+            "useWorst": "Use worst 25 as selection (switches to \"optimise existing\" mode)",
             "selected": "{count} entitie(s) added to selection",
+            "clean": "No gaps found — all content is complete.",
+            "reportProgress": "{scanned} texts checked …",
+            "reportClean": "No AI patterns found ({scanned} texts checked) — all existing texts clean.",
             "reportResult": "{total} texts with AI patterns of {scanned} checked (top 50 shown)",
             "missingDescription": "Without description",
             "missingMeta": "Without meta title/description",

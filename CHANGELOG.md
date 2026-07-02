@@ -3,6 +3,30 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.14.0] - 2026-07-02
+
+### Added / Changed (Usability-Review umgesetzt)
+- **Neue Seite „SEO-Werkzeuge"**: SEO-Dateinamen, Zeilenumbruch-Bereinigung und Kannibalisierungs-Check sind von der Batch-Seite auf eine eigene Seite umgezogen — sie haben keinen Bezug zur Batch-Auswahl. Die Batch-Seite folgt jetzt dem Workflow: Konfiguration → Arbeitsvorrat finden (Lücken/Report/Aktualität, direkt VOR der Auswahl) → Auswahl & Start → Fortschritt.
+- **Bestätigungs-Modal vor dem Umbenennen** (irreversibel, URLs ändern sich) mit Zusammenfassung und Redirect-Pflicht-Hinweis.
+- **Dry-Run ist jetzt Standard** — der Start-Button zeigt den aktiven Modus („Dry-Run starten" vs. „Batch starten").
+- **Empty-States für alle Scans**: „Keine Treffer — alles sauber" statt leerer Fläche (Lücken, Report, Aktualität, Dateinamen, Umbrüche, Kannibalisierung).
+- **Worker-Stillstands-Warnung**: Läuft ein Job 30 s ohne jeden Fortschritt, erscheint eine deutliche Warnung („läuft ein Message-Worker?") statt eines endlos drehenden Balkens.
+- **Fortschrittszähler** für die Qualitäts-Report-Schleife („N Texte geprüft …") und „Alle bereinigen" (N/M).
+- **Alt-Text-Führung im Dateinamen-Scan**: Warnung mit Anzahl, wenn gefundene Bilder noch keinen Alt-Text haben (erst Alt-Batch, dann umbenennen).
+- **Begriffe vereinheitlicht**: „Aktualität prüfen" statt „Freshness", „Übernehmen"-Buttons machen den stillen Moduswechsel sichtbar („wechselt auf Modus …").
+
+### Fixed
+- **i18n-Interpolation**: `$tc(key, anzahl, werte)` verwirft in Shopware 6.7 benannte Platzhalter — alle Aufrufe auf `$tc(key, werte, anzahl)` umgestellt; davon waren u.a. Dry-Run-/Commit-Meldungen, Report-Zeilen und der Verbindungstest betroffen.
+- **Veralteter Admin-Snippet-Cache**: `admin_snippet_*`-Keys unter ALTEN Cache-Präfixen in Redis DB 1 werden von `cache:clear` nie entfernt und ließen Snippet-Änderungen unsichtbar bleiben (16 verwaiste Generationen gefunden). Dokumentiert in CLAUDE.md.
+
+## [0.13.3] - 2026-07-02
+
+### Changed (nur intern, kein Verhaltens-/API-Unterschied)
+- **Controller-Refactoring**: JSON-Body-Dekodierung + Pflichtfeld-Prüfung aller API-Routen in private Helper (`jsonBody`/`requireFields`/`missingFieldsResponse`) konsolidiert; `mode`/`metaFields`-Normalisierung (`modeFrom`/`metaFieldsFrom`) für generate + batch vereinheitlicht. Routen, Fehlermeldungen und Statuscodes unverändert.
+- **Admin Batch-Seite**: gemeinsames `runBusy()`-Muster für alle Scan-/Aktions-Buttons (Busy-Flag, Fehler-Notification, Flag-Reset), `notifyApiError()`-Helper, Computed `effectiveLanguageId` statt 9x `this.languageId || Shopware.Context.api.languageId`, `removeLineBreakEntry()` gegen doppelte Filter-Logik.
+- **Admin Generator-Seite**: `notifyApiError()`-Helper, gemeinsame `pillStyle()`-Badge-Optik, Import-Reihenfolge bereinigt, leere Catch-Bindings entfernt.
+- **Services**: `ReadabilityChecker` mit `wordCount()`-Helper (3x dedupliziert), `FocusKeywordChecker` Überschriften-Extraktion vereinfacht (funktionslose Array-Verschachtelung entfernt), `MediaRenamer`/`CannibalizationScanner` ungenutzte Variablen entfernt.
+
 ## [0.13.0] - 2026-07-02
 
 ### Added

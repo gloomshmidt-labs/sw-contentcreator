@@ -63,7 +63,11 @@ class MediaRenamer
 
         $items = [];
         $usedNames = [];
+        $withoutAlt = 0;
         foreach ($rows as $row) {
+            if (trim((string) ($row['alt'] ?? '')) === '') {
+                $withoutAlt++;
+            }
             $suggested = $this->suggestName((string) $row['product_name'], (string) ($row['alt'] ?? ''));
             // Kollisionen innerhalb des Vorschlags-Sets deterministisch auflösen
             $base = $suggested;
@@ -82,7 +86,7 @@ class MediaRenamer
             ];
         }
 
-        return ['items' => $items, 'total' => $total];
+        return ['items' => $items, 'total' => $total, 'withoutAlt' => $withoutAlt];
     }
 
     /**
@@ -101,7 +105,7 @@ class MediaRenamer
 
         try {
             $this->fileSaver->renameMedia($mediaId, $newName, $context);
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             // Namenskollision im Bestand: deterministisches Suffix und ein zweiter Versuch
             $newName .= '-' . substr($mediaId, 0, 4);
             $this->fileSaver->renameMedia($mediaId, $newName, $context);

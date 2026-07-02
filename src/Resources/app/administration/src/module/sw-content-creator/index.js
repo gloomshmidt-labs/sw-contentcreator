@@ -1,5 +1,6 @@
 import './page/sw-content-creator-generator';
 import './page/sw-content-creator-batch';
+import './page/sw-content-creator-tools';
 import './page/sw-content-creator-settings';
 
 const { Module } = Shopware;
@@ -20,6 +21,10 @@ Module.register('sw-content-creator', {
         batch: {
             component: 'sw-content-creator-batch',
             path: 'batch',
+        },
+        tools: {
+            component: 'sw-content-creator-tools',
+            path: 'tools',
         },
         settings: {
             component: 'sw-content-creator-settings',
