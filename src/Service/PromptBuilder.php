@@ -523,9 +523,10 @@ class PromptBuilder
         if ($de) {
             return <<<TXT
                 AUFGABE: SEO- und barrierefreier Alt-Text für das gezeigte Bild.
-                - Beschreibe knapp und konkret, was zu sehen ist; nenne das Produkt/Tier beim Namen.
+                - Beschreibe KONKRET, was zu sehen ist: Motiv + auffällige Merkmale (Farbe, Material, Pose) + Perspektive, wenn erkennbar (z.B. Seitenansicht, Detailaufnahme).
+                - Nenne Produkt/Tier und Hersteller aus den Fakten beim Namen — das ist das Bild-Keyword.
                 - Max. ca. 125 Zeichen, ein Satz, keine Anführungszeichen.
-                - NICHT mit "Bild von"/"Foto von" beginnen. Keine erfundenen Details.
+                - NIEMALS generisch ("Produktbild", "Bild von", "Foto von", Dateiname). Keine erfundenen Details.
 
                 AUSGABE: Gib AUSSCHLIESSLICH den Alt-Text als reinen Text zurück — ohne Anführungszeichen, ohne Vorbemerkung.
                 TXT;
@@ -533,9 +534,10 @@ class PromptBuilder
 
         return <<<TXT
             TASK: SEO and accessible alt text for the shown image.
-            - Describe concisely and concretely what is visible; name the product/animal.
+            - Describe CONCRETELY what is visible: subject + striking features (colour, material, pose) + perspective if recognisable (e.g. side view, close-up).
+            - Name the product/animal and manufacturer from the facts — that is the image keyword.
             - Max ~125 characters, one sentence, no quotation marks.
-            - Do NOT start with "image of"/"photo of". No invented details.
+            - NEVER generic ("product image", "image of", "photo of", file name). No invented details.
 
             OUTPUT: Return ONLY the alt text as plain text — no quotation marks, no preamble.
             TXT;

@@ -3,6 +3,13 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.12.0] - 2026-07-02
+
+### Added (Bilder-SEO, aus Live-Shop-Analyse)
+- **Produktkontext für Alt-Texte**: Die Vision-Generierung erfährt jetzt, zu welchem Produkt (Name + Hersteller) ein Bild gehört — Alt-Texte werden dadurch keyword-tragend statt generisch.
+- **Präzisere Alt-Regeln**: Motiv + auffällige Merkmale (Farbe/Material/Pose) + Perspektive; Generisches („Produktbild", Dateiname) explizit verboten.
+- **Erkennung generischer Alt-Texte** im Lücken-Scan (neue Gruppe „weakAlt"): findet gepflegte, aber SEO-wertlose Alts wie „Produktbild 2", „… Demo", zu kurze oder Dateinamen-Alts — als Batch-Arbeitsvorrat.
+
 ## [0.11.0] - 2026-07-02
 
 ### Added

@@ -71,6 +71,7 @@
             <argument type="service" id="language.repository"/>
             <argument type="service" id="sales_channel.repository"/>
             <argument type="service" id="product_manufacturer.repository"/>
+            <argument type="service" id="product_media.repository"/>
             <argument type="service" id="ContentCreator\Service\CmsSlotResolver"/>
         </service>
 

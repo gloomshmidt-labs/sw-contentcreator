@@ -172,6 +172,7 @@
             "missingDescription": "Ohne Beschreibung",
             "missingMeta": "Ohne Meta-Title/-Description",
             "missingAlt": "Produktbilder ohne Alt-Text",
+            "weakAlt": "Produktbilder mit generischem Alt-Text (\"Produktbild 2\", zu kurz, Dateiname)",
             "fixNow": "Im Generator öffnen"
         },
         "variants": {

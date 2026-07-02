@@ -35,6 +35,7 @@ class GapScanner
             ],
             'media' => [
                 'missingAlt' => $this->mediaGap($languageId),
+                'weakAlt' => $this->weakAltGap($languageId),
             ],
             default => throw new \InvalidArgumentException('Unbekannter Entity-Typ: ' . $entityType),
         };
@@ -90,6 +91,33 @@ class GapScanner
              LEFT JOIN media_translation mt ON mt.media_id = m.id AND mt.language_id = UNHEX(:lang)
              WHERE (mt.alt IS NULL OR mt.alt = \'\')
              LIMIT ' . (self::MAX_IDS + 1),
+            ['lang' => $languageId, 'live' => Defaults::LIVE_VERSION]
+        );
+
+        return $this->result($rows);
+    }
+
+    /**
+     * Generische/schwache Alt-Texte an Produktbildern (Live-Analyse-Befund:
+     * "Produktbild 2", "… Demo", Dateinamen-Alts) — gepflegt, aber SEO-wertlos.
+     *
+     * @return array{count: int, ids: list<string>}
+     */
+    private function weakAltGap(string $languageId): array
+    {
+        $rows = $this->connection->fetchFirstColumn(
+            "SELECT DISTINCT LOWER(HEX(m.id))
+             FROM media m
+             INNER JOIN product_media pm ON pm.media_id = m.id AND pm.product_version_id = UNHEX(:live)
+             INNER JOIN media_translation mt ON mt.media_id = m.id AND mt.language_id = UNHEX(:lang)
+             WHERE mt.alt IS NOT NULL AND TRIM(mt.alt) != ''
+               AND (
+                    mt.alt REGEXP '(Produktbild|Product image|Bild|Image) ?[0-9]*$'
+                    OR mt.alt REGEXP 'Demo ?[0-9]*$'
+                    OR CHAR_LENGTH(TRIM(mt.alt)) < 15
+                    OR mt.alt = m.file_name
+               )
+             LIMIT " . (self::MAX_IDS + 1),
             ['lang' => $languageId, 'live' => Defaults::LIVE_VERSION]
         );
 

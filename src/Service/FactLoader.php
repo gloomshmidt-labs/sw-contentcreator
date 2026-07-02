@@ -21,6 +21,7 @@ class FactLoader
         private readonly EntityRepository $languageRepository,
         private readonly EntityRepository $salesChannelRepository,
         private readonly EntityRepository $manufacturerRepository,
+        private readonly EntityRepository $productMediaRepository,
         private readonly CmsSlotResolver $slotResolver
     ) {
     }
@@ -229,8 +230,23 @@ class FactLoader
 
         $alt = (string) ($media->getAlt() ?? '');
 
+        // Produkt-Kontext: Zu welchem Produkt gehört das Bild? Macht die
+        // Vision-Alt-Generierung präzise statt generisch (Live-Analyse-Befund).
+        $productName = '';
+        $manufacturer = '';
+        $criteria = new Criteria();
+        $criteria->addFilter(new \Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter('media.id', $id));
+        $criteria->addAssociation('product.manufacturer');
+        $criteria->setLimit(1);
+        $productMedia = $this->productMediaRepository->search($criteria, $context)->first();
+        if ($productMedia?->getProduct() !== null) {
+            $productName = (string) ($productMedia->getProduct()->getTranslation('name') ?? '');
+            $manufacturer = (string) ($productMedia->getProduct()->getManufacturer()?->getTranslation('name') ?? '');
+        }
+
         return [
-            'name' => (string) ($media->getFileName() ?? ''),
+            'name' => $productName !== '' ? $productName : (string) ($media->getFileName() ?? ''),
+            'manufacturer' => $manufacturer,
             'imageUrl' => (string) ($media->getUrl() ?? ''),
             'existingText' => $alt,
             '_hasAlt' => trim($alt) !== '',
