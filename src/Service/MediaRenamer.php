@@ -30,11 +30,21 @@ class MediaRenamer
 
     /**
      * Produktbilder mit nicht-beschreibenden Dateinamen + Namensvorschlag (Dry-Run).
+     * Liefert max. MAX_SCAN pro Lauf (Wellen-Prinzip: umbenannte matchen nicht mehr)
+     * plus die Gesamtzahl, damit klar ist, wie viele Läufe noch anstehen.
      *
-     * @return list<array{mediaId: string, currentName: string, suggestedName: string, productName: string}>
+     * @return array{items: list<array{mediaId: string, currentName: string, suggestedName: string, productName: string}>, total: int}
      */
     public function scan(string $languageId): array
     {
+        $total = (int) $this->connection->fetchOne(
+            "SELECT COUNT(DISTINCT m.id)
+             FROM media m
+             INNER JOIN product_media pm ON pm.media_id = m.id AND pm.product_version_id = UNHEX(:live)
+             WHERE m.file_name REGEXP '^[0-9][0-9a-zA-Z_-]*$' OR m.file_name REGEXP '^[a-f0-9]{30,}$'",
+            ['live' => Defaults::LIVE_VERSION]
+        );
+
         $rows = $this->connection->fetchAllAssociative(
             "SELECT DISTINCT LOWER(HEX(m.id)) AS media_id, m.file_name,
                     pt.name AS product_name, mt.alt
@@ -72,7 +82,7 @@ class MediaRenamer
             ];
         }
 
-        return $items;
+        return ['items' => $items, 'total' => $total];
     }
 
     /**

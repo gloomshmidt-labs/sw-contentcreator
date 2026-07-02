@@ -367,7 +367,7 @@ class ContentCreatorController extends AbstractController
         }
 
         try {
-            return new JsonResponse(['success' => true, 'items' => $this->mediaRenamer->scan($languageId)]);
+            return new JsonResponse(['success' => true] + $this->mediaRenamer->scan($languageId));
         } catch (\Throwable $e) {
             return new JsonResponse(['success' => false, 'error' => $e->getMessage()], 400);
         }

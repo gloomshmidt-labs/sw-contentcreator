@@ -31,6 +31,7 @@ Component.register('sw-content-creator-batch', {
             freshnessResult: null,
             freshnessBusy: false,
             renameItems: null,
+            renameTotal: 0,
             renameBusy: false,
             report: null,
             reportBusy: false,
@@ -224,7 +225,10 @@ Component.register('sw-content-creator-batch', {
             this.contentCreatorApiService.mediaRenameScan({
                 languageId: this.languageId || Shopware.Context.api.languageId,
             })
-                .then((res) => { this.renameItems = res.items || []; })
+                .then((res) => {
+                    this.renameItems = res.items || [];
+                    this.renameTotal = res.total || this.renameItems.length;
+                })
                 .catch((err) => {
                     this.createNotificationError({ message: err?.response?.data?.error || err.message });
                 })

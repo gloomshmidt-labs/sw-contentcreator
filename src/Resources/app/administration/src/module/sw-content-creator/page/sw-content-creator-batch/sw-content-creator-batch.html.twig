@@ -201,7 +201,7 @@
 
                 <template v-if="renameItems">
                     <p style="margin-top:12px; font-weight:600;">
-                        {{ $tc('sw-content-creator.rename.found', renameItems.length, { count: renameItems.length }) }}
+                        {{ $tc('sw-content-creator.rename.found', renameTotal, { total: renameTotal, batch: renameItems.length }) }}
                     </p>
                     <div v-for="item in renameItems.slice(0, 50)" :key="item.mediaId" style="font-size:13px; padding:2px 0; display:flex; gap:8px;">
                         <span style="color:#758ca3; min-width:180px;">{{ item.currentName }}</span>
