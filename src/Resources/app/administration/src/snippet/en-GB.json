@@ -85,7 +85,8 @@
             "saved": "Saved",
             "result": "Result",
             "toBatch": "Go to batch processing",
-            "hint": "When applied, the teaser is written into the text slot of the category layout (first text slot before the product listing)."
+            "hint": "When applied, the teaser is written into the text slot of the category layout (first text slot before the product listing).",
+            "channelFirst": "Please select a sales channel first — the category tree of that shop will then appear."
         },
         "levels": {
             "excellent": "Excellent",

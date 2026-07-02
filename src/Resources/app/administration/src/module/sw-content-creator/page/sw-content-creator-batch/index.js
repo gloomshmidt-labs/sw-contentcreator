@@ -1,6 +1,7 @@
 import template from './sw-content-creator-batch.html.twig';
 import { estimateCost, formatCost } from '../../../content-creator/engine/pricing';
 import languageResolveMixin from '../../mixin/language-resolve.mixin';
+import categoryTreeMixin from '../../mixin/category-tree.mixin';
 
 const { Component, Mixin } = Shopware;
 
@@ -9,14 +10,14 @@ Component.register('sw-content-creator-batch', {
 
     inject: ['contentCreatorApiService', 'repositoryFactory'],
 
-    mixins: [Mixin.getByName('notification'), languageResolveMixin],
+    mixins: [Mixin.getByName('notification'), languageResolveMixin, categoryTreeMixin],
 
     data() {
         return {
             entityType: 'product',
             selectedIds: [],
             selectedTypes: [],
-            mode: 'create',
+            mode: 'optimize',
             job: null,
             polling: null,
             isStarting: false,
@@ -31,8 +32,6 @@ Component.register('sw-content-creator-batch', {
             reportProgress: null,
             workerStalled: false,
             stalledPolls: 0,
-            categorySalesChannelId: null,
-            categoryRootId: null,
         };
     },
 
@@ -147,22 +146,12 @@ Component.register('sw-content-creator-batch', {
             this.selectedTypes = [];
             this.categorySalesChannelId = null;
             this.categoryRootId = null;
+            this.categoryOptions = [];
         },
 
-        // Verkaufskanal gewählt → dessen Navigations-Root als Kategorie-Filter laden
-        onCategoryChannelChange(id) {
-            this.categorySalesChannelId = id;
+        // Hook des category-tree-Mixins beim Kanalwechsel
+        resetCategorySelection() {
             this.selectedIds = [];
-            if (!id) {
-                this.categoryRootId = null;
-                return;
-            }
-            this.repositoryFactory.create('sales_channel')
-                .get(id, Shopware.Context.api)
-                .then((salesChannel) => {
-                    this.categoryRootId = salesChannel?.navigationCategoryId || null;
-                })
-                .catch(() => { this.categoryRootId = null; });
         },
 
         onIdsChange(ids) {

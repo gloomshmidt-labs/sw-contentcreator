@@ -85,7 +85,8 @@
             "saved": "Gespeichert",
             "result": "Ergebnis",
             "toBatch": "Zur Stapelverarbeitung",
-            "hint": "Der Teaser wird beim Übernehmen in den Text-Slot des Kategorie-Layouts geschrieben (erster Text-Slot vor dem Produkt-Listing)."
+            "hint": "Der Teaser wird beim Übernehmen in den Text-Slot des Kategorie-Layouts geschrieben (erster Text-Slot vor dem Produkt-Listing).",
+            "channelFirst": "Bitte zuerst einen Verkaufskanal wählen — dann erscheint der Kategoriebaum dieses Shops."
         },
         "levels": {
             "excellent": "Ausgezeichnet",

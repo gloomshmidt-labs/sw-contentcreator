@@ -129,6 +129,7 @@
                 <sw-entity-single-select
                     v-if="entityType === 'category'"
                     entity="sales_channel"
+                    :criteria="storefrontChannelCriteria"
                     :label="$tc('sw-content-creator.generator.channelFilter')"
                     :helpText="$tc('sw-content-creator.generator.channelFilterHelp')"
                     :value="categorySalesChannelId"

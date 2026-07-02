@@ -41,6 +41,29 @@
                 </div>
 
                 <sw-entity-single-select
+                    v-if="entityType === 'category'"
+                    entity="sales_channel"
+                    :criteria="storefrontChannelCriteria"
+                    :label="$tc('sw-content-creator.generator.channelFilter')"
+                    :helpText="$tc('sw-content-creator.generator.channelFilterHelp')"
+                    :value="categorySalesChannelId"
+                    @update:value="onCategoryChannelChange">
+                </sw-entity-single-select>
+
+                <sw-single-select
+                    v-if="entityType === 'category' && categoryRootId"
+                    :isLoading="categoryTreeLoading"
+                    :options="categoryOptions"
+                    :label="$tc('sw-content-creator.generator.selectEntity')"
+                    :value="selectedId"
+                    @update:value="onSelectEntity">
+                </sw-single-select>
+                <p v-else-if="entityType === 'category'" style="color:#758ca3; font-size:13px;">
+                    {{ $tc('sw-content-creator.generator.channelFirst') }}
+                </p>
+
+                <sw-entity-single-select
+                    v-if="entityType !== 'category'"
                     :entity="entityDalName"
                     :context="languageContext"
                     :label="$tc('sw-content-creator.generator.selectEntity')"

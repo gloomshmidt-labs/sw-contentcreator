@@ -4,6 +4,7 @@ import { highlightText, generateHtmlDiff, calculateFleschIndex, similarity } fro
 import { estimateCost, formatCost } from '../../../content-creator/engine/pricing';
 import { titlePx, descPx, truncateTitle, truncateDesc, barColor, TITLE_LIMIT_PX, DESC_LIMIT_PX } from '../../../content-creator/engine/serp-preview';
 import languageResolveMixin from '../../mixin/language-resolve.mixin';
+import categoryTreeMixin from '../../mixin/category-tree.mixin';
 
 const { Component, Mixin } = Shopware;
 
@@ -23,7 +24,7 @@ Component.register('sw-content-creator-generator', {
 
     inject: ['contentCreatorApiService', 'repositoryFactory', 'systemConfigApiService'],
 
-    mixins: [Mixin.getByName('notification'), languageResolveMixin],
+    mixins: [Mixin.getByName('notification'), languageResolveMixin, categoryTreeMixin],
 
     data() {
         return {
@@ -33,7 +34,7 @@ Component.register('sw-content-creator-generator', {
             isLoading: false,
             generatingType: null,
             generated: {},
-            mode: 'create',
+            mode: 'optimize',
             metaFields: { metaTitle: true, metaDescription: true, metaKeywords: true },
             viewTabs: {},
             whitelist: [],
@@ -43,8 +44,6 @@ Component.register('sw-content-creator-generator', {
             backups: {},
             focusKeyword: '',
             cannibalWarning: [],
-            categorySalesChannelId: null,
-            categoryRootId: null,
             serverText: null,
         };
     },
@@ -170,7 +169,12 @@ Component.register('sw-content-creator-generator', {
             this.selectedId = null;
             this.entity = null;
             this.generated = {};
-            this.resolveLanguageId(value);
+            this.serverText = null;
+            this.resolveLanguageId(value).then(() => {
+                if (this.categoryRootId) {
+                    this.loadCategoryTree();
+                }
+            });
         },
 
         buildOptimiser() {
@@ -327,23 +331,15 @@ Component.register('sw-content-creator-generator', {
             this.generated = {};
             this.categorySalesChannelId = null;
             this.categoryRootId = null;
+            this.categoryOptions = [];
         },
 
-        // Verkaufskanal gewählt → dessen Navigations-Root als Kategorie-Filter laden
-        onCategoryChannelChange(id) {
-            this.categorySalesChannelId = id;
+        // Hook des category-tree-Mixins beim Kanalwechsel
+        resetCategorySelection() {
             this.selectedId = null;
             this.entity = null;
-            if (!id) {
-                this.categoryRootId = null;
-                return;
-            }
-            this.repositoryFactory.create('sales_channel')
-                .get(id, Shopware.Context.api)
-                .then((salesChannel) => {
-                    this.categoryRootId = salesChannel?.navigationCategoryId || null;
-                })
-                .catch(() => { this.categoryRootId = null; });
+            this.serverText = null;
+            this.generated = {};
         },
 
         // 1-Klick-Fix: Deep-Link aus dem Qualitäts-Report (?entityType=&id=&mode=)

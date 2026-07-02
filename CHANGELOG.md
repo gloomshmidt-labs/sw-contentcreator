@@ -3,6 +3,13 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.16.0] - 2026-07-02
+
+### Changed (User-Feedback)
+- **Modus-Standard ist jetzt „Bestand optimieren"** (Generator + Stapelverarbeitung) — der Haupt-Anwendungsfall.
+- **Kategorie-Auswahl wie im Textoptimierung-Tool**: Erst Verkaufskanal wählen, dann öffnet sich ein Dropdown mit dem kompletten, hierarchisch eingerückten Kategoriebaum dieses Shops (Baum-Reihenfolge wie im Admin, bis 500 Kategorien) — kein Suchfeld-Raten mehr. Sprache wechseln lädt den Baum in der neuen Sprache.
+- **Kanal-Auswahl zeigt nur Storefront-Verkaufskanäle** (Headless/API-Kanäle ausgefiltert) — im Generator, in der Stapelverarbeitung und für den Kategorie-Filter.
+
 ## [0.15.0] - 2026-07-02
 
 ### Fixed (Praxis-Feedback: „Kein Text vorhanden" bei Startseite/Kategorien)
