@@ -3,6 +3,17 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.15.0] - 2026-07-02
+
+### Fixed (Praxis-Feedback: „Kein Text vorhanden" bei Startseite/Kategorien)
+- **Startseiten-Text aus der Erlebniswelt**: Der Bestandstext der Startseite wird jetzt wie im Textoptimierung-Tool geladen — CMS-Seite aus `homeCmsPageId` des Kanals (Fallback: Layout der Navigations-Root-Kategorie), alle statischen Text-Slots in Seitenreihenfolge; bei gemapptem Slot (`category.description`) die description der Root-Kategorie.
+- **Kategorie-Bestandstext-Kaskade**: description → statische Text-Slots im Kategorie-Layout (slotConfig) → Text-Slots der Erlebniswelt. Damit sehen Anzeige UND Optimieren-Modus den Content, egal wo er gepflegt ist.
+- **Zurückschreiben in den Layout-Slot**: Liegt der Kategorie-Detailtext im Layout (description leer), schreibt Optimieren/Übernehmen den neuen Text in GENAU diesen Slot zurück (statt unsichtbar in die description) — inkl. Slot-Backup und Restore (E2E verifiziert: Schreiben, Backup, Wiederherstellen).
+- **Anzeige = Server-Sicht**: Neuer Endpoint `POST /api/content-creator/current-text`; der Generator zeigt als „Aktueller Text" exakt das, was auch die Generierung als Bestand sieht (Single Source of Truth statt nur `description`).
+
+### Added
+- **Verkaufskanal-Filter für die Kategorie-Auswahl** (Generator + Batch): Erst Kanal wählen, dann zeigt die Objektauswahl nur die Kategorien dieses Shops (Filter auf den Navigations-Unterbaum, Tool-Muster).
+
 ## [0.14.0] - 2026-07-02
 
 ### Added / Changed (Usability-Review umgesetzt)

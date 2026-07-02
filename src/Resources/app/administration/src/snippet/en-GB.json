@@ -52,6 +52,8 @@
             "entityType": "Entity type",
             "language": "Language",
             "selectEntity": "Select entity",
+            "channelFilter": "Sales channel (category filter)",
+            "channelFilterHelp": "Shows only the categories of the selected sales channel. Without a selection, all categories are searched.",
             "currentText": "Current text",
             "noText": "No text available",
             "quality": "Quality",

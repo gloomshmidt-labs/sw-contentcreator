@@ -49,6 +49,39 @@ class ContentCreatorController extends AbstractController
     ) {
     }
 
+    /**
+     * Bestandstext einer Entity, wie ihn auch die Generierung sieht (inkl.
+     * Layout-Slots/Erlebniswelt) — Single Source of Truth für die Admin-Anzeige.
+     */
+    #[Route(path: '/api/content-creator/current-text', name: 'api.content-creator.current-text', defaults: ['_acl' => ['content_creator.viewer']], methods: ['POST'])]
+    public function currentText(Request $request): JsonResponse
+    {
+        $fields = $this->requireFields($this->jsonBody($request), ['entityType', 'id', 'languageId']);
+        if ($fields instanceof JsonResponse) {
+            return $fields;
+        }
+
+        try {
+            $langContext = $this->factLoader->context($fields['languageId']);
+            $facts = match ($fields['entityType']) {
+                'product' => $this->factLoader->loadProduct($fields['id'], $langContext),
+                'category' => $this->factLoader->loadCategory($fields['id'], $langContext),
+                'sales_channel' => $this->factLoader->loadSalesChannel($fields['id'], $langContext),
+                'manufacturer' => $this->factLoader->loadManufacturer($fields['id'], $langContext),
+                'media' => $this->factLoader->loadMedia($fields['id'], $langContext),
+                default => throw new \InvalidArgumentException('Unbekannter Entity-Typ: ' . $fields['entityType']),
+            };
+
+            return new JsonResponse([
+                'success' => true,
+                'text' => (string) ($facts['existingText'] ?? ''),
+                'teaser' => (string) ($facts['existingTeaser'] ?? ''),
+            ]);
+        } catch (\Throwable $e) {
+            return new JsonResponse(['success' => false, 'error' => $e->getMessage()], 400);
+        }
+    }
+
     #[Route(path: '/api/content-creator/backup/latest', name: 'api.content-creator.backup.latest', defaults: ['_acl' => ['content_creator.viewer']], methods: ['POST'])]
     public function latestBackup(Request $request, Context $context): JsonResponse
     {

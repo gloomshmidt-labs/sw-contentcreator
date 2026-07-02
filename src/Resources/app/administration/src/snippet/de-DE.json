@@ -52,6 +52,8 @@
             "entityType": "Objekt-Typ",
             "language": "Sprache",
             "selectEntity": "Objekt auswählen",
+            "channelFilter": "Verkaufskanal (Kategorie-Filter)",
+            "channelFilterHelp": "Zeigt nur die Kategorien des gewählten Verkaufskanals an. Ohne Auswahl werden alle Kategorien durchsucht.",
             "currentText": "Aktueller Text",
             "noText": "Kein Text vorhanden",
             "quality": "Qualität",

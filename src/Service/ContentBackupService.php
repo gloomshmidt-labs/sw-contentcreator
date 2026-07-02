@@ -80,7 +80,8 @@ class ContentBackupService
         $languageId = $backup->getLanguageId();
         $payload = $backup->getPayload() ?? [];
 
-        if ($backup->getContentType() === PromptBuilder::TYPE_CATEGORY_TEASER) {
+        if (isset($payload['slotId'])) {
+            // Slot-Backup (Teaser oder Detailtext im Layout-Slot)
             $this->restoreTeaser($entityId, $languageId, $payload, $context);
         } else {
             $this->repositoryFor($entityType)->update([[
@@ -135,6 +136,18 @@ class ContentBackupService
             $value = (\is_array($content) && ($content['source'] ?? '') === 'static') ? ($content['value'] ?? null) : null;
 
             return ['slotId' => $slotId, 'value' => $value];
+        }
+
+        // Detailtext im Layout-Slot → Slot-Backup (gleiche Form wie beim Teaser)
+        if ($type === PromptBuilder::TYPE_CATEGORY_DETAIL) {
+            $detailSlotId = $this->slotResolver->categoryDetailSlotId($entityId, $context);
+            if ($detailSlotId !== null) {
+                $slotConfig = $this->rawField('category', $entityId, $languageId, 'slotConfig', $context) ?? [];
+                $content = $slotConfig[$detailSlotId]['content'] ?? null;
+                $value = (\is_array($content) && ($content['source'] ?? '') === 'static') ? ($content['value'] ?? null) : null;
+
+                return ['slotId' => $detailSlotId, 'value' => $value];
+            }
         }
 
         $fields = match ($type) {

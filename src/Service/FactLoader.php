@@ -128,16 +128,34 @@ class FactLoader
 
         $description = (string) ($category->getDescription() ?? '');
         $breadcrumb = $category->getBreadcrumb();
+        $slotConfig = $category->getTranslation('slotConfig') ?? [];
 
         // Teaser liegt im CMS-slotConfig (erster Text-Slot vor dem Listing), nicht in der description
         $teaser = '';
         $teaserSlotId = $this->slotResolver->categoryTeaserSlotId($id, $context);
         if ($teaserSlotId !== null) {
-            $slotConfig = $category->getTranslation('slotConfig') ?? [];
             $content = $slotConfig[$teaserSlotId]['content'] ?? [];
             if (($content['source'] ?? '') === 'static') {
                 $teaser = trim(strip_tags((string) ($content['value'] ?? '')));
             }
+        }
+
+        // Bestandstext-Kaskade (Tool-Lösung): description → statische Text-Slots
+        // im Kategorie-Layout (slotConfig) → Text-Slots der Erlebniswelt selbst.
+        $existingText = trim(strip_tags($description));
+        if ($existingText === '') {
+            $slotTexts = [];
+            foreach ($slotConfig as $config) {
+                $content = $config['content'] ?? [];
+                $value = (string) ($content['value'] ?? '');
+                if (($content['source'] ?? '') === 'static' && mb_strlen(trim(strip_tags($value))) > 10) {
+                    $slotTexts[] = trim($value);
+                }
+            }
+            $existingText = trim(strip_tags(implode("\n\n", $slotTexts)));
+        }
+        if ($existingText === '' && $category->getCmsPageId() !== null) {
+            $existingText = trim(strip_tags($this->slotResolver->pageText($category->getCmsPageId(), $context)));
         }
 
         return [
@@ -147,10 +165,10 @@ class FactLoader
             'keywords' => (string) ($category->getKeywords() ?? ''),
             'existingMetaTitle' => (string) ($category->getMetaTitle() ?? ''),
             'existingMetaDescription' => (string) ($category->getMetaDescription() ?? ''),
-            'existingText' => trim(strip_tags($description)),
+            'existingText' => $existingText,
             'existingTeaser' => $teaser,
             'existingFaq' => $this->existingFaq($category),
-            '_hasDescription' => trim($description) !== '',
+            '_hasDescription' => $existingText !== '',
             '_hasTeaser' => $teaser !== '',
             '_teaserSlotId' => $teaserSlotId,
         ];
@@ -171,14 +189,27 @@ class FactLoader
             throw new \RuntimeException('Verkaufskanal nicht gefunden: ' . $id);
         }
 
+        // Startseiten-Text liegt in der Erlebniswelt: homeCmsPageId des Kanals,
+        // Fallback cmsPageId der Navigations-Root-Kategorie (Tool-Lösung).
+        $rootCategory = $salesChannel->getNavigationCategoryId() !== null
+            ? $this->categoryRepository->search(new Criteria([$salesChannel->getNavigationCategoryId()]), $context)->first()
+            : null;
+        $cmsPageId = $salesChannel->getHomeCmsPageId() ?? $rootCategory?->getCmsPageId();
+        $existingText = $cmsPageId !== null ? $this->slotResolver->pageText($cmsPageId, $context) : '';
+        if ($existingText === '') {
+            // Gemappter Homepage-Slot (category.description): Text liegt in der
+            // description der Navigations-Root-Kategorie
+            $existingText = trim((string) ($rootCategory?->getTranslation('description') ?? ''));
+        }
+
         return [
             'name' => (string) ($salesChannel->getTranslation('name') ?? ''),
             'shopBrand' => $this->shopBrand($salesChannel, $context->getLanguageId()),
             'keywords' => (string) ($salesChannel->getTranslation('homeMetaKeywords') ?? ''),
             'existingMetaTitle' => (string) ($salesChannel->getTranslation('homeMetaTitle') ?? ''),
             'existingMetaDescription' => (string) ($salesChannel->getTranslation('homeMetaDescription') ?? ''),
-            'existingText' => '',
-            '_hasDescription' => false,
+            'existingText' => $existingText,
+            '_hasDescription' => $existingText !== '',
         ];
     }
 

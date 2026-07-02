@@ -37,10 +37,27 @@ class ContentWriter
             $content = \is_string($generatorResult['content'] ?? null) ? trim($generatorResult['content']) : '';
             if ($content !== '') {
                 $this->backupService->snapshot($entityType, $id, $languageId, $type, $context);
-                $this->writeCategoryTeaser($id, $languageId, $content, $context);
+                $slotId = $this->slotResolver->categoryTeaserSlotId($id, $context);
+                if ($slotId === null) {
+                    throw new \RuntimeException('Kein Teaser-Textslot im CMS-Layout der Kategorie gefunden (Text-Slot vor dem Produkt-Listing).');
+                }
+                $this->writeCategorySlot($id, $languageId, $content, $slotId, $context);
             }
 
             return;
+        }
+
+        // Kategorie-Detailtext, der im Layout-Slot liegt (nicht in der description):
+        // dorthin zurückschreiben, wo der Shop ihn anzeigt (Tool-Muster).
+        if ($type === PromptBuilder::TYPE_CATEGORY_DETAIL) {
+            $detailSlotId = $this->slotResolver->categoryDetailSlotId($id, $context);
+            $content = \is_string($generatorResult['content'] ?? null) ? trim($generatorResult['content']) : '';
+            if ($detailSlotId !== null && $content !== '') {
+                $this->backupService->snapshot($entityType, $id, $languageId, $type, $context);
+                $this->writeCategorySlot($id, $languageId, $content, $detailSlotId, $context, stampFreshness: true);
+
+                return;
+            }
         }
 
         $fields = $this->fieldsFor($type, $generatorResult);
@@ -72,16 +89,11 @@ class ContentWriter
     }
 
     /**
-     * Teaser in den slotConfig der Zielsprache schreiben — nur der Ziel-Slot wird
-     * ersetzt, alle anderen Slot-Overrides dieser Sprache bleiben erhalten.
+     * Text in einen CMS-Slot (slotConfig) der Zielsprache schreiben — nur der
+     * Ziel-Slot wird ersetzt, alle anderen Slot-Overrides bleiben erhalten.
      */
-    private function writeCategoryTeaser(string $categoryId, string $languageId, string $html, Context $context): void
+    private function writeCategorySlot(string $categoryId, string $languageId, string $html, string $slotId, Context $context, bool $stampFreshness = false): void
     {
-        $slotId = $this->slotResolver->categoryTeaserSlotId($categoryId, $context);
-        if ($slotId === null) {
-            throw new \RuntimeException('Kein Teaser-Textslot im CMS-Layout der Kategorie gefunden (Text-Slot vor dem Produkt-Listing).');
-        }
-
         // Rohe Übersetzung der Zielsprache lesen (NICHT die geerbte/gemergte),
         // damit keine vererbten Werte in die Übersetzung materialisiert werden.
         $criteria = new Criteria([$categoryId]);
@@ -93,9 +105,14 @@ class ContentWriter
             'content' => ['source' => 'static', 'value' => $html],
         ]);
 
+        $fields = ['slotConfig' => $slotConfig];
+        if ($stampFreshness) {
+            $fields['customFields'] = [self::GENERATED_AT_FIELD => (new \DateTimeImmutable())->format(\DATE_ATOM)];
+        }
+
         $this->categoryRepository->update([[
             'id' => $categoryId,
-            'translations' => [$languageId => ['slotConfig' => $slotConfig]],
+            'translations' => [$languageId => $fields],
         ]], $context);
     }
 

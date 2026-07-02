@@ -43,6 +43,9 @@ Component.register('sw-content-creator-generator', {
             backups: {},
             focusKeyword: '',
             cannibalWarning: [],
+            categorySalesChannelId: null,
+            categoryRootId: null,
+            serverText: null,
         };
     },
 
@@ -66,6 +69,18 @@ Component.register('sw-content-creator-generator', {
         // UI-Typ → DAL-Entity (nur der Hersteller weicht ab)
         entityDalName() {
             return this.entityType === 'manufacturer' ? 'product_manufacturer' : this.entityType;
+        },
+        // Kategorie-Auswahl auf den Baum des gewählten Verkaufskanals eingrenzen
+        // (Tool-Lösung: erst Kanal wählen, dann nur dessen navigationCategory-Unterbaum)
+        entityCriteria() {
+            const criteria = new Shopware.Data.Criteria(1, 25);
+            if (this.entityType === 'category' && this.categoryRootId) {
+                criteria.addFilter(Shopware.Data.Criteria.multi('OR', [
+                    Shopware.Data.Criteria.contains('path', `|${this.categoryRootId}|`),
+                    Shopware.Data.Criteria.equals('id', this.categoryRootId),
+                ]));
+            }
+            return criteria;
         },
         entityTypeOptions() {
             return [
@@ -133,6 +148,11 @@ Component.register('sw-content-creator-generator', {
             ];
         },
         currentText() {
+            // Server-Sicht bevorzugen: enthält auch Layout-Slots/Erlebniswelt
+            // (Startseite, Kategorien mit Content im CMS-Layout)
+            if (this.serverText !== null) {
+                return this.serverText;
+            }
             return this.entity ? (this.entity.description || '') : '';
         },
         currentScore() {
@@ -305,6 +325,25 @@ Component.register('sw-content-creator-generator', {
             this.selectedId = null;
             this.entity = null;
             this.generated = {};
+            this.categorySalesChannelId = null;
+            this.categoryRootId = null;
+        },
+
+        // Verkaufskanal gewählt → dessen Navigations-Root als Kategorie-Filter laden
+        onCategoryChannelChange(id) {
+            this.categorySalesChannelId = id;
+            this.selectedId = null;
+            this.entity = null;
+            if (!id) {
+                this.categoryRootId = null;
+                return;
+            }
+            this.repositoryFactory.create('sales_channel')
+                .get(id, Shopware.Context.api)
+                .then((salesChannel) => {
+                    this.categoryRootId = salesChannel?.navigationCategoryId || null;
+                })
+                .catch(() => { this.categoryRootId = null; });
         },
 
         // 1-Klick-Fix: Deep-Link aus dem Qualitäts-Report (?entityType=&id=&mode=)
@@ -330,6 +369,7 @@ Component.register('sw-content-creator-generator', {
             this.generated = {};
             this.backups = {};
             this.focusKeyword = '';
+            this.serverText = null;
             if (!id) {
                 this.entity = null;
                 return;
@@ -344,6 +384,15 @@ Component.register('sw-content-creator-generator', {
                 })
                 .catch((err) => this.notifyApiError(err))
                 .finally(() => { this.isLoading = false; });
+
+            // Bestandstext aus Server-Sicht (inkl. Layout-Slots/Erlebniswelt)
+            this.contentCreatorApiService.currentText({
+                entityType: this.entityType,
+                id,
+                languageId: this.languageId || Shopware.Context.api.languageId,
+            })
+                .then((res) => { this.serverText = res.text || ''; })
+                .catch(() => { this.serverText = null; });
         },
 
         // Fokus-Keyword an der Entity persistieren (translatable customField)

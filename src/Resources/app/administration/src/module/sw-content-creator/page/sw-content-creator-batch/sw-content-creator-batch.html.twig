@@ -126,10 +126,20 @@
 
             {% block sw_content_creator_batch_start %}
             <sw-card :title="$tc('sw-content-creator.batch.startCard')">
+                <sw-entity-single-select
+                    v-if="entityType === 'category'"
+                    entity="sales_channel"
+                    :label="$tc('sw-content-creator.generator.channelFilter')"
+                    :helpText="$tc('sw-content-creator.generator.channelFilterHelp')"
+                    :value="categorySalesChannelId"
+                    @update:value="onCategoryChannelChange">
+                </sw-entity-single-select>
+
                 <sw-entity-multi-id-select
                     class="sw-content-creator-batch__ids"
                     :repository="repository"
                     :context="languageContext"
+                    :criteria="entityCriteria"
                     :label="$tc('sw-content-creator.batch.selectEntities')"
                     :value="selectedIds"
                     @update:value="onIdsChange">

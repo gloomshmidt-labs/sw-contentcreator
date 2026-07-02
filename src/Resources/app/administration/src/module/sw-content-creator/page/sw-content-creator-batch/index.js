@@ -31,6 +31,8 @@ Component.register('sw-content-creator-batch', {
             reportProgress: null,
             workerStalled: false,
             stalledPolls: 0,
+            categorySalesChannelId: null,
+            categoryRootId: null,
         };
     },
 
@@ -41,6 +43,17 @@ Component.register('sw-content-creator-batch', {
         // Aufgelöste Sprach-ID mit Admin-Kontext als Fallback (für alle API-Calls)
         effectiveLanguageId() {
             return this.languageId || Shopware.Context.api.languageId;
+        },
+        // Kategorie-Auswahl auf den Baum des gewählten Verkaufskanals eingrenzen
+        entityCriteria() {
+            const criteria = new Shopware.Data.Criteria(1, 25);
+            if (this.entityType === 'category' && this.categoryRootId) {
+                criteria.addFilter(Shopware.Data.Criteria.multi('OR', [
+                    Shopware.Data.Criteria.contains('path', `|${this.categoryRootId}|`),
+                    Shopware.Data.Criteria.equals('id', this.categoryRootId),
+                ]));
+            }
+            return criteria;
         },
         entityTypeOptions() {
             return [
@@ -132,6 +145,24 @@ Component.register('sw-content-creator-batch', {
             this.entityType = value;
             this.selectedIds = [];
             this.selectedTypes = [];
+            this.categorySalesChannelId = null;
+            this.categoryRootId = null;
+        },
+
+        // Verkaufskanal gewählt → dessen Navigations-Root als Kategorie-Filter laden
+        onCategoryChannelChange(id) {
+            this.categorySalesChannelId = id;
+            this.selectedIds = [];
+            if (!id) {
+                this.categoryRootId = null;
+                return;
+            }
+            this.repositoryFactory.create('sales_channel')
+                .get(id, Shopware.Context.api)
+                .then((salesChannel) => {
+                    this.categoryRootId = salesChannel?.navigationCategoryId || null;
+                })
+                .catch(() => { this.categoryRootId = null; });
         },
 
         onIdsChange(ids) {

@@ -72,6 +72,12 @@ export default class ContentCreatorApiService extends ApiService {
             .then((response) => ApiService.handleResponse(response));
     }
 
+    currentText(payload) {
+        return this.httpClient
+            .post('/content-creator/current-text', payload, { headers: this.getBasicHeaders() })
+            .then((response) => ApiService.handleResponse(response));
+    }
+
     mediaRenameScan(payload) {
         return this.httpClient
             .post('/content-creator/media-rename/scan', payload, { headers: this.getBasicHeaders() })

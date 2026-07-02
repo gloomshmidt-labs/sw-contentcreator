@@ -74,4 +74,70 @@ class CmsSlotResolver
 
         return $this->cache[$categoryId] = null;
     }
+
+    /**
+     * Liegt der Detailtext einer Kategorie im Layout statt in der description?
+     * Liefert die Slot-ID des ersten statischen Text-Slots im slotConfig, wenn
+     * die description leer ist (Tool-Muster: Optimiertes gehört in den Slot
+     * zurück, sonst zeigt der Shop weiter den alten Text).
+     */
+    public function categoryDetailSlotId(string $categoryId, Context $context): ?string
+    {
+        $category = $this->categoryRepository->search(new Criteria([$categoryId]), $context)->first();
+        if ($category === null) {
+            return null;
+        }
+        if (trim(strip_tags((string) ($category->getTranslation('description') ?? ''))) !== '') {
+            return null;
+        }
+
+        foreach ($category->getTranslation('slotConfig') ?? [] as $slotId => $config) {
+            $content = $config['content'] ?? [];
+            $value = (string) ($content['value'] ?? '');
+            if (($content['source'] ?? '') === 'static' && mb_strlen(trim(strip_tags($value))) > 10) {
+                return (string) $slotId;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Gesamter Text-Inhalt einer CMS-Seite (Erlebniswelt) in der Kontext-Sprache:
+     * alle Text-/HTML-Slots in Seitenreihenfolge, wie im Textoptimierung-Tool
+     * (Startseiten-Content liegt in der Erlebniswelt, nicht am Verkaufskanal).
+     */
+    public function pageText(string $cmsPageId, Context $context): string
+    {
+        $criteria = new Criteria([$cmsPageId]);
+        $criteria->addAssociation('sections.blocks.slots');
+        $page = $this->cmsPageRepository->search($criteria, $context)->first();
+
+        $sections = $page?->getSections()?->getElements() ?? [];
+        usort($sections, static fn ($a, $b) => $a->getPosition() <=> $b->getPosition());
+
+        $texts = [];
+        foreach ($sections as $section) {
+            $blocks = $section->getBlocks()?->getElements() ?? [];
+            usort($blocks, static fn ($a, $b) => $a->getPosition() <=> $b->getPosition());
+
+            foreach ($blocks as $block) {
+                foreach ($block->getSlots()?->getElements() ?? [] as $slot) {
+                    if (!\in_array($slot->getType(), self::TEXT_SLOT_TYPES, true)) {
+                        continue;
+                    }
+                    $config = $slot->getTranslation('config') ?? [];
+                    $content = $config['content'] ?? [];
+                    $value = $content['value'] ?? null;
+                    // Nur statische Inhalte — gemappte Slots (z.B. category.description)
+                    // enthalten den Mapping-Pfad, keinen Text
+                    if (($content['source'] ?? '') === 'static' && \is_string($value) && mb_strlen(trim(strip_tags($value))) > 10) {
+                        $texts[] = trim($value);
+                    }
+                }
+            }
+        }
+
+        return implode("\n\n", $texts);
+    }
 }
