@@ -3,6 +3,11 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.18.1] - 2026-07-03
+
+### Changed (User-Einwand: Zuordnung über Artikelnummer-Dateinamen)
+- **Alter Dateiname bleibt im neuen Namen erhalten**: Vorschläge lauten jetzt `produktname-15601a` statt `produktname-2` — die Artikelnummer bleibt als Zuordnungs-Anker für Menschen und externe Systeme greifbar (Muster wie bei großen Shops: SKU im Bildnamen). Nur nichtssagende Hash-Namen (30+ Hex-Zeichen) werden nicht übernommen.
+
 ## [0.18.0] - 2026-07-02
 
 ### Added (User-Wunsch: Nachbearbeitung vor dem Übernehmen)

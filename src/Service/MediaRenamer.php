@@ -68,7 +68,7 @@ class MediaRenamer
             if (trim((string) ($row['alt'] ?? '')) === '') {
                 $withoutAlt++;
             }
-            $suggested = $this->suggestName((string) $row['product_name'], (string) ($row['alt'] ?? ''));
+            $suggested = $this->suggestName((string) $row['product_name'], (string) ($row['alt'] ?? ''), (string) $row['file_name']);
             // Kollisionen innerhalb des Vorschlags-Sets deterministisch auflösen
             $base = $suggested;
             $i = 2;
@@ -206,11 +206,20 @@ class MediaRenamer
     }
 
     /**
-     * Vorschlag: Slug aus Produktname + unterscheidenden Alt-Wörtern.
+     * Vorschlag: Slug aus Produktname + ALTEM Dateinamen (Artikelnummer bleibt
+     * für die Zuordnung erhalten, z.B. 15601a → folkmanis-handpuppe-schnecke-15601a)
+     * + unterscheidenden Alt-Wörtern, soweit die Maximallänge es zulässt.
      */
-    private function suggestName(string $productName, string $alt): string
+    private function suggestName(string $productName, string $alt, string $currentName = ''): string
     {
         $base = $this->slugify($productName);
+
+        // Alter Dateiname (i.d.R. die Artikelnummer) bleibt als Zuordnungs-Anker
+        // erhalten — außer er ist ein nichtssagender Hash (30+ Hex-Zeichen)
+        $anchor = $this->slugify($currentName);
+        if ($anchor !== '' && !preg_match('/^[a-f0-9]{30,}$/', $anchor)) {
+            $base .= '-' . mb_substr($anchor, 0, 20);
+        }
 
         // Unterscheidende Wörter aus dem Alt (ohne die Produktname-Wörter)
         $productTokens = array_flip(explode('-', $base));
