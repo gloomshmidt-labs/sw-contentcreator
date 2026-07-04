@@ -23,6 +23,8 @@
 
                 <template v-if="get('provider') === 'openai'">
                     <sw-password-field
+                        autocomplete="new-password"
+                        name="cc-openai-api-key"
                         :label="$tc('sw-content-creator.settings.openaiKey')"
                         :value="get('openaiApiKey')"
                         @update:value="(v) => set('openaiApiKey', v)">
@@ -36,6 +38,8 @@
                 </template>
                 <template v-else>
                     <sw-password-field
+                        autocomplete="new-password"
+                        name="cc-anthropic-api-key"
                         :label="$tc('sw-content-creator.settings.anthropicKey')"
                         :helpText="$tc('sw-content-creator.settings.anthropicKeyHelp')"
                         :value="get('anthropicApiKey')"

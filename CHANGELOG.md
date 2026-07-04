@@ -3,6 +3,11 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.26.1] - 2026-07-04
+
+### Fixed
+- **Browser-Autofill konnte die API-Keys überschreiben**: Die Passwortfelder tragen jetzt `autocomplete="new-password"` und neutrale Feldnamen — Passwort-Manager füllen dort keine gespeicherten Website-Passwörter mehr ein, die beim nächsten Speichern den echten Key ersetzt hätten (Symptom: „sehr kurzer Key" nach dem Öffnen der Einstellungen).
+
 ## [0.26.0] - 2026-07-04
 
 ### Added (gezieltes Testen pro Produkt)
