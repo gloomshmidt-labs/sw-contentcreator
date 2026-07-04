@@ -269,18 +269,22 @@ class ContentCreatorController extends AbstractController
             $model = $configuredBatchModel !== '' ? $configuredBatchModel : null;
         }
 
-        $jobId = $this->batchDispatcher->dispatch(
-            $entityType,
-            $ids,
-            $types,
-            $data['languageId'] ?? $context->getLanguageId(),
-            $data['provider'] ?? null,
-            $model,
-            $context,
-            $this->modeFrom($data),
-            $this->metaFieldsFrom($data),
-            (bool) ($data['dryRun'] ?? false)
-        );
+        try {
+            $jobId = $this->batchDispatcher->dispatch(
+                $entityType,
+                $ids,
+                $types,
+                $data['languageId'] ?? $context->getLanguageId(),
+                $data['provider'] ?? null,
+                $model,
+                $context,
+                $this->modeFrom($data),
+                $this->metaFieldsFrom($data),
+                (bool) ($data['dryRun'] ?? false)
+            );
+        } catch (\InvalidArgumentException $e) {
+            return new JsonResponse(['success' => false, 'error' => $e->getMessage()], 400);
+        }
 
         return new JsonResponse(['success' => true, 'jobId' => $jobId, 'total' => \count($ids)]);
     }
