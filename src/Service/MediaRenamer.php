@@ -53,18 +53,24 @@ class MediaRenamer
             $params
         );
 
+        // Gezielter Produkt-Scan: ALLE Bilder anbieten (auch bereits umbenannte
+        // zur Korrektur) — der Anker kommt dann aus dem Umbenennungs-Protokoll.
+        // Globaler Scan: nur Artikelnummer-/Hash-Namen (Wellen-Prinzip).
+        $nameFilter = $productId !== null
+            ? ''
+            : "AND (m.file_name REGEXP '^[0-9][0-9a-zA-Z_-]*$' OR m.file_name REGEXP '^[a-f0-9]{30,}$')";
+
         $rows = $this->connection->fetchAllAssociative(
             "SELECT DISTINCT LOWER(HEX(m.id)) AS media_id, m.file_name,
-                    pt.name AS product_name, mt.alt
+                    pt.name AS product_name, mt.alt,
+                    (SELECT r.old_path FROM content_creator_media_rename r
+                     WHERE r.media_id = m.id ORDER BY r.created_at ASC LIMIT 1) AS first_old_path
              FROM media m
              INNER JOIN product_media pm ON pm.media_id = m.id AND pm.product_version_id = UNHEX(:live){$productFilter}
              INNER JOIN product_translation pt
                 ON pt.product_id = pm.product_id AND pt.product_version_id = pm.product_version_id AND pt.language_id = UNHEX(:lang)
              LEFT JOIN media_translation mt ON mt.media_id = m.id AND mt.language_id = UNHEX(:lang)
-             WHERE pt.name IS NOT NULL AND (
-                    m.file_name REGEXP '^[0-9][0-9a-zA-Z_-]*$'
-                    OR m.file_name REGEXP '^[a-f0-9]{30,}$'
-               )
+             WHERE pt.name IS NOT NULL {$nameFilter}
              LIMIT " . self::MAX_SCAN,
             $params + ['lang' => $languageId]
         );
@@ -76,7 +82,19 @@ class MediaRenamer
             if (trim((string) ($row['alt'] ?? '')) === '') {
                 $withoutAlt++;
             }
-            $suggested = $this->suggestName((string) $row['product_name'], (string) ($row['alt'] ?? ''), (string) $row['file_name']);
+            // Anker = URSPRÜNGLICHER Name (aus dem Protokoll), falls schon mal umbenannt
+            $anchorSource = (string) $row['file_name'];
+            if (!empty($row['first_old_path'])) {
+                $original = pathinfo((string) $row['first_old_path'], \PATHINFO_FILENAME);
+                if ($original !== '') {
+                    $anchorSource = $original;
+                }
+            }
+            $suggested = $this->suggestName((string) $row['product_name'], (string) ($row['alt'] ?? ''), $anchorSource);
+            // Bereits perfekte Namen nicht anbieten
+            if ($suggested === (string) $row['file_name']) {
+                continue;
+            }
             // Kollisionen innerhalb des Vorschlags-Sets deterministisch auflösen
             $base = $suggested;
             $i = 2;

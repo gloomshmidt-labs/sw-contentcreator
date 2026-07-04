@@ -3,6 +3,12 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.27.1] - 2026-07-04
+
+### Added / Fixed (Nachkorrektur bereits umbenannter Bilder)
+- **Korrektur-Scan im Produkt-Kontext**: Der gezielte Scan (Generator-Bilder-Karte) bietet jetzt ALLE Bilder des Produkts an — auch bereits umbenannte können erneut korrigiert werden. Der Artikelnummer-Anker kommt dabei aus dem Umbenennungs-Protokoll (ursprünglicher Name), Namen die bereits dem Vorschlag entsprechen werden ausgeblendet. Der globale Wellen-Scan bleibt auf Artikelnummer-/Hash-Namen beschränkt.
+- **Ketten-Redirects E2E bestätigt**: a→b→c erzeugt automatisch a→c UND b→c — Nachkorrekturen sind also redirect-seitig voll abgedeckt (war bereits implementiert, jetzt getestet).
+
 ## [0.27.0] - 2026-07-04
 
 ### Changed (Batch-Tauglichkeit der Dateinamen)
