@@ -9,6 +9,7 @@ use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\Uuid\Uuid;
+use Shopware\Core\System\SystemConfig\SystemConfigService;
 
 /**
  * SEO-Dateinamen für Produktbilder: Artikelnummern-/Hash-Dateinamen (15601a.jpg)
@@ -24,7 +25,8 @@ class MediaRenamer
     public function __construct(
         private readonly Connection $connection,
         private readonly EntityRepository $mediaRepository,
-        private readonly FileSaver $fileSaver
+        private readonly FileSaver $fileSaver,
+        private readonly SystemConfigService $systemConfig
     ) {
     }
 
@@ -174,6 +176,33 @@ class MediaRenamer
         }
 
         return implode("\n", $lines) . "\n";
+    }
+
+    /**
+     * Schreibt die komplette Redirect-Datei (kumulativ) an den konfigurierten
+     * Pfad — einmalig als nginx-Include einrichten, danach hält das Plugin die
+     * Datei nach jedem Umbenennungs-Lauf automatisch aktuell. nginx liest
+     * Includes erst beim Reload; ein täglicher reload-Cron genügt, da frisch
+     * umbenannte Bilder noch nicht indexiert sind.
+     *
+     * @return string|null Geschriebener Pfad oder null (nicht konfiguriert)
+     */
+    public function writeRedirectFile(): ?string
+    {
+        $path = trim((string) $this->systemConfig->get('ContentCreator.config.redirectFile'));
+        if ($path === '') {
+            return null;
+        }
+
+        $dir = \dirname($path);
+        if (!is_dir($dir) || !is_writable($dir)) {
+            throw new \RuntimeException('Redirect-Datei-Verzeichnis nicht beschreibbar: ' . $dir);
+        }
+        if (file_put_contents($path, $this->exportNginx(), \LOCK_EX) === false) {
+            throw new \RuntimeException('Redirect-Datei konnte nicht geschrieben werden: ' . $path);
+        }
+
+        return $path;
     }
 
     /**

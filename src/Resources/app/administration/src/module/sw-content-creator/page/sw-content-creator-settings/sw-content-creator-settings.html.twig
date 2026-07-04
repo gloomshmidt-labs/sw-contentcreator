@@ -68,6 +68,18 @@
             {% endblock %}
 
             {% block sw_content_creator_settings_automation %}
+            <sw-card :title="$tc('sw-content-creator.settings.redirectCard')" :isLoading="isLoading">
+                <sw-text-field
+                    :label="$tc('sw-content-creator.settings.redirectFile')"
+                    :helpText="$tc('sw-content-creator.settings.redirectFileHelp')"
+                    :value="config['ContentCreator.config.redirectFile']"
+                    @update:value="(v) => { config['ContentCreator.config.redirectFile'] = v; }">
+                </sw-text-field>
+                <sw-alert variant="info">
+                    {{ $tc('sw-content-creator.settings.redirectSetup') }}
+                </sw-alert>
+            </sw-card>
+
             <sw-card :title="$tc('sw-content-creator.settings.usageCard')" :isLoading="isLoading">
                 <p style="color:#758ca3; font-size:13px; margin-bottom:12px;">
                     {{ $tc('sw-content-creator.settings.usageHint') }}

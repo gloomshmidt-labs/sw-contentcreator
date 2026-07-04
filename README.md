@@ -73,9 +73,12 @@ Produkte sind kanalneutral: In Produkt-Texten und -Meta erscheint nie der Shopna
 
 Die Batch-Seite kann Produktbilder mit Artikelnummer-/Hash-Dateinamen auf beschreibende Namen umbenennen. **Wichtig:** Dabei ändert sich die komplette Bild-URL — damit alte URLs (Google Bilder, externe Links) erhalten bleiben:
 
-1. Nach jedem Umbenennungs-Lauf **„nginx-Redirects herunterladen"** klicken.
-2. Den Inhalt der Datei in Plesk unter **Apache & nginx Einstellungen → Zusätzliche nginx-Anweisungen** der Domain einfügen (oder als `include`-Datei ablegen) und übernehmen.
-3. Die Datei enthält immer ALLE bisherigen Redirects (inkl. Thumbnails) — bestehende Einträge einfach komplett ersetzen.
+**Empfohlen — automatische Redirect-Datei (einmalige Einrichtung):**
+1. In den Einstellungen unter „Bild-Redirects" einen Datei-Pfad eintragen (z.B. `<shoproot>/var/media-redirects.conf`). Das Plugin schreibt die komplette, kumulative Redirect-Datei nach jedem Umbenennungs-Lauf automatisch dorthin.
+2. In Plesk unter **Apache & nginx Einstellungen → Zusätzliche nginx-Anweisungen** einmalig einbinden: `include <PFAD>;`
+3. Täglichen Root-Cronjob anlegen: `systemctl reload nginx` — nginx liest Include-Dateien nur beim Reload. Für frisch umbenannte Bilder ist die Verzögerung unkritisch (deren alte URLs sind noch nicht indexiert); ein Reload mit fehlerhafter Datei lässt die laufende Konfiguration unangetastet.
+
+**Alternativ — manueller Export:** Nach dem Umbenennungs-Lauf „nginx-Redirects herunterladen" und den Inhalt in die Plesk-nginx-Anweisungen einfügen (Datei enthält immer ALLE bisherigen Redirects inkl. Thumbnails — bestehenden Block komplett ersetzen).
 
 Bilder, die an mehreren Produkten hängen, erhalten den Namen des zuerst gefundenen Produkts.
 

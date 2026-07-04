@@ -3,6 +3,11 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.20.0] - 2026-07-04
+
+### Added (User-Wunsch: Redirects ohne wiederkehrende Handarbeit)
+- **Automatische Redirect-Datei**: In den Einstellungen kann ein Datei-Pfad hinterlegt werden (z.B. `<shoproot>/var/media-redirects.conf`) — nach jedem Umbenennungs-Lauf schreibt das Plugin die komplette, kumulative nginx-Redirect-Datei automatisch dorthin. Einmalige Einrichtung: Pfad speichern, in Plesk `include <PFAD>;` eintragen, täglichen Root-Cron `systemctl reload nginx` anlegen (nginx liest Includes nur beim Reload; für frisch umbenannte Bilder unkritisch, da deren alte URLs noch nicht indexiert sind — ein Reload mit fehlerhafter Datei lässt die laufende Konfiguration aktiv). Der manuelle Download-Export bleibt als Alternative erhalten.
+
 ## [0.19.0] - 2026-07-04
 
 ### Fixed (Praxis-Feedback vom plesk-1-Test)

@@ -45,7 +45,11 @@
             "usageCard": "API usage (via this plugin)",
             "usageHint": "Cumulative tokens and estimated cost of all generations through this plugin, per month/provider/model. Account BALANCE cannot be queried with regular API keys — it is only visible in the Anthropic Console (console.anthropic.com → Billing) or the OpenAI dashboard (platform.openai.com → Usage).",
             "usageEmpty": "No usage recorded yet (tracking starts with this version).",
-            "usageMonth": "Month"
+            "usageMonth": "Month",
+            "redirectCard": "Image redirects (automatic file)",
+            "redirectFile": "Redirect file path (empty = disabled)",
+            "redirectFileHelp": "Absolute path, e.g. /var/www/vhosts/DOMAIN/shop/var/media-redirects.conf. After every rename run the plugin automatically writes the complete (cumulative) redirect file there.",
+            "redirectSetup": "One-time setup: (1) Enter the file path here and save. (2) In Plesk under \"Apache & nginx settings → Additional nginx directives\" add once: include <PATH>; (3) Create a daily root cron \"systemctl reload nginx\" — nginx reads includes only on reload; uncritical for freshly renamed images since their old URLs are not indexed yet. A reload with a broken file keeps the running configuration active."
         },
         "generator": {
             "title": "Generate texts",
