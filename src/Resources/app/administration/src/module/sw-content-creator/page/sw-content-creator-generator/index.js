@@ -47,6 +47,7 @@ Component.register('sw-content-creator-generator', {
             serverText: null,
             serverTeaser: '',
             serverMeta: null,
+            productMedia: [],
         };
     },
 
@@ -381,6 +382,7 @@ Component.register('sw-content-creator-generator', {
                     const customFields = e?.translated?.customFields || e?.customFields || {};
                     this.focusKeyword = customFields[FOCUS_KEYWORD_FIELD] || '';
                     this.typeButtons.forEach((btn) => this.loadBackupInfo(btn.type));
+                    this.loadProductMedia();
                 })
                 .catch((err) => this.notifyApiError(err))
                 .finally(() => { this.isLoading = false; });
@@ -610,6 +612,68 @@ Component.register('sw-content-creator-generator', {
 
             return this.repository.get(this.selectedId, this.languageContext)
                 .then((e) => { this.entity = e; });
+        },
+
+        // Produktbilder für die Alt-Text-Karte (nur bei Produkten)
+        loadProductMedia() {
+            this.productMedia = [];
+            if (this.entityType !== 'product' || !this.selectedId) {
+                return;
+            }
+            const criteria = new Shopware.Data.Criteria(1, 50);
+            criteria.addFilter(Shopware.Data.Criteria.equals('productId', this.selectedId));
+            criteria.addAssociation('media');
+            criteria.addSorting(Shopware.Data.Criteria.sort('position', 'ASC'));
+            this.repositoryFactory.create('product_media')
+                .search(criteria, this.languageContext)
+                .then((result) => {
+                    this.productMedia = result.map((pm) => ({
+                        mediaId: pm.mediaId,
+                        url: pm.media?.url || '',
+                        fileName: pm.media?.fileName || '',
+                        alt: pm.media?.translated?.alt || pm.media?.alt || '',
+                        generating: false,
+                        result: null,
+                        score: null,
+                    }));
+                })
+                .catch(() => { this.productMedia = []; });
+        },
+
+        generateAlt(item) {
+            item.generating = true;
+            this.contentCreatorApiService.generate({
+                entityType: 'media',
+                id: item.mediaId,
+                type: 'media_alt',
+                languageId: this.languageId,
+                mode: this.mode,
+            })
+                .then((res) => {
+                    item.result = res.result?.content || '';
+                    item.score = res.result?.quality?.score ?? null;
+                })
+                .catch((err) => this.notifyApiError(err))
+                .finally(() => { item.generating = false; });
+        },
+
+        applyAlt(item) {
+            if (!item.result) {
+                return;
+            }
+            this.contentCreatorApiService.apply({
+                entityType: 'media',
+                id: item.mediaId,
+                type: 'media_alt',
+                languageId: this.languageId,
+                result: { content: item.result },
+            })
+                .then(() => {
+                    this.createNotificationSuccess({ message: this.$tc('sw-content-creator.generator.saved') });
+                    item.alt = item.result;
+                    item.result = null;
+                })
+                .catch((err) => this.notifyApiError(err));
         },
 
         // Übernehmen läuft für ALLE Typen über das Backend (ContentWriter):

@@ -16,6 +16,7 @@
         <sw-card-view>
             {% block sw_content_creator_batch_config %}
             <sw-card :title="$tc('sw-content-creator.batch.title')">
+                <p style="color:#758ca3; font-size:13px; margin-bottom:12px;">{{ $tc('sw-content-creator.general.introBatch') }}</p>
                 <div style="display:flex; gap:16px;">
                     <sw-single-select
                         :label="$tc('sw-content-creator.batch.entityType')"
@@ -231,7 +232,9 @@
                         <p style="margin-top:12px; font-weight:600;">{{ $tc('sw-content-creator.batch.resultsTitle') }}</p>
                         <p style="color:#758ca3; font-size:12px;">{{ $tc('sw-content-creator.batch.resultsHint') }}</p>
                         <div style="max-height:480px; overflow-y:auto;">
-                            <div v-for="result in dryRunResults" :key="result.id" style="border:1px solid #e5e9f0; border-radius:4px; padding:8px; margin-top:8px;">
+                            <div v-for="result in dryRunResults" :key="result.id" style="border:1px solid #e5e9f0; border-radius:4px; padding:8px; margin-top:8px; display:flex; gap:12px;">
+                                <img v-if="result.imagePath" :src="'/' + result.imagePath" style="width:72px; height:72px; object-fit:contain; background:#f8f9fb; border-radius:4px; flex-shrink:0;"/>
+                                <div style="flex:1; min-width:0;">
                                 <p style="font-weight:600; font-size:13px;">
                                     {{ typeLabel(result.type) }} — {{ result.name || result.entityId.substring(0, 8) + '…' }}
                                     <span v-if="result.score !== null" style="color:#758ca3; font-weight:400;">(Score {{ result.score }})</span>
@@ -247,6 +250,7 @@
                                 <textarea v-else :value="result.content" :rows="result.type === 'media_alt' ? 2 : 6"
                                     style="width:100%; font-size:13px; padding:4px 6px; margin-top:4px; border:1px solid #d1d9e0; border-radius:4px; font-family:inherit;"
                                     @input="(e) => { result.content = e.target.value; }" @blur="saveDryRunEdit(result)"></textarea>
+                                </div>
                             </div>
                         </div>
                     </template>

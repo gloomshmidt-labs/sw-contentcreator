@@ -342,6 +342,9 @@ class ContentCreatorController extends AbstractController
                 'meta' => $payload['meta'] ?? null,
                 'score' => $payload['quality']['score'] ?? null,
                 'name' => $this->entityDisplayName((string) $row['type'], (string) $row['entityId']),
+                'imagePath' => $row['type'] === \ContentCreator\Service\PromptBuilder::TYPE_MEDIA_ALT
+                    ? (string) ($this->connection->fetchOne('SELECT path FROM media WHERE id = UNHEX(:id)', ['id' => $row['entityId']]) ?: '')
+                    : '',
             ];
         }
 

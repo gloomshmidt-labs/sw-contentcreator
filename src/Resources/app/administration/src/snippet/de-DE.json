@@ -2,7 +2,10 @@
     "sw-content-creator": {
         "general": {
             "title": "ContentCreator",
-            "description": "KI-gestützte SEO-Texte"
+            "description": "KI-gestützte SEO-Texte",
+            "introGenerator": "EIN Objekt im Detail bearbeiten: Texte, Metas, FAQ — bei Produkten auch die Alt-Texte der Bilder. Mit Vorschau, Diff, Bearbeiten und Ein-Klick-Backup. Für viele Objekte auf einmal → Stapelverarbeitung.",
+            "introBatch": "VIELE Objekte auf einmal: Arbeitsvorrat per Scan finden (Lücken, Qualität, Aktualität), im Dry-Run prüfen und editieren, dann gesammelt übernehmen. Für ein einzelnes Objekt → Generator.",
+            "introTools": "Einmalige Wartungs- und Diagnose-Werkzeuge, unabhängig von der Text-Generierung: SEO-Dateinamen der Bilder, Zeilenumbruch-Bereinigung, Keyword-Kannibalisierung. Die gewählte Sprache gilt für alle Werkzeuge dieser Seite."
         },
         "settings": {
             "navTitle": "Einstellungen",
@@ -97,7 +100,9 @@
             "channelFirst": "Bitte zuerst einen Verkaufskanal wählen — dann erscheint der Kategoriebaum dieses Shops.",
             "currentMeta": "Aktuelle Meta-Angaben",
             "tabEdit": "Bearbeiten",
-            "editHint": "HTML-Quelltext direkt bearbeiten — Änderungen fließen sofort in Vorschau, Diff und „Übernehmen & speichern“ ein."
+            "editHint": "HTML-Quelltext direkt bearbeiten — Änderungen fließen sofort in Vorschau, Diff und „Übernehmen & speichern“ ein.",
+            "mediaCard": "Produktbilder & Alt-Texte",
+            "mediaCardHint": "Alt-Text je Bild generieren (die KI sieht sich das Bild an), Ergebnis prüfen/anpassen, übernehmen — schreibt Alt- und Title-Attribut mit Backup."
         },
         "levels": {
             "excellent": "Ausgezeichnet",

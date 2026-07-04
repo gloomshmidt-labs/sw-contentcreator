@@ -2,7 +2,10 @@
     "sw-content-creator": {
         "general": {
             "title": "ContentCreator",
-            "description": "AI-powered SEO texts"
+            "description": "AI-powered SEO texts",
+            "introGenerator": "Work on ONE entity in detail: texts, metas, FAQ — for products also the images\\u2019 alt texts. With preview, diff, editing and one-click backup. For many entities at once \\u2192 batch processing.",
+            "introBatch": "MANY entities at once: build a work queue via scans (gaps, quality, freshness), review and edit in a dry run, then apply in one go. For a single entity \\u2192 generator.",
+            "introTools": "One-off maintenance and diagnostics tools, independent of text generation: SEO image file names, line-break cleanup, keyword cannibalisation. The selected language applies to all tools on this page."
         },
         "settings": {
             "navTitle": "Settings",
@@ -97,7 +100,9 @@
             "channelFirst": "Please select a sales channel first — the category tree of that shop will then appear.",
             "currentMeta": "Current meta data",
             "tabEdit": "Edit",
-            "editHint": "Edit the HTML source directly — changes flow immediately into preview, diff and “Apply & save”."
+            "editHint": "Edit the HTML source directly — changes flow immediately into preview, diff and “Apply & save”.",
+            "mediaCard": "Product images & alt texts",
+            "mediaCardHint": "Generate the alt text per image (the AI looks at the image), review/adjust the result, apply — writes alt and title attribute with backup."
         },
         "levels": {
             "excellent": "Excellent",

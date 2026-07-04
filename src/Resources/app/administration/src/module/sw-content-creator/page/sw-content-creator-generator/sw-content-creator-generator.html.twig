@@ -16,6 +16,7 @@
         <sw-card-view>
             {% block sw_content_creator_generator_selection %}
             <sw-card :title="$tc('sw-content-creator.generator.title')">
+                <p style="color:#758ca3; font-size:13px; margin-bottom:12px;">{{ $tc('sw-content-creator.general.introGenerator') }}</p>
                 <div class="sw-content-creator-generator__row" style="display:flex; gap:16px;">
                     <sw-single-select
                         :label="$tc('sw-content-creator.generator.entityType')"
@@ -135,7 +136,35 @@
             </sw-card>
             {% endblock %}
 
-            {% block sw_content_creator_generator_types %}
+                        {% block sw_content_creator_generator_media_alts %}
+            <sw-card v-if="entityType === 'product' && productMedia.length" :title="$tc('sw-content-creator.generator.mediaCard')">
+                <p style="color:#758ca3; font-size:13px; margin-bottom:8px;">{{ $tc('sw-content-creator.generator.mediaCardHint') }}</p>
+                <div v-for="item in productMedia" :key="item.mediaId" style="display:flex; gap:12px; align-items:flex-start; padding:8px 0; border-bottom:1px solid #f0f2f5;">
+                    <img :src="item.url" :alt="item.fileName" style="width:64px; height:64px; object-fit:contain; background:#f8f9fb; border-radius:4px; flex-shrink:0;"/>
+                    <div style="flex:1;">
+                        <p style="font-size:12px; color:#758ca3;">{{ item.fileName }}</p>
+                        <p v-if="!item.result" style="font-size:13px;">
+                            <strong>Alt:</strong> {{ item.alt || '—' }}
+                        </p>
+                        <template v-else>
+                            <input type="text" :value="item.result" style="width:100%; font-size:13px; padding:4px 6px; border:1px solid #d1d9e0; border-radius:4px;"
+                                @input="(e) => { item.result = e.target.value; }"/>
+                            <span v-if="item.score !== null" style="font-size:12px; color:#758ca3;">Score {{ item.score }}</span>
+                        </template>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <sw-button size="small" :isLoading="item.generating" @click="generateAlt(item)">
+                            {{ mode === 'optimize' && item.alt ? $tc('sw-content-creator.generator.optimize') : $tc('sw-content-creator.generator.generate') }}
+                        </sw-button>
+                        <sw-button v-if="item.result" size="small" variant="primary" @click="applyAlt(item)">
+                            {{ $tc('sw-content-creator.generator.apply') }}
+                        </sw-button>
+                    </div>
+                </div>
+            </sw-card>
+            {% endblock %}
+
+{% block sw_content_creator_generator_types %}
             <template v-if="entity">
                 <sw-card v-for="btn in typeButtons" :key="btn.type" :title="typeLabel(btn.type)">
                     <div v-if="mode === 'optimize' && btn.kind === 'meta'" style="display:flex; gap:16px; margin-bottom:8px;">

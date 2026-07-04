@@ -3,6 +3,13 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.25.0] - 2026-07-04
+
+### Added / Changed (GUI-Kritik: „warum nur über die Stapelverarbeitung?")
+- **Alt-Texte jetzt auch im Generator**: Bei Produkten zeigt die neue Karte „Produktbilder & Alt-Texte" alle Bilder mit **Mini-Vorschau** und aktuellem Alt-Text — je Bild generieren (Vision), Ergebnis inline prüfen/anpassen, einzeln übernehmen (schreibt Alt + Title mit Backup).
+- **Bild-Vorschau in der Dry-Run-Review**: Alt-Text-Ergebnisse zeigen das zugehörige Bild als Thumbnail neben dem editierbaren Text — prüfen ohne Rätselraten.
+- **Zweck-Zeilen auf allen drei Seiten**: Generator („EIN Objekt im Detail …"), Stapelverarbeitung („VIELE Objekte auf einmal …"), SEO-Werkzeuge („Einmalige Wartungs-/Diagnose-Werkzeuge …") — die Aufgabenteilung steht jetzt direkt in der Oberfläche.
+
 ## [0.24.0] - 2026-07-04
 
 ### Added (User-Wunsch: Dry-Run-Ergebnisse sehen und korrigieren)
