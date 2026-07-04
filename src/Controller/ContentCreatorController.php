@@ -318,6 +318,91 @@ class ContentCreatorController extends AbstractController
     }
 
     /**
+     * Bestandene Dry-Run-Ergebnisse zum Review/Editieren vor dem Übernehmen.
+     */
+    #[Route(path: '/api/content-creator/batch/{jobId}/results', name: 'api.content-creator.batch.results', defaults: ['_acl' => ['content_creator.viewer']], methods: ['GET'])]
+    public function batchResults(string $jobId): JsonResponse
+    {
+        $rows = $this->connection->fetchAllAssociative(
+            'SELECT LOWER(HEX(id)) AS id, LOWER(HEX(entity_id)) AS entityId, content_type AS type, payload
+             FROM content_creator_batch_result
+             WHERE job_id = UNHEX(:job) AND passed = 1 AND applied = 0
+             ORDER BY created_at ASC LIMIT 200',
+            ['job' => $jobId]
+        );
+
+        $results = [];
+        foreach ($rows as $row) {
+            $payload = json_decode((string) $row['payload'], true) ?: [];
+            $results[] = [
+                'id' => (string) $row['id'],
+                'entityId' => (string) $row['entityId'],
+                'type' => (string) $row['type'],
+                'content' => $payload['content'] ?? null,
+                'meta' => $payload['meta'] ?? null,
+                'score' => $payload['quality']['score'] ?? null,
+                'name' => $this->entityDisplayName((string) $row['type'], (string) $row['entityId']),
+            ];
+        }
+
+        return new JsonResponse(['success' => true, 'results' => $results]);
+    }
+
+    /**
+     * Editiertes Dry-Run-Ergebnis speichern (vor dem Übernehmen).
+     */
+    #[Route(path: '/api/content-creator/batch-result/{resultId}', name: 'api.content-creator.batch-result.update', defaults: ['_acl' => ['content_creator.editor']], methods: ['POST'])]
+    public function updateBatchResult(string $resultId, Request $request): JsonResponse
+    {
+        $data = $this->jsonBody($request);
+        $payloadJson = $this->connection->fetchOne(
+            'SELECT payload FROM content_creator_batch_result WHERE id = UNHEX(:id) AND applied = 0',
+            ['id' => $resultId]
+        );
+        if ($payloadJson === false) {
+            return new JsonResponse(['success' => false, 'error' => 'Ergebnis nicht gefunden oder bereits übernommen.'], 404);
+        }
+
+        $payload = json_decode((string) $payloadJson, true) ?: [];
+        if (\is_string($data['content'] ?? null)) {
+            $payload['content'] = $data['content'];
+        }
+        if (\is_array($data['meta'] ?? null)) {
+            $payload['meta'] = array_merge($payload['meta'] ?? [], $data['meta']);
+        }
+        $this->connection->executeStatement(
+            'UPDATE content_creator_batch_result SET payload = :payload WHERE id = UNHEX(:id)',
+            ['payload' => json_encode($payload, \JSON_THROW_ON_ERROR), 'id' => $resultId]
+        );
+
+        return new JsonResponse(['success' => true]);
+    }
+
+    /**
+     * Anzeigename fürs Review: Medien → Dateiname, sonst übersetzter Name.
+     */
+    private function entityDisplayName(string $type, string $entityId): string
+    {
+        if ($type === \ContentCreator\Service\PromptBuilder::TYPE_MEDIA_ALT) {
+            return (string) ($this->connection->fetchOne(
+                'SELECT file_name FROM media WHERE id = UNHEX(:id)',
+                ['id' => $entityId]
+            ) ?: '');
+        }
+        foreach (['product_translation' => 'product_id', 'category_translation' => 'category_id', 'product_manufacturer_translation' => 'product_manufacturer_id'] as $table => $fk) {
+            $name = $this->connection->fetchOne(
+                'SELECT name FROM ' . $table . ' WHERE ' . $fk . ' = UNHEX(:id) AND name IS NOT NULL LIMIT 1',
+                ['id' => $entityId]
+            );
+            if ($name) {
+                return (string) $name;
+            }
+        }
+
+        return '';
+    }
+
+    /**
      * Gründe der nicht bestandenen Ergebnis-Zeilen (Gate-Ablehnung oder Fehler)
      * für die Anzeige im Admin — beantwortet das "Warum?" nach einem Lauf.
      *

@@ -211,14 +211,45 @@
                     <sw-alert variant="info" style="margin-top:8px;">
                         {{ $tc('sw-content-creator.batch.dryRunDone', { passed: job.pendingResults || 0 }, job.pendingResults || 0) }}
                     </sw-alert>
-                    <sw-button
-                        v-if="(job.pendingResults || 0) > 0"
-                        variant="primary"
-                        style="margin-top:8px;"
-                        :isLoading="isCommitting"
-                        @click="commitDryRun">
-                        {{ $tc('sw-content-creator.batch.commit', { passed: job.pendingResults || 0 }, job.pendingResults || 0) }}
-                    </sw-button>
+                    <div style="display:flex; gap:8px; margin-top:8px;">
+                        <sw-button
+                            v-if="(job.pendingResults || 0) > 0"
+                            :isLoading="dryRunResultsBusy"
+                            @click="loadDryRunResults">
+                            {{ $tc('sw-content-creator.batch.showResults') }}
+                        </sw-button>
+                        <sw-button
+                            v-if="(job.pendingResults || 0) > 0"
+                            variant="primary"
+                            :isLoading="isCommitting"
+                            @click="commitDryRun">
+                            {{ $tc('sw-content-creator.batch.commit', { passed: job.pendingResults || 0 }, job.pendingResults || 0) }}
+                        </sw-button>
+                    </div>
+
+                    <template v-if="dryRunResults">
+                        <p style="margin-top:12px; font-weight:600;">{{ $tc('sw-content-creator.batch.resultsTitle') }}</p>
+                        <p style="color:#758ca3; font-size:12px;">{{ $tc('sw-content-creator.batch.resultsHint') }}</p>
+                        <div style="max-height:480px; overflow-y:auto;">
+                            <div v-for="result in dryRunResults" :key="result.id" style="border:1px solid #e5e9f0; border-radius:4px; padding:8px; margin-top:8px;">
+                                <p style="font-weight:600; font-size:13px;">
+                                    {{ typeLabel(result.type) }} — {{ result.name || result.entityId.substring(0, 8) + '…' }}
+                                    <span v-if="result.score !== null" style="color:#758ca3; font-weight:400;">(Score {{ result.score }})</span>
+                                </p>
+                                <template v-if="result.meta">
+                                    <input type="text" :value="result.meta.metaTitle" style="width:100%; font-size:13px; padding:4px 6px; margin-top:4px; border:1px solid #d1d9e0; border-radius:4px;"
+                                        @input="(e) => { result.meta.metaTitle = e.target.value; }" @blur="saveDryRunEdit(result)" placeholder="Meta-Title"/>
+                                    <textarea :value="result.meta.metaDescription" rows="2" style="width:100%; font-size:13px; padding:4px 6px; margin-top:4px; border:1px solid #d1d9e0; border-radius:4px;"
+                                        @input="(e) => { result.meta.metaDescription = e.target.value; }" @blur="saveDryRunEdit(result)" placeholder="Meta-Description"></textarea>
+                                    <input type="text" :value="result.meta.metaKeywords" style="width:100%; font-size:13px; padding:4px 6px; margin-top:4px; border:1px solid #d1d9e0; border-radius:4px;"
+                                        @input="(e) => { result.meta.metaKeywords = e.target.value; }" @blur="saveDryRunEdit(result)" placeholder="Keywords"/>
+                                </template>
+                                <textarea v-else :value="result.content" :rows="result.type === 'media_alt' ? 2 : 6"
+                                    style="width:100%; font-size:13px; padding:4px 6px; margin-top:4px; border:1px solid #d1d9e0; border-radius:4px; font-family:inherit;"
+                                    @input="(e) => { result.content = e.target.value; }" @blur="saveDryRunEdit(result)"></textarea>
+                            </div>
+                        </div>
+                    </template>
                 </template>
             </sw-card>
             {% endblock %}

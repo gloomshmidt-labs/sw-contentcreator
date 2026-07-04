@@ -143,7 +143,10 @@
             "rejected": "Abgelehnt",
             "failed": "Fehler",
             "rejectedHint": "Abgelehnte Objekte haben das Qualitäts-Gate nicht bestanden und wurden NICHT in den Shop geschrieben (Details im Log). Schwelle und Nachbesserungen sind in den Einstellungen konfigurierbar.",
-            "issuesTitle": "Gründe (abgelehnt/Fehler):"
+            "issuesTitle": "Gründe (abgelehnt/Fehler):",
+            "showResults": "Ergebnisse ansehen & bearbeiten",
+            "resultsTitle": "Bestandene Ergebnisse (vor dem Übernehmen editierbar):",
+            "resultsHint": "Änderungen werden beim Verlassen eines Feldes automatisch gespeichert — „Übernehmen\" schreibt den editierten Stand."
         },
         "focus": {
             "label": "Fokus-Keyword",

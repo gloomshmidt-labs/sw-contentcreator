@@ -72,6 +72,18 @@ export default class ContentCreatorApiService extends ApiService {
             .then((response) => ApiService.handleResponse(response));
     }
 
+    batchResults(jobId) {
+        return this.httpClient
+            .get(`/content-creator/batch/${jobId}/results`, { headers: this.getBasicHeaders() })
+            .then((response) => ApiService.handleResponse(response));
+    }
+
+    updateBatchResult(resultId, payload) {
+        return this.httpClient
+            .post(`/content-creator/batch-result/${resultId}`, payload, { headers: this.getBasicHeaders() })
+            .then((response) => ApiService.handleResponse(response));
+    }
+
     usage() {
         return this.httpClient
             .get('/content-creator/usage', { headers: this.getBasicHeaders() })

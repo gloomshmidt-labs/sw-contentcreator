@@ -30,6 +30,8 @@ Component.register('sw-content-creator-batch', {
             report: null,
             reportBusy: false,
             reportProgress: null,
+            dryRunResults: null,
+            dryRunResultsBusy: false,
             workerStalled: false,
             stalledPolls: 0,
         };
@@ -193,6 +195,7 @@ Component.register('sw-content-creator-batch', {
                 dryRun: this.dryRun,
             })
                 .then((res) => {
+                    this.dryRunResults = null;
                     this.job = { id: res.jobId, total: res.total, processed: 0, failed: 0, rejected: 0, status: 'running', dryRun: this.dryRun };
                     this.startPolling();
                 }));
@@ -231,6 +234,22 @@ Component.register('sw-content-creator-batch', {
             }
         },
 
+        loadDryRunResults() {
+            if (!this.job?.id) {
+                return;
+            }
+            this.runBusy('dryRunResultsBusy', () => this.contentCreatorApiService.batchResults(this.job.id)
+                .then((res) => { this.dryRunResults = res.results || []; }));
+        },
+
+        // Edit direkt am gespeicherten Ergebnis — der Commit übernimmt den editierten Stand
+        saveDryRunEdit(result) {
+            this.contentCreatorApiService.updateBatchResult(result.id, {
+                content: typeof result.content === 'string' ? result.content : undefined,
+                meta: result.meta || undefined,
+            }).catch((err) => this.notifyApiError(err));
+        },
+
         commitDryRun() {
             if (!this.job?.id) {
                 return;
@@ -241,6 +260,7 @@ Component.register('sw-content-creator-batch', {
                         message: this.$tc('sw-content-creator.batch.committed', { applied: res.applied, errors: res.errors }, res.applied),
                     });
                     this.job = { ...this.job, committed: true };
+                    this.dryRunResults = null;
                 }));
         },
 

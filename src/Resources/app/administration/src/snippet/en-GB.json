@@ -143,7 +143,10 @@
             "rejected": "Rejected",
             "failed": "Errors",
             "rejectedHint": "Rejected entities did not pass the quality gate and were NOT written to the shop (details in the log). Threshold and revisions are configurable in the settings.",
-            "issuesTitle": "Reasons (rejected/errors):"
+            "issuesTitle": "Reasons (rejected/errors):",
+            "showResults": "View & edit results",
+            "resultsTitle": "Passing results (editable before applying):",
+            "resultsHint": "Changes are saved automatically when leaving a field — \"Apply\" writes the edited state."
         },
         "focus": {
             "label": "Focus keyword",

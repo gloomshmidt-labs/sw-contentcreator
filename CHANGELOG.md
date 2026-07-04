@@ -3,6 +3,11 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.24.0] - 2026-07-04
+
+### Added (User-Wunsch: Dry-Run-Ergebnisse sehen und korrigieren)
+- **„Ergebnisse ansehen & bearbeiten"** nach jedem Dry-Run: Alle bestandenen Ergebnisse werden mit Objektname und Score aufgelistet und sind **direkt editierbar** (Alt-Texte/Texte als Textfeld, Metas als drei Felder). Änderungen speichern automatisch beim Verlassen des Feldes — „Übernehmen" schreibt den editierten Stand in den Shop. Neue Routen: `GET batch/{id}/results`, `POST batch-result/{id}`.
+
 ## [0.23.0] - 2026-07-04
 
 ### Added (User-Workflow: „Produkt wählen → alle seine Bilder")
