@@ -176,7 +176,7 @@
             "hint": "Finds product images with article-number/hash file names (e.g. 15601a.jpg) and suggests descriptive names — the OLD name is kept for mapping (15601a → productname-15601a). TIP: Generate alt texts first for even more descriptive suggestions. Every rename is logged — the export generates the nginx 301 redirects for Plesk.",
             "scan": "Scan file names",
             "export": "Download nginx redirects",
-            "found": "{total} image(s) in total — this run processes {batch} (wave principle: rescan after renaming for the next batch)",
+            "found": "{total} image(s) in total — this run processes {batch} (wave principle: rescan after renaming). Suggestions are editable before applying.",
             "warning": "Renaming changes the image URLs. Afterwards download the redirect file and include it in Plesk (Apache & nginx settings → Additional nginx directives) so old URLs redirect via 301.",
             "apply": "Rename {count} image(s) now",
             "altFirst": "Recommendation: {count} of the found images have NO alt text yet — generate alt texts first (batch → media → gap scan), then rename. Otherwise only number suffixes remain.",

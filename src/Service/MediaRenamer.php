@@ -262,7 +262,7 @@ class MediaRenamer
         }
 
         // Füllwörter tragen im Dateinamen nichts bei
-        $stopwords = ['der', 'die', 'das', 'den', 'dem', 'des', 'ein', 'eine', 'und', 'mit', 'fuer', 'von', 'aus', 'the', 'and', 'for', 'with'];
+        $stopwords = ['der', 'die', 'das', 'den', 'dem', 'des', 'ein', 'eine', 'einem', 'einen', 'und', 'mit', 'fuer', 'fuers', 'von', 'vom', 'aus', 'im', 'am', 'zum', 'zur', 'beim', 'ins', 'auf', 'bei', 'als', 'the', 'and', 'for', 'with', 'from'];
 
         $seen = [];
         $tokens = [];

@@ -55,12 +55,20 @@
                         <p style="margin-top:12px; font-weight:600;">
                             {{ $tc('sw-content-creator.rename.found', { total: renameTotal, batch: renameItems.length }, renameTotal) }}
                         </p>
-                        <div v-for="item in renameItems.slice(0, 50)" :key="item.mediaId" style="font-size:13px; padding:2px 0; display:flex; gap:8px; align-items:center;">
-                            <span style="color:#758ca3; min-width:180px;">{{ item.currentName }}</span>
-                            <span style="flex:1;">→ <strong>{{ item.suggestedName }}</strong> <span style="color:#758ca3;">({{ item.productName }})</span></span>
-                            <sw-button size="small" :disabled="renameBusy" @click="confirmRenameSingle(item)">
-                                {{ $tc('sw-content-creator.rename.applySingle') }}
-                            </sw-button>
+                        <div style="max-height:420px; overflow-y:auto; border:1px solid #e5e9f0; border-radius:4px; padding:4px 8px; margin-top:8px;">
+                            <div v-for="item in renameItems" :key="item.mediaId" style="font-size:13px; padding:3px 0; display:flex; gap:8px; align-items:center;">
+                                <span style="color:#758ca3; min-width:150px; overflow:hidden; text-overflow:ellipsis;" :title="item.currentName">{{ item.currentName }}</span>
+                                <span>→</span>
+                                <input
+                                    type="text"
+                                    :value="item.suggestedName"
+                                    @input="(e) => { item.suggestedName = e.target.value; }"
+                                    style="flex:1; font-size:13px; padding:3px 6px; border:1px solid #d1d9e0; border-radius:4px; font-family:monospace;"/>
+                                <span style="color:#758ca3; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" :title="item.productName">({{ item.productName }})</span>
+                                <sw-button size="small" :disabled="renameBusy" @click="confirmRenameSingle(item)">
+                                    {{ $tc('sw-content-creator.rename.applySingle') }}
+                                </sw-button>
+                            </div>
                         </div>
                         <sw-button
                             variant="primary"

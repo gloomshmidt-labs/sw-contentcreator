@@ -3,6 +3,13 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.21.1] - 2026-07-04
+
+### Changed (User-Feedback aus dem plesk-1-Test)
+- **Namensvorschläge sind jetzt editierbar** — jede Zeile ist ein Eingabefeld; der bearbeitete Name wird beim Übernehmen verwendet (Server bereinigt erneut zu einem gültigen Slug).
+- **Alle gescannten Bilder sichtbar** (scrollbare Liste) statt nur der ersten 50.
+- **Stoppwort-Liste erweitert** (fuers, vom, zum, zur, beim, im, am, ins, auf, bei, als …) — kein „…-fuers-20930" mehr am Namensende.
+
 ## [0.21.0] - 2026-07-04
 
 ### Changed (User-Feedback zu Dateinamen + Bild-Attributen)
