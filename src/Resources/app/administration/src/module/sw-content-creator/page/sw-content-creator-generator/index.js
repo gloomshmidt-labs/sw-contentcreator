@@ -676,11 +676,12 @@ Component.register('sw-content-creator-generator', {
                     this.createNotificationSuccess({
                         message: this.$tc('sw-content-creator.rename.done', { renamed: res.renamed, errors: (res.errors || []).length }, res.renamed),
                     });
-                    // URL + Dateiname haben sich geändert → Bilderliste neu laden
-                    return this.loadProductMedia();
+                    // URL + Dateiname haben sich geändert → Bilderliste neu laden,
+                    // danach die Vorschläge der ÜBRIGEN Bilder automatisch nachladen
+                    return this.loadProductMedia().then(() => this.loadRenameSuggestions());
                 })
                 .catch((err) => this.notifyApiError(err))
-                .finally(() => { item.generating = false; this.renameSuggestionsLoaded = false; });
+                .finally(() => { item.generating = false; });
         },
 
         generateAlt(item) {

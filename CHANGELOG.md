@@ -3,6 +3,11 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.27.3] - 2026-07-04
+
+### Fixed
+- **Generator-Bilder-Karte**: Nach „Nur dieses umbenennen" bleiben die Vorschläge der übrigen Bilder erhalten (werden nach dem URL-Reload automatisch nachgeladen) — kein erneutes Klicken auf „SEO-Dateinamen vorschlagen" pro Bild mehr. Bereits perfekte Namen verschwinden dabei automatisch aus der Liste.
+
 ## [0.27.2] - 2026-07-04
 
 ### Fixed
