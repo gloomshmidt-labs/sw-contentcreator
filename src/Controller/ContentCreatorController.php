@@ -12,6 +12,7 @@ use ContentCreator\Service\FreshnessScanner;
 use ContentCreator\Service\GapScanner;
 use ContentCreator\Service\LineBreakScanner;
 use ContentCreator\Service\MediaRenamer;
+use ContentCreator\Service\UsageTracker;
 use ContentCreator\Service\Provider\AiRequest;
 use ContentCreator\Service\ProviderRegistry;
 use ContentCreator\Service\QualityChecker;
@@ -45,6 +46,7 @@ class ContentCreatorController extends AbstractController
         private readonly CannibalizationScanner $cannibalizationScanner,
         private readonly FreshnessScanner $freshnessScanner,
         private readonly MediaRenamer $mediaRenamer,
+        private readonly UsageTracker $usageTracker,
         private readonly Connection $connection
     ) {
     }
@@ -370,6 +372,12 @@ class ContentCreatorController extends AbstractController
         } catch (\Throwable $e) {
             return new JsonResponse(['success' => false, 'error' => $e->getMessage()], 400);
         }
+    }
+
+    #[Route(path: '/api/content-creator/usage', name: 'api.content-creator.usage', defaults: ['_acl' => ['content_creator.viewer']], methods: ['GET'])]
+    public function usage(): JsonResponse
+    {
+        return new JsonResponse(['success' => true, 'rows' => $this->usageTracker->report()]);
     }
 
     #[Route(path: '/api/content-creator/media-rename/scan', name: 'api.content-creator.media-rename.scan', defaults: ['_acl' => ['content_creator.viewer']], methods: ['POST'])]

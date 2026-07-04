@@ -68,6 +68,33 @@
             {% endblock %}
 
             {% block sw_content_creator_settings_automation %}
+            <sw-card :title="$tc('sw-content-creator.settings.usageCard')" :isLoading="isLoading">
+                <p style="color:#758ca3; font-size:13px; margin-bottom:12px;">
+                    {{ $tc('sw-content-creator.settings.usageHint') }}
+                </p>
+                <p v-if="!usageRows.length" style="color:#758ca3;">{{ $tc('sw-content-creator.settings.usageEmpty') }}</p>
+                <div v-else>
+                    <div style="display:flex; gap:12px; font-weight:600; padding:4px 0; border-bottom:1px solid #e5e9f0;">
+                        <span style="width:70px;">{{ $tc('sw-content-creator.settings.usageMonth') }}</span>
+                        <span style="width:80px;">Provider</span>
+                        <span style="flex:1;">Modell</span>
+                        <span style="width:90px; text-align:right;">Requests</span>
+                        <span style="width:110px; text-align:right;">Tokens in</span>
+                        <span style="width:110px; text-align:right;">Tokens out</span>
+                        <span style="width:80px; text-align:right;">~Kosten</span>
+                    </div>
+                    <div v-for="row in usageRows" :key="row.month + row.provider + row.model" style="display:flex; gap:12px; padding:4px 0; font-size:13px;">
+                        <span style="width:70px;">{{ row.month }}</span>
+                        <span style="width:80px;">{{ row.provider }}</span>
+                        <span style="flex:1;">{{ row.model }}</span>
+                        <span style="width:90px; text-align:right;">{{ row.requests }}</span>
+                        <span style="width:110px; text-align:right;">{{ Number(row.inputTokens).toLocaleString() }}</span>
+                        <span style="width:110px; text-align:right;">{{ Number(row.outputTokens).toLocaleString() }}</span>
+                        <span style="width:80px; text-align:right;">{{ usageCost(row) }}</span>
+                    </div>
+                </div>
+            </sw-card>
+
             <sw-card :title="$tc('sw-content-creator.settings.automationCard')" :isLoading="isLoading">
                 <sw-switch-field
                     :label="$tc('sw-content-creator.settings.dailyFill')"

@@ -41,7 +41,11 @@
             "animalProfile": "Tier-Steckbrief bei Tier-Produkten ergänzen",
             "funFact": "\"Wussten Sie\"-Fun-Fact bei Tier-Produkten ergänzen",
             "research": "Web-Recherche vor dem Schreiben",
-            "researchHelp": "Die KI recherchiert vor dem Schreiben im Web (Hersteller-Seiten, Fachinfos) — wie die Recherche-Pflicht der SEO-Skills. Funktioniert mit Claude und OpenAI; verursacht Zusatzkosten pro Text."
+            "researchHelp": "Die KI recherchiert vor dem Schreiben im Web (Hersteller-Seiten, Fachinfos) — wie die Recherche-Pflicht der SEO-Skills. Funktioniert mit Claude und OpenAI; verursacht Zusatzkosten pro Text.",
+            "usageCard": "API-Verbrauch (über dieses Plugin)",
+            "usageHint": "Kumulierte Tokens und geschätzte Kosten aller Generierungen über dieses Plugin, je Monat/Provider/Modell. Das Konto-GUTHABEN lässt sich mit normalen API-Keys nicht abfragen — es ist nur in der Anthropic Console (console.anthropic.com → Billing) bzw. im OpenAI-Dashboard (platform.openai.com → Usage) einsehbar.",
+            "usageEmpty": "Noch kein Verbrauch erfasst (Zählung beginnt mit dieser Version).",
+            "usageMonth": "Monat"
         },
         "generator": {
             "title": "Texte generieren",

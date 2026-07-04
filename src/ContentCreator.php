@@ -52,6 +52,7 @@ class ContentCreator extends Plugin
         $connection = $this->container->get(Connection::class);
 
         // Eigene Tabellen entfernen (abhängige zuerst)
+        $connection->executeStatement('DROP TABLE IF EXISTS `content_creator_usage`');
         $connection->executeStatement('DROP TABLE IF EXISTS `content_creator_media_rename`');
         $connection->executeStatement('DROP TABLE IF EXISTS `content_creator_batch_result`');
         $connection->executeStatement('DROP TABLE IF EXISTS `content_creator_backup`');

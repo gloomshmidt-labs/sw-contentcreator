@@ -1,4 +1,5 @@
 import template from './sw-content-creator-settings.html.twig';
+import { estimateCost, formatCost } from '../../../content-creator/engine/pricing';
 
 const { Component, Mixin } = Shopware;
 
@@ -17,6 +18,7 @@ Component.register('sw-content-creator-settings', {
             isLoading: false,
             isSaving: false,
             isTesting: false,
+            usageRows: [],
         };
     },
 
@@ -44,10 +46,23 @@ Component.register('sw-content-creator-settings', {
     },
 
     created() {
+        this.loadUsage();
         this.load();
     },
 
     methods: {
+        loadUsage() {
+            this.contentCreatorApiService.usage()
+                .then((res) => { this.usageRows = res.rows || []; })
+                .catch(() => { this.usageRows = []; });
+        },
+
+        usageCost(row) {
+            const cost = estimateCost(row.model, Number(row.inputTokens) || 0, Number(row.outputTokens) || 0);
+            return cost === null ? '—' : formatCost(cost);
+        },
+
+
         key(name) {
             return `${DOMAIN}.${name}`;
         },

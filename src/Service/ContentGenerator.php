@@ -43,7 +43,8 @@ class ContentGenerator
         private readonly QualityChecker $qualityChecker,
         private readonly FactGuard $factGuard,
         private readonly FocusKeywordChecker $focusKeywordChecker,
-        private readonly ReadabilityChecker $readabilityChecker
+        private readonly ReadabilityChecker $readabilityChecker,
+        private readonly UsageTracker $usageTracker
     ) {
     }
 
@@ -82,8 +83,10 @@ class ContentGenerator
 
         $existingText = trim((string) ($ctx['existingText'] ?? ''));
 
+        // Feld-Fallback: Optimieren ohne Bestand für DIESES Feld → automatisch
+        // neu erstellen (unabhängig vom Bestand der anderen Felder)
         if ($mode === PromptBuilder::MODE_OPTIMIZE && !$isMeta && $type !== PromptBuilder::TYPE_MEDIA_ALT && $existingText === '') {
-            throw new \InvalidArgumentException('Optimieren-Modus: Es ist kein Bestandstext vorhanden.');
+            $mode = PromptBuilder::MODE_CREATE;
         }
 
         $provider = $this->providerRegistry->get($providerName);
@@ -268,6 +271,13 @@ class ContentGenerator
                 $best['passed'] = $analysis['score'] <= $threshold && $lengthIssues === [];
             }
         }
+
+        $this->usageTracker->record(
+            $provider->getName(),
+            (string) ($resultModel ?? ''),
+            (int) ($usage['input'] ?? 0),
+            (int) ($usage['output'] ?? 0)
+        );
 
         return [
             'type' => $type,

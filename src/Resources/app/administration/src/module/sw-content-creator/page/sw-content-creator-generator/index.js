@@ -489,11 +489,6 @@ Component.register('sw-content-creator-generator', {
             if (!this.selectedId) {
                 return;
             }
-            // Optimieren ohne Bestandstext ist für Textfelder nicht möglich
-            if (this.mode === 'optimize' && !this.isMetaType(type) && !this.currentText.trim()) {
-                this.createNotificationWarning({ message: this.$tc('sw-content-creator.generator.noExistingText') });
-                return;
-            }
             const payload = {
                 type,
                 entityType: this.entityType,

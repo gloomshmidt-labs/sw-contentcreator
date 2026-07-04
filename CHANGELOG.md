@@ -3,6 +3,15 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.19.0] - 2026-07-04
+
+### Fixed (Praxis-Feedback vom plesk-1-Test)
+- **Feld-Fallback im Optimieren-Modus**: Hat das konkrete Feld keinen Bestand (z.B. FAQ, Teaser, Beschreibung), wird automatisch neu erstellt — unabhängig vom Bestand der anderen Felder. Vorher: Fehlermeldung. Der blockierende Client-Guard ist entfernt; die Logik liegt zentral im Generator (gilt für Einzeltexte, Batch, CLI, Cron).
+- **Prompt-Regeln gegen Fakten-Schnitzer**: (1) Tier-/Rasse-/Artbezeichnungen werden EXAKT aus dem Produktnamen übernommen — nie durch verwandte oder Oberbegriffe ersetzt (ein „Bobtail" wird nicht zum „Schäferhund"); (2) die Funktionsweise der Produktart muss stimmen — eine Handpuppe hat keine Fäden, Fäden gehören zu Marionetten.
+
+### Added
+- **API-Verbrauchsanzeige** (Einstellungen): Kumulierte Requests, Tokens und geschätzte Kosten je Monat/Provider/Modell — zentral erfasst bei jeder Generierung (Einzeltexte, Batch, CLI, Cron; Tabelle `content_creator_usage`). Hinweis in der Karte: Das Konto-GUTHABEN ist mit normalen API-Keys technisch nicht abfragbar (nur Anthropic Console bzw. OpenAI-Dashboard).
+
 ## [0.18.1] - 2026-07-03
 
 ### Changed (User-Einwand: Zuordnung über Artikelnummer-Dateinamen)

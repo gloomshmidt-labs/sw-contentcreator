@@ -182,6 +182,8 @@ class PromptBuilder
                 - Does every sentence make sense and add value?
                 - Would a real human write it this way — or does it sound artificial?
                 - Do all statements match the provided facts?
+                - Take animal/breed/species names EXACTLY from the product name — never replace them with related or umbrella terms (a "Bobtail" does not become a "sheepdog"; add qualifiers only when factually unambiguous).
+                - Describe the product type's mechanics correctly and never invent mechanics it does not have (a hand puppet is guided by the hand — there are no strings; strings belong to marionettes only).
                 - Is the text individual, or could it fit 10 other products/categories? Does anything repeat? Then cut it.
                 TXT;
         }
@@ -191,6 +193,8 @@ class PromptBuilder
             - Ergibt jeder Satz Sinn und bringt er Mehrwert?
             - Würde ein echter Mensch das so schreiben — oder klingt es künstlich?
             - Stimmen alle Aussagen mit den gelieferten Fakten überein?
+            - Tier-/Rasse-/Artbezeichnungen EXAKT aus dem Produktnamen übernehmen — nie durch verwandte Begriffe oder Oberbegriffe ersetzen (ein "Bobtail" wird nicht zum "Schäferhund"; Zusätze nur, wenn sie fachlich eindeutig sind).
+            - Beschreibe die Funktionsweise der Produktart korrekt und erfinde keine Mechanik, die sie nicht hat (eine Handpuppe wird mit der Hand geführt — es gibt keine Fäden; Fäden nur bei Marionetten).
             - Ist der Text individuell, oder könnte er auf 10 andere Produkte/Kategorien passen? Wiederholt sich etwas? Dann kürzen.
             TXT;
     }

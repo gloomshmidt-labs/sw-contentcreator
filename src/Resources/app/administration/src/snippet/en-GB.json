@@ -41,7 +41,11 @@
             "animalProfile": "Add animal profile paragraph for animal products",
             "funFact": "Add \"Did you know\" fun fact for animal products",
             "research": "Web research before writing",
-            "researchHelp": "The AI researches the web before writing (manufacturer sites, specialist info) — like the research requirement of the SEO skills. Works with Claude and OpenAI; incurs extra cost per text."
+            "researchHelp": "The AI researches the web before writing (manufacturer sites, specialist info) — like the research requirement of the SEO skills. Works with Claude and OpenAI; incurs extra cost per text.",
+            "usageCard": "API usage (via this plugin)",
+            "usageHint": "Cumulative tokens and estimated cost of all generations through this plugin, per month/provider/model. Account BALANCE cannot be queried with regular API keys — it is only visible in the Anthropic Console (console.anthropic.com → Billing) or the OpenAI dashboard (platform.openai.com → Usage).",
+            "usageEmpty": "No usage recorded yet (tracking starts with this version).",
+            "usageMonth": "Month"
         },
         "generator": {
             "title": "Generate texts",
