@@ -159,7 +159,10 @@ Component.register('sw-content-creator-batch', {
         },
 
         typeLabel(type) {
-            return this.$tc(`sw-content-creator.types.${type}`);
+            const key = `sw-content-creator.types.${type}`;
+            const label = this.$tc(key);
+            // Unbekannter Typ (z.B. Fehler vor der Typ-Schleife): roh anzeigen statt Snippet-Key
+            return label === key ? type : label;
         },
 
         setType(type, checked) {

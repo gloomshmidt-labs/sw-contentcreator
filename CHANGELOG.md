@@ -3,6 +3,11 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.22.1] - 2026-07-04
+
+### Fixed
+- Gründe-Anzeige: Fehler vor der Texttyp-Schleife (z.B. „Medium nicht gefunden") zeigen jetzt den angefragten Texttyp statt eines rohen Snippet-Keys; unbekannte Typen werden als Klartext dargestellt.
+
 ## [0.22.0] - 2026-07-04
 
 ### Added (User-Frage „warum 0 bestanden?" — jetzt beantwortet die UI das selbst)

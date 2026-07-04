@@ -129,7 +129,7 @@ class BatchGenerateHandler
             ]);
             // Grund im Admin sichtbar machen (Diagnose-Zeile, wird nie übernommen)
             try {
-                $this->storeDryRunResult($jobId, $itemId, $type ?? 'unbekannt', ['error' => $e->getMessage()], false);
+                $this->storeDryRunResult($jobId, $itemId, $type ?? ($requestedTypes[0] ?? '-'), ['error' => $e->getMessage()], false);
             } catch (\Throwable) {
             }
         }
