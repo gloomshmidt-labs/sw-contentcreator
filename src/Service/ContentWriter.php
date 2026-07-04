@@ -129,7 +129,7 @@ class ContentWriter
             PromptBuilder::TYPE_PRODUCT_DESCRIPTION,
             PromptBuilder::TYPE_CATEGORY_DETAIL,
             PromptBuilder::TYPE_MANUFACTURER_DESCRIPTION => $content !== '' ? ['description' => $content] : [],
-            PromptBuilder::TYPE_MEDIA_ALT => $content !== '' ? ['alt' => $content] : [],
+            PromptBuilder::TYPE_MEDIA_ALT => $content !== '' ? ['alt' => $content, 'title' => $content] : [],
             PromptBuilder::TYPE_FAQ => $content !== '' ? ['customFields' => [self::FAQ_FIELD => $content]] : [],
             PromptBuilder::TYPE_PRODUCT_META,
             PromptBuilder::TYPE_CATEGORY_META => $this->metaFields($result),

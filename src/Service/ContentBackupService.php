@@ -153,7 +153,7 @@ class ContentBackupService
         $fields = match ($type) {
             PromptBuilder::TYPE_PRODUCT_DESCRIPTION, PromptBuilder::TYPE_CATEGORY_DETAIL,
             PromptBuilder::TYPE_MANUFACTURER_DESCRIPTION => ['description'],
-            PromptBuilder::TYPE_MEDIA_ALT => ['alt'],
+            PromptBuilder::TYPE_MEDIA_ALT => ['alt', 'title'],
             PromptBuilder::TYPE_PRODUCT_META, PromptBuilder::TYPE_CATEGORY_META => ['metaTitle', 'metaDescription', 'keywords'],
             PromptBuilder::TYPE_HOME_META => ['homeMetaTitle', 'homeMetaDescription', 'homeMetaKeywords'],
             default => [],

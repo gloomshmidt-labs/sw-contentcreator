@@ -3,6 +3,12 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.21.0] - 2026-07-04
+
+### Changed (User-Feedback zu Dateinamen + Bild-Attributen)
+- **Artikelnummer-Anker garantiert am Ende des Dateinamens** und nie abgeschnitten (`…-handpuppe-grosse-30773` statt `…-30773-fuers-kasperle`); gekürzt wird nur wortweise davor (keine halben Wörter mehr), Füllwörter (der/die/das/für/mit …) fliegen raus.
+- **Alt-Text-Generierung füllt jetzt auch das Title-Attribut** der Bilder (gleicher Text) — inkl. Backup/Restore beider Felder.
+
 ## [0.20.1] - 2026-07-04
 
 ### Added

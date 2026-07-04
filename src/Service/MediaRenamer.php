@@ -235,32 +235,54 @@ class MediaRenamer
     }
 
     /**
-     * Vorschlag: Slug aus Produktname + ALTEM Dateinamen (Artikelnummer bleibt
-     * für die Zuordnung erhalten, z.B. 15601a → folkmanis-handpuppe-schnecke-15601a)
-     * + unterscheidenden Alt-Wörtern, soweit die Maximallänge es zulässt.
+     * Vorschlag: Slug aus Produktname (+ unterscheidenden Alt-Wörtern, soweit
+     * Platz ist) mit dem ALTEN Dateinamen als Zuordnungs-Anker GARANTIERT am
+     * Ende (15601a -> folkmanis-handpuppe-schnecke-15601a). Gekürzt wird nur
+     * wortweise vor dem Anker — der Anker selbst wird nie abgeschnitten.
      */
     private function suggestName(string $productName, string $alt, string $currentName = ''): string
     {
-        $base = $this->slugify($productName);
-
-        // Alter Dateiname (i.d.R. die Artikelnummer) bleibt als Zuordnungs-Anker
-        // erhalten — außer er ist ein nichtssagender Hash (30+ Hex-Zeichen)
+        // Alter Dateiname (i.d.R. die Artikelnummer) als Zuordnungs-Anker —
+        // außer er ist ein nichtssagender Hash (30+ Hex-Zeichen)
         $anchor = $this->slugify($currentName);
-        if ($anchor !== '' && !preg_match('/^[a-f0-9]{30,}$/', $anchor)) {
-            $base .= '-' . mb_substr($anchor, 0, 20);
+        if ($anchor === '' || preg_match('/^[a-f0-9]{30,}$/', $anchor)) {
+            $anchor = '';
+        } else {
+            $anchor = mb_substr($anchor, 0, 20);
+        }
+        $budget = self::MAX_NAME_LENGTH - ($anchor !== '' ? mb_strlen($anchor) + 1 : 0);
+
+        // Produktname + unterscheidende Alt-Wörter wortweise auffüllen,
+        // solange das Budget reicht (keine Kürzung mitten im Wort)
+        $sources = explode('-', $this->slugify($productName));
+        foreach (explode('-', $this->slugify($alt)) as $altToken) {
+            if ($altToken !== '' && mb_strlen($altToken) > 2) {
+                $sources[] = $altToken;
+            }
         }
 
-        // Unterscheidende Wörter aus dem Alt (ohne die Produktname-Wörter)
-        $productTokens = array_flip(explode('-', $base));
-        $altTokens = array_filter(
-            explode('-', $this->slugify($alt)),
-            static fn (string $t) => $t !== '' && mb_strlen($t) > 2 && !isset($productTokens[$t])
-        );
-        $suffix = implode('-', \array_slice(array_values($altTokens), 0, 3));
+        // Füllwörter tragen im Dateinamen nichts bei
+        $stopwords = ['der', 'die', 'das', 'den', 'dem', 'des', 'ein', 'eine', 'und', 'mit', 'fuer', 'von', 'aus', 'the', 'and', 'for', 'with'];
 
-        $name = $suffix !== '' ? $base . '-' . $suffix : $base;
+        $seen = [];
+        $tokens = [];
+        $length = 0;
+        foreach ($sources as $token) {
+            if ($token === '' || isset($seen[$token]) || \in_array($token, $stopwords, true)) {
+                continue;
+            }
+            $tokenLength = mb_strlen($token) + ($tokens === [] ? 0 : 1);
+            if ($length + $tokenLength > $budget) {
+                break;
+            }
+            $seen[$token] = true;
+            $tokens[] = $token;
+            $length += $tokenLength;
+        }
 
-        return mb_substr($name, 0, self::MAX_NAME_LENGTH);
+        $name = implode('-', $tokens);
+
+        return $anchor !== '' ? ($name !== '' ? $name . '-' . $anchor : $anchor) : $name;
     }
 
     private function slugify(string $text): string
