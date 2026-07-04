@@ -147,6 +147,11 @@ Component.register('sw-content-creator-batch', {
             this.categorySalesChannelId = null;
             this.categoryRootId = null;
             this.categoryOptions = [];
+            // Scan-Ergebnisse gehören zum alten Objekt-Typ — ihre "Übernehmen"-
+            // Buttons würden sonst fremde IDs in die neue Auswahl spülen
+            this.gapResult = null;
+            this.report = null;
+            this.freshnessResult = null;
         },
 
         // Hook des category-tree-Mixins beim Kanalwechsel

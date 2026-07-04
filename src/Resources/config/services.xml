@@ -104,6 +104,7 @@
         <service id="ContentCreator\Service\BatchDispatcher">
             <argument type="service" id="content_creator_generation_job.repository"/>
             <argument type="service" id="messenger.default_bus"/>
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
         </service>
 
         <!-- Zeilenumbruch-Scan/-Fix für CMS-Slots -->

@@ -3,6 +3,12 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.22.2] - 2026-07-04
+
+### Fixed (Bug aus dem plesk-1-Test: Produkt-ID im Medien-Batch)
+- **Scan-Ergebnisse werden beim Objekt-Typ-Wechsel geleert**: Lücken-/Report-/Aktualitäts-Ergebnisse blieben stehen und ihre „Übernehmen"-Buttons konnten IDs der alten Objektart in die neue Auswahl spülen (→ „Medium nicht gefunden" mit einer Produkt-ID).
+- **Server-Schutznetz**: Der Batch-Start prüft alle IDs gegen die Ziel-Entity; fremde IDs fliegen raus, und eine komplett unpassende Auswahl wird mit klarer Meldung abgelehnt statt einen Fehler-Lauf zu produzieren.
+
 ## [0.22.1] - 2026-07-04
 
 ### Fixed
