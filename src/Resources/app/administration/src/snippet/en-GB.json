@@ -142,7 +142,8 @@
             "written": "Written",
             "rejected": "Rejected",
             "failed": "Errors",
-            "rejectedHint": "Rejected entities did not pass the quality gate and were NOT written to the shop (details in the log). Threshold and revisions are configurable in the settings."
+            "rejectedHint": "Rejected entities did not pass the quality gate and were NOT written to the shop (details in the log). Threshold and revisions are configurable in the settings.",
+            "issuesTitle": "Reasons (rejected/errors):"
         },
         "focus": {
             "label": "Focus keyword",
@@ -184,7 +185,9 @@
             "confirmText": "{count} image(s) will be renamed irreversibly — the image URLs in the shop change immediately.",
             "confirmButton": "Yes, rename",
             "done": "{renamed} image(s) renamed ({errors} errors) — update the redirect file!",
-            "applySingle": "Rename only this one"
+            "applySingle": "Rename only this one",
+            "warningAuto": "The redirect file is updated automatically — nginx picks it up on the next reload (daily cron). Nothing else to do.",
+            "autoActive": "✓ Automatic redirect file active"
         },
         "freshness": {
             "scan": "Check freshness",

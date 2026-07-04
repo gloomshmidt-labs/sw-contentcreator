@@ -309,7 +309,46 @@ class ContentCreatorController extends AbstractController
                 'SELECT COUNT(*) FROM content_creator_batch_result WHERE job_id = UNHEX(:job) AND passed = 1 AND applied = 0',
                 ['job' => $jobId]
             ) : 0,
+            'issues' => $this->jobIssues($jobId),
         ]]);
+    }
+
+    /**
+     * Gründe der nicht bestandenen Ergebnis-Zeilen (Gate-Ablehnung oder Fehler)
+     * für die Anzeige im Admin — beantwortet das "Warum?" nach einem Lauf.
+     *
+     * @return list<array{entityId: string, type: string, reason: string}>
+     */
+    private function jobIssues(string $jobId): array
+    {
+        $rows = $this->connection->fetchAllAssociative(
+            'SELECT LOWER(HEX(entity_id)) AS entityId, content_type AS type, payload
+             FROM content_creator_batch_result
+             WHERE job_id = UNHEX(:job) AND passed = 0
+             ORDER BY created_at ASC LIMIT 20',
+            ['job' => $jobId]
+        );
+
+        $issues = [];
+        foreach ($rows as $row) {
+            $payload = json_decode((string) $row['payload'], true) ?: [];
+            if (\is_string($payload['error'] ?? null) && $payload['error'] !== '') {
+                $reason = 'Fehler: ' . mb_substr($payload['error'], 0, 220);
+            } else {
+                $quality = $payload['quality'] ?? [];
+                $parts = ['Score ' . ($quality['score'] ?? '?') . ' > Schwelle ' . ($quality['threshold'] ?? '?')];
+                foreach (($quality['lengthIssues'] ?? []) as $issue) {
+                    $parts[] = ($issue['field'] ?? '?') . ': ' . ($issue['length'] ?? '?') . ' Zeichen';
+                }
+                if (($quality['missingFacts'] ?? []) !== []) {
+                    $parts[] = 'Fehlende Fakten: ' . implode(', ', \array_slice($quality['missingFacts'], 0, 5));
+                }
+                $reason = 'Gate: ' . implode(' | ', $parts);
+            }
+            $issues[] = ['entityId' => (string) $row['entityId'], 'type' => (string) $row['type'], 'reason' => $reason];
+        }
+
+        return $issues;
     }
 
     /**

@@ -127,6 +127,11 @@ class BatchGenerateHandler
                 'item' => $itemId,
                 'error' => $e->getMessage(),
             ]);
+            // Grund im Admin sichtbar machen (Diagnose-Zeile, wird nie übernommen)
+            try {
+                $this->storeDryRunResult($jobId, $itemId, $type ?? 'unbekannt', ['error' => $e->getMessage()], false);
+            } catch (\Throwable) {
+            }
         }
 
         // Item-Status: Fehler > geschrieben > alles abgelehnt
@@ -184,9 +189,10 @@ class BatchGenerateHandler
                 'entity' => $itemId,
                 'type' => $type,
                 'payload' => json_encode([
-                    'content' => $result['content'],
-                    'meta' => $result['meta'],
-                    'quality' => $result['quality'],
+                    'content' => $result['content'] ?? null,
+                    'meta' => $result['meta'] ?? null,
+                    'quality' => $result['quality'] ?? null,
+                    'error' => $result['error'] ?? null,
                 ], \JSON_THROW_ON_ERROR),
                 'passed' => $passed ? 1 : 0,
             ]

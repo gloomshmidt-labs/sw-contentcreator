@@ -11,7 +11,7 @@ const { Component, Mixin } = Shopware;
 Component.register('sw-content-creator-tools', {
     template,
 
-    inject: ['contentCreatorApiService'],
+    inject: ['contentCreatorApiService', 'repositoryFactory', 'systemConfigApiService'],
 
     mixins: [Mixin.getByName('notification'), languageResolveMixin, busyMixin],
 
@@ -28,8 +28,17 @@ Component.register('sw-content-creator-tools', {
             renameWithoutAlt: 0,
             renameBusy: false,
             showRenameConfirm: false,
+            redirectFileConfigured: false,
             pendingRenameItems: null,
         };
+    },
+
+    created() {
+        this.systemConfigApiService.getValues('ContentCreator.config')
+            .then((values) => {
+                this.redirectFileConfigured = !!(values['ContentCreator.config.redirectFile'] || '').trim();
+            })
+            .catch(() => { this.redirectFileConfigured = false; });
     },
 
     computed: {

@@ -199,6 +199,14 @@
                 <sw-alert v-if="(job.rejected || 0) > 0" variant="warning" style="margin-top:8px;">
                     {{ $tc('sw-content-creator.batch.rejectedHint') }}
                 </sw-alert>
+                <template v-if="!isRunning && job.issues && job.issues.length">
+                    <p style="margin-top:12px; font-weight:600;">{{ $tc('sw-content-creator.batch.issuesTitle') }}</p>
+                    <div style="max-height:260px; overflow-y:auto;">
+                        <div v-for="(issue, idx) in job.issues" :key="idx" style="font-size:12px; padding:2px 0; color:#61300d;">
+                            <strong>{{ typeLabel(issue.type) }}</strong> ({{ issue.entityId.substring(0, 8) }}…): {{ issue.reason }}
+                        </div>
+                    </div>
+                </template>
                 <template v-if="job.dryRun && !isRunning && !job.committed">
                     <sw-alert variant="info" style="margin-top:8px;">
                         {{ $tc('sw-content-creator.batch.dryRunDone', { passed: job.pendingResults || 0 }, job.pendingResults || 0) }}

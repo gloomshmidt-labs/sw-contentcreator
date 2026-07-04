@@ -3,6 +3,12 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.22.0] - 2026-07-04
+
+### Added (User-Frage „warum 0 bestanden?" — jetzt beantwortet die UI das selbst)
+- **Gründe-Anzeige nach jedem Batch-Lauf**: Die Fortschrittskarte listet für abgelehnte/fehlgeschlagene Objekte den konkreten Grund (Gate-Score + Längenverstöße + fehlende Fakten bzw. die Fehlermeldung, z.B. „OpenAI API-Fehler: Failed to download file" bei nicht erreichbaren Bildern). Fehler werden dafür auch als Diagnose-Zeilen gespeichert.
+- **Redirect-Hinweise passen sich an**: Ist die automatische Redirect-Datei konfiguriert, zeigt die SEO-Dateinamen-Karte „✓ Automatische Redirect-Datei aktiv" statt Download-Button, und der Bestätigungsdialog erklärt, dass nichts weiter zu tun ist.
+
 ## [0.21.1] - 2026-07-04
 
 ### Changed (User-Feedback aus dem plesk-1-Test)

@@ -142,7 +142,8 @@
             "written": "Geschrieben",
             "rejected": "Abgelehnt",
             "failed": "Fehler",
-            "rejectedHint": "Abgelehnte Objekte haben das Qualitäts-Gate nicht bestanden und wurden NICHT in den Shop geschrieben (Details im Log). Schwelle und Nachbesserungen sind in den Einstellungen konfigurierbar."
+            "rejectedHint": "Abgelehnte Objekte haben das Qualitäts-Gate nicht bestanden und wurden NICHT in den Shop geschrieben (Details im Log). Schwelle und Nachbesserungen sind in den Einstellungen konfigurierbar.",
+            "issuesTitle": "Gründe (abgelehnt/Fehler):"
         },
         "focus": {
             "label": "Fokus-Keyword",
@@ -184,7 +185,9 @@
             "confirmText": "{count} Bild(er) werden unwiderruflich umbenannt — die Bild-URLs im Shop ändern sich sofort.",
             "confirmButton": "Ja, umbenennen",
             "done": "{renamed} Bild(er) umbenannt ({errors} Fehler) — Redirect-Datei aktualisieren!",
-            "applySingle": "Nur dieses umbenennen"
+            "applySingle": "Nur dieses umbenennen",
+            "warningAuto": "Die Redirect-Datei wird automatisch aktualisiert — nginx übernimmt sie beim nächsten Reload (täglicher Cron). Es ist nichts weiter zu tun.",
+            "autoActive": "✓ Automatische Redirect-Datei aktiv"
         },
         "freshness": {
             "scan": "Aktualität prüfen",

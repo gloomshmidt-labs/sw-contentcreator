@@ -39,9 +39,12 @@
                     <sw-button :isLoading="renameBusy" @click="scanMediaRenames">
                         {{ $tc('sw-content-creator.rename.scan') }}
                     </sw-button>
-                    <sw-button @click="downloadRedirects">
+                    <sw-button v-if="!redirectFileConfigured" @click="downloadRedirects">
                         {{ $tc('sw-content-creator.rename.export') }}
                     </sw-button>
+                    <span v-else style="color:#37a04a; font-size:13px; align-self:center;">
+                        {{ $tc('sw-content-creator.rename.autoActive') }}
+                    </span>
                 </div>
 
                 <template v-if="renameItems !== null">
@@ -86,7 +89,7 @@
                     variant="small"
                     @modal-close="showRenameConfirm = false">
                     <p>{{ $tc('sw-content-creator.rename.confirmText', { count: pendingRenameItems ? pendingRenameItems.length : 0 }, pendingRenameItems ? pendingRenameItems.length : 0) }}</p>
-                    <p style="margin-top:8px;">{{ $tc('sw-content-creator.rename.warning') }}</p>
+                    <p style="margin-top:8px;">{{ redirectFileConfigured ? $tc('sw-content-creator.rename.warningAuto') : $tc('sw-content-creator.rename.warning') }}</p>
                     <template #modal-footer>
                         <sw-button size="small" @click="showRenameConfirm = false">
                             {{ $tc('sw-content-creator.tools.cancel') }}
