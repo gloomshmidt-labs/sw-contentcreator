@@ -3,6 +3,11 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.27.2] - 2026-07-04
+
+### Fixed
+- **Ketten-Glättung jetzt auch für Thumbnails**: Bei Nachkorrekturen zeigten die Thumbnail-Redirects der Ur-Namen auf den Zwischennamen (301→301-Doppel-Hop, funktionierte, aber unsauber). Jetzt zeigt JEDE alte URL — Hauptbild wie alle Thumbnail-Größen — direkt aufs finale Ziel (Invariante geprüft: kein Redirect-Ziel ist zugleich Quelle).
+
 ## [0.27.1] - 2026-07-04
 
 ### Added / Fixed (Nachkorrektur bereits umbenannter Bilder)

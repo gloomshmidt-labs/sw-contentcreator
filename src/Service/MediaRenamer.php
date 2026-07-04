@@ -172,19 +172,20 @@ class MediaRenamer
             'SELECT old_path, new_path, thumbnails FROM content_creator_media_rename ORDER BY created_at ASC'
         );
 
-        // a→b, b→c ⇒ a→c (und b→c)
+        // a→b, b→c ⇒ a→c (und b→c) — gilt für Hauptbild UND jede Thumbnail-Größe
         $redirects = [];
-        foreach ($rows as $row) {
-            $old = (string) $row['old_path'];
-            $new = (string) $row['new_path'];
+        $add = static function (string $old, string $new) use (&$redirects): void {
             foreach ($redirects as $source => $target) {
                 if ($target === $old) {
                     $redirects[$source] = $new;
                 }
             }
             $redirects[$old] = $new;
+        };
+        foreach ($rows as $row) {
+            $add((string) $row['old_path'], (string) $row['new_path']);
             foreach (json_decode((string) ($row['thumbnails'] ?? ''), true) ?: [] as $oldThumb => $newThumb) {
-                $redirects[$oldThumb] = $newThumb;
+                $add((string) $oldThumb, (string) $newThumb);
             }
         }
 
