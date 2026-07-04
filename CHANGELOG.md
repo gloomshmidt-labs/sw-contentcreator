@@ -3,6 +3,11 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.27.0] - 2026-07-04
+
+### Changed (Batch-Tauglichkeit der Dateinamen)
+- **Namensvorschläge bewusst vereinfacht: nur Produktname + Artikelnummer-Anker** (`folkmanis-handpuppe-schnecke-15601a`). Die Alt-Text-Wörter fließen nicht mehr ein — sie brachten gebeugte Wortfragmente und Kürzungs-Wackler, die Einzelprüfung erzwangen, bei minimalem SEO-Nutzen (der Dateiname ist ein schwaches Signal; die Beschreibungskraft liefert der Alt-Text). Ergebnis: grammatisch saubere, vollständig vorhersehbare Vorschläge — **batch-tauglich ohne Einzelprüfung**, editierbar bleiben sie trotzdem.
+
 ## [0.26.1] - 2026-07-04
 
 ### Fixed

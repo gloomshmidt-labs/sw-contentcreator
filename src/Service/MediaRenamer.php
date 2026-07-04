@@ -241,10 +241,12 @@ class MediaRenamer
     }
 
     /**
-     * Vorschlag: Slug aus Produktname (+ unterscheidenden Alt-Wörtern, soweit
-     * Platz ist) mit dem ALTEN Dateinamen als Zuordnungs-Anker GARANTIERT am
-     * Ende (15601a -> folkmanis-handpuppe-schnecke-15601a). Gekürzt wird nur
-     * wortweise vor dem Anker — der Anker selbst wird nie abgeschnitten.
+     * Vorschlag: Slug aus dem Produktnamen + ALTEM Dateinamen als Zuordnungs-
+     * Anker GARANTIERT am Ende (15601a -> folkmanis-handpuppe-schnecke-15601a).
+     * Bewusst OHNE Alt-Text-Wörter: Produktnamen sind gepflegt, dadurch sind
+     * die Vorschläge grammatisch sauber und ohne Einzelprüfung batch-tauglich
+     * (die Beschreibungskraft liefert der Alt-Text, nicht der Dateiname).
+     * Gekürzt wird nur wortweise; der Anker wird nie abgeschnitten.
      */
     private function suggestName(string $productName, string $alt, string $currentName = ''): string
     {
@@ -258,22 +260,13 @@ class MediaRenamer
         }
         $budget = self::MAX_NAME_LENGTH - ($anchor !== '' ? mb_strlen($anchor) + 1 : 0);
 
-        // Produktname + unterscheidende Alt-Wörter wortweise auffüllen,
-        // solange das Budget reicht (keine Kürzung mitten im Wort)
-        $sources = explode('-', $this->slugify($productName));
-        foreach (explode('-', $this->slugify($alt)) as $altToken) {
-            if ($altToken !== '' && mb_strlen($altToken) > 2) {
-                $sources[] = $altToken;
-            }
-        }
-
         // Füllwörter tragen im Dateinamen nichts bei
         $stopwords = ['der', 'die', 'das', 'den', 'dem', 'des', 'ein', 'eine', 'einem', 'einen', 'und', 'mit', 'fuer', 'fuers', 'von', 'vom', 'aus', 'im', 'am', 'zum', 'zur', 'beim', 'ins', 'auf', 'bei', 'als', 'the', 'and', 'for', 'with', 'from'];
 
         $seen = [];
         $tokens = [];
         $length = 0;
-        foreach ($sources as $token) {
+        foreach (explode('-', $this->slugify($productName)) as $token) {
             if ($token === '' || isset($seen[$token]) || \in_array($token, $stopwords, true)) {
                 continue;
             }
