@@ -183,7 +183,8 @@
             "confirmTitle": "Bilder wirklich umbenennen?",
             "confirmText": "{count} Bild(er) werden unwiderruflich umbenannt — die Bild-URLs im Shop ändern sich sofort.",
             "confirmButton": "Ja, umbenennen",
-            "done": "{renamed} Bild(er) umbenannt ({errors} Fehler) — Redirect-Datei aktualisieren!"
+            "done": "{renamed} Bild(er) umbenannt ({errors} Fehler) — Redirect-Datei aktualisieren!",
+            "applySingle": "Nur dieses umbenennen"
         },
         "freshness": {
             "scan": "Aktualität prüfen",

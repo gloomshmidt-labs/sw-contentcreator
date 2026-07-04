@@ -3,6 +3,11 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.20.1] - 2026-07-04
+
+### Added
+- **„Nur dieses umbenennen"** pro Zeile im SEO-Dateinamen-Scan — für kontrollierte Einzeltests (z.B. ein Produkt auf dem Testshop), mit demselben Bestätigungsdialog und automatischer Redirect-Datei-Aktualisierung. Umbenannte Zeilen verschwinden aus der Liste.
+
 ## [0.20.0] - 2026-07-04
 
 ### Added (User-Wunsch: Redirects ohne wiederkehrende Handarbeit)

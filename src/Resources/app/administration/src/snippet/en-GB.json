@@ -183,7 +183,8 @@
             "confirmTitle": "Really rename images?",
             "confirmText": "{count} image(s) will be renamed irreversibly — the image URLs in the shop change immediately.",
             "confirmButton": "Yes, rename",
-            "done": "{renamed} image(s) renamed ({errors} errors) — update the redirect file!"
+            "done": "{renamed} image(s) renamed ({errors} errors) — update the redirect file!",
+            "applySingle": "Rename only this one"
         },
         "freshness": {
             "scan": "Check freshness",

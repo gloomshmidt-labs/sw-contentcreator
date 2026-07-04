@@ -28,6 +28,7 @@ Component.register('sw-content-creator-tools', {
             renameWithoutAlt: 0,
             renameBusy: false,
             showRenameConfirm: false,
+            pendingRenameItems: null,
         };
     },
 
@@ -75,12 +76,20 @@ Component.register('sw-content-creator-tools', {
         },
 
         confirmRename() {
+            this.pendingRenameItems = this.renameItems || [];
+            this.showRenameConfirm = true;
+        },
+
+        // Kontrollierter Einzel-Test: nur dieses eine Bild umbenennen
+        confirmRenameSingle(item) {
+            this.pendingRenameItems = [item];
             this.showRenameConfirm = true;
         },
 
         applyMediaRenames() {
             this.showRenameConfirm = false;
-            const items = (this.renameItems || []).map((i) => ({
+            const pending = this.pendingRenameItems || [];
+            const items = pending.map((i) => ({
                 mediaId: i.mediaId,
                 newName: i.suggestedName,
                 currentName: i.currentName,
@@ -93,7 +102,9 @@ Component.register('sw-content-creator-tools', {
                     this.createNotificationSuccess({
                         message: this.$tc('sw-content-creator.rename.done', { renamed: res.renamed, errors: (res.errors || []).length }, res.renamed),
                     });
-                    this.renameItems = null;
+                    const renamedIds = new Set(items.map((i) => i.mediaId));
+                    this.renameItems = (this.renameItems || []).filter((i) => !renamedIds.has(i.mediaId));
+                    this.pendingRenameItems = null;
                 }));
         },
 

@@ -55,10 +55,12 @@
                         <p style="margin-top:12px; font-weight:600;">
                             {{ $tc('sw-content-creator.rename.found', { total: renameTotal, batch: renameItems.length }, renameTotal) }}
                         </p>
-                        <div v-for="item in renameItems.slice(0, 50)" :key="item.mediaId" style="font-size:13px; padding:2px 0; display:flex; gap:8px;">
+                        <div v-for="item in renameItems.slice(0, 50)" :key="item.mediaId" style="font-size:13px; padding:2px 0; display:flex; gap:8px; align-items:center;">
                             <span style="color:#758ca3; min-width:180px;">{{ item.currentName }}</span>
-                            <span>→ <strong>{{ item.suggestedName }}</strong></span>
-                            <span style="color:#758ca3;">({{ item.productName }})</span>
+                            <span style="flex:1;">→ <strong>{{ item.suggestedName }}</strong> <span style="color:#758ca3;">({{ item.productName }})</span></span>
+                            <sw-button size="small" :disabled="renameBusy" @click="confirmRenameSingle(item)">
+                                {{ $tc('sw-content-creator.rename.applySingle') }}
+                            </sw-button>
                         </div>
                         <sw-button
                             variant="primary"
@@ -75,7 +77,7 @@
                     :title="$tc('sw-content-creator.rename.confirmTitle')"
                     variant="small"
                     @modal-close="showRenameConfirm = false">
-                    <p>{{ $tc('sw-content-creator.rename.confirmText', { count: renameItems ? renameItems.length : 0 }, renameItems ? renameItems.length : 0) }}</p>
+                    <p>{{ $tc('sw-content-creator.rename.confirmText', { count: pendingRenameItems ? pendingRenameItems.length : 0 }, pendingRenameItems ? pendingRenameItems.length : 0) }}</p>
                     <p style="margin-top:8px;">{{ $tc('sw-content-creator.rename.warning') }}</p>
                     <template #modal-footer>
                         <sw-button size="small" @click="showRenameConfirm = false">
