@@ -3,6 +3,11 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.27.4] - 2026-07-04
+
+### Changed
+- **Freies Umbenennen im Generator immer möglich**: „SEO-Dateinamen vorschlagen" zeigt jetzt für ALLE Bilder ein editierbares Namensfeld — ohne Verbesserungsvorschlag vorbefüllt mit dem aktuellen Namen. Unveränderte Namen werden beim Klick nicht sinnlos umbenannt/protokolliert („Name unverändert — nichts zu tun").
+
 ## [0.27.3] - 2026-07-04
 
 ### Fixed

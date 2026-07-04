@@ -104,7 +104,8 @@
             "mediaCard": "Product images & alt texts",
             "mediaCardHint": "Generate the alt text per image (the AI looks at the image), review/adjust the result, apply — writes alt and title attribute with backup.",
             "suggestFilenames": "Suggest SEO file names",
-            "noRenameCandidates": "All file names of this product are already descriptive — nothing to rename."
+            "noRenameCandidates": "No automatic improvements found — the names remain freely editable.",
+            "nameUnchanged": "Name unchanged — nothing to do."
         },
         "levels": {
             "excellent": "Excellent",

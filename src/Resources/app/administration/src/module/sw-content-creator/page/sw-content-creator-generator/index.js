@@ -651,8 +651,10 @@ Component.register('sw-content-creator-generator', {
             })
                 .then((res) => {
                     const byId = new Map((res.items || []).map((i) => [i.mediaId, i.suggestedName]));
+                    // Immer editierbar: ohne Verbesserungsvorschlag wird der
+                    // aktuelle Name vorbefüllt (freies Umbenennen möglich)
                     this.productMedia.forEach((item) => {
-                        item.suggestedName = byId.get(item.mediaId) || null;
+                        item.suggestedName = byId.get(item.mediaId) || item.fileName;
                     });
                     this.renameSuggestionsLoaded = true;
                     if (!byId.size) {
@@ -664,6 +666,11 @@ Component.register('sw-content-creator-generator', {
 
         renameImage(item) {
             if (!item.suggestedName) {
+                return;
+            }
+            // Unveränderte Namen nicht sinnlos umbenennen/protokollieren
+            if (item.suggestedName === item.fileName) {
+                this.createNotificationInfo({ message: this.$tc('sw-content-creator.generator.nameUnchanged') });
                 return;
             }
             item.generating = true;

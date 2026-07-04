@@ -104,7 +104,8 @@
             "mediaCard": "Produktbilder & Alt-Texte",
             "mediaCardHint": "Alt-Text je Bild generieren (die KI sieht sich das Bild an), Ergebnis prüfen/anpassen, übernehmen — schreibt Alt- und Title-Attribut mit Backup.",
             "suggestFilenames": "SEO-Dateinamen vorschlagen",
-            "noRenameCandidates": "Alle Dateinamen dieses Produkts sind bereits beschreibend — nichts umzubenennen."
+            "noRenameCandidates": "Keine automatischen Verbesserungen gefunden — die Namen sind trotzdem frei editierbar.",
+            "nameUnchanged": "Name unverändert — nichts zu tun."
         },
         "levels": {
             "excellent": "Ausgezeichnet",
