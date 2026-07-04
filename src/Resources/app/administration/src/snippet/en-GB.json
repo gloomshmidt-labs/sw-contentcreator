@@ -198,7 +198,9 @@
             "done": "{renamed} image(s) renamed ({errors} errors) — update the redirect file!",
             "applySingle": "Rename only this one",
             "warningAuto": "The redirect file is updated automatically — nginx picks it up on the next reload (daily cron). Nothing else to do.",
-            "autoActive": "✓ Automatic redirect file active"
+            "autoActive": "✓ Automatic redirect file active",
+            "writeNow": "Rewrite file now",
+            "fileWritten": "Redirect file rewritten:"
         },
         "freshness": {
             "scan": "Check freshness",

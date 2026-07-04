@@ -108,6 +108,12 @@ export default class ContentCreatorApiService extends ApiService {
             .then((response) => ApiService.handleResponse(response));
     }
 
+    mediaRenameWriteFile() {
+        return this.httpClient
+            .post('/content-creator/media-rename/write-file', {}, { headers: this.getBasicHeaders() })
+            .then((response) => ApiService.handleResponse(response));
+    }
+
     mediaRenameExport() {
         return this.httpClient
             .get('/content-creator/media-rename/export', { headers: this.getBasicHeaders(), responseType: 'text' })

@@ -3,6 +3,12 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.28.0] - 2026-07-04
+
+### Added
+- **„Datei jetzt neu schreiben"** (SEO-Werkzeuge, bei aktiver Auto-Redirect-Datei): schreibt die Redirect-Datei sofort aus dem aktuellen Protokoll neu — z.B. nach manuellem Aufräumen der Protokoll-Tabelle beim Testen. Route `POST media-rename/write-file`.
+- Dokumentiert: Zwischennamen-Redirects bleiben nach einem Rundtrip bewusst erhalten (die URLs existierten öffentlich — konservatives Sicherheitsnetz); Bereinigung über das Protokoll (SQL) + diesen Button.
+
 ## [0.27.5] - 2026-07-04
 
 ### Fixed

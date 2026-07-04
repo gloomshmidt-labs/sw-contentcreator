@@ -567,6 +567,21 @@ class ContentCreatorController extends AbstractController
         return new JsonResponse(['success' => true, 'renamed' => $renamed, 'redirectFile' => $redirectFile, 'errors' => \array_slice($errors, 0, 10)]);
     }
 
+    #[Route(path: '/api/content-creator/media-rename/write-file', name: 'api.content-creator.media-rename.write-file', defaults: ['_acl' => ['content_creator.editor']], methods: ['POST'])]
+    public function writeRedirectFile(): JsonResponse
+    {
+        try {
+            $path = $this->mediaRenamer->writeRedirectFile();
+            if ($path === null) {
+                return new JsonResponse(['success' => false, 'error' => 'Kein Redirect-Datei-Pfad konfiguriert (Einstellungen).'], 400);
+            }
+
+            return new JsonResponse(['success' => true, 'path' => $path]);
+        } catch (\Throwable $e) {
+            return new JsonResponse(['success' => false, 'error' => $e->getMessage()], 400);
+        }
+    }
+
     #[Route(path: '/api/content-creator/media-rename/export', name: 'api.content-creator.media-rename.export', defaults: ['_acl' => ['content_creator.viewer']], methods: ['GET'])]
     public function mediaRenameExport(): Response
     {

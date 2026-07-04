@@ -198,7 +198,9 @@
             "done": "{renamed} Bild(er) umbenannt ({errors} Fehler) — Redirect-Datei aktualisieren!",
             "applySingle": "Nur dieses umbenennen",
             "warningAuto": "Die Redirect-Datei wird automatisch aktualisiert — nginx übernimmt sie beim nächsten Reload (täglicher Cron). Es ist nichts weiter zu tun.",
-            "autoActive": "✓ Automatische Redirect-Datei aktiv"
+            "autoActive": "✓ Automatische Redirect-Datei aktiv",
+            "writeNow": "Datei jetzt neu schreiben",
+            "fileWritten": "Redirect-Datei neu geschrieben:"
         },
         "freshness": {
             "scan": "Aktualität prüfen",

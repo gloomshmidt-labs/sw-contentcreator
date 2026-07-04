@@ -42,9 +42,14 @@
                     <sw-button v-if="!redirectFileConfigured" @click="downloadRedirects">
                         {{ $tc('sw-content-creator.rename.export') }}
                     </sw-button>
-                    <span v-else style="color:#37a04a; font-size:13px; align-self:center;">
-                        {{ $tc('sw-content-creator.rename.autoActive') }}
-                    </span>
+                    <template v-else>
+                        <span style="color:#37a04a; font-size:13px; align-self:center;">
+                            {{ $tc('sw-content-creator.rename.autoActive') }}
+                        </span>
+                        <sw-button size="small" @click="writeRedirectFileNow">
+                            {{ $tc('sw-content-creator.rename.writeNow') }}
+                        </sw-button>
+                    </template>
                 </div>
 
                 <template v-if="renameItems !== null">

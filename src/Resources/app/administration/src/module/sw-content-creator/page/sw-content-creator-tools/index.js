@@ -117,6 +117,14 @@ Component.register('sw-content-creator-tools', {
                 }));
         },
 
+        writeRedirectFileNow() {
+            this.contentCreatorApiService.mediaRenameWriteFile()
+                .then((res) => {
+                    this.createNotificationSuccess({ message: this.$tc('sw-content-creator.rename.fileWritten') + ' ' + (res.path || '') });
+                })
+                .catch((err) => this.notifyApiError(err));
+        },
+
         downloadRedirects() {
             this.contentCreatorApiService.mediaRenameExport()
                 .then((content) => {
