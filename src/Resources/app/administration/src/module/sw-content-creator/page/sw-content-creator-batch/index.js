@@ -77,7 +77,7 @@ Component.register('sw-content-creator-batch', {
         },
         typeOptions() {
             if (this.entityType === 'product') {
-                return ['product_description', 'product_meta', 'faq'];
+                return ['product_description', 'product_meta', 'faq', 'media_alt'];
             }
             if (this.entityType === 'category') {
                 return ['category_teaser', 'category_detail', 'category_meta', 'faq'];

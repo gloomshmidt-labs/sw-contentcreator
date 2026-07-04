@@ -112,7 +112,7 @@
             "category_teaser": "Teaser",
             "category_detail": "Detail text",
             "category_meta": "Meta data",
-            "media_alt": "Alt texts",
+            "media_alt": "Alt texts (product images)",
             "home_meta": "Homepage meta",
             "manufacturer_description": "Manufacturer portrait",
             "faq": "FAQ block"

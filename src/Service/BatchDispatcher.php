@@ -39,13 +39,15 @@ class BatchDispatcher
         bool $dryRun = false
     ): string {
         $ids = array_values(array_unique(array_filter($ids)));
-        $ids = $this->filterExistingIds($entityType, $ids);
-        if ($ids === []) {
+        $validIds = $this->filterExistingIds($entityType, $ids);
+        if ($validIds === []) {
             throw new \InvalidArgumentException(sprintf(
-                'Keine der ausgewählten IDs existiert als "%s" — vermutlich stammt die Auswahl aus einem Scan eines anderen Objekt-Typs. Bitte neu scannen/auswählen.',
-                $entityType
+                'Keine der ausgewählten IDs existiert als "%s". %s',
+                $entityType,
+                $this->describeIds(array_slice($ids, 0, 3))
             ));
         }
+        $ids = $validIds;
         $jobId = Uuid::randomHex();
 
         $this->generationJobRepository->create([[
@@ -73,6 +75,38 @@ class BatchDispatcher
         }
 
         return $jobId;
+    }
+
+    /**
+     * Diagnose für die Fehlermeldung: sagt, in welcher Tabelle die IDs
+     * tatsächlich liegen (überführt z.B. Produkt-IDs im Medien-Batch).
+     *
+     * @param list<string> $ids
+     */
+    private function describeIds(array $ids): string
+    {
+        $tables = ['product' => 'Produkt', 'category' => 'Kategorie', 'media' => 'Medium', 'product_manufacturer' => 'Hersteller', 'sales_channel' => 'Verkaufskanal'];
+        $parts = [];
+        foreach ($ids as $id) {
+            if (!ctype_xdigit($id) || \strlen($id) !== 32) {
+                $parts[] = substr($id, 0, 8) . '… ist keine gültige ID';
+                continue;
+            }
+            $found = null;
+            foreach ($tables as $table => $label) {
+                $exists = $this->connection->fetchOne(
+                    'SELECT 1 FROM ' . $table . ' WHERE id = UNHEX(:id) LIMIT 1',
+                    ['id' => $id]
+                );
+                if ($exists) {
+                    $found = $label;
+                    break;
+                }
+            }
+            $parts[] = substr($id, 0, 8) . '… ist ' . ($found !== null ? 'ein ' . $found : 'in keiner bekannten Tabelle');
+        }
+
+        return 'Diagnose: ' . implode('; ', $parts) . '.';
     }
 
     /**

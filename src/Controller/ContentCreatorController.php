@@ -381,8 +381,13 @@ class ContentCreatorController extends AbstractController
         foreach ($rows as $row) {
             try {
                 $payload = json_decode((string) $row['payload'], true) ?: [];
+                // media_alt-Ergebnisse gehören IMMER zu Medien — auch wenn der
+                // Job über Produkte lief (Produktbilder-Expansion)
+                $rowEntityType = $row['content_type'] === \ContentCreator\Service\PromptBuilder::TYPE_MEDIA_ALT
+                    ? 'media'
+                    : $job->getEntityType();
                 $this->contentWriter->apply(
-                    $job->getEntityType(),
+                    $rowEntityType,
                     (string) $row['entity_id'],
                     $languageId,
                     (string) $row['content_type'],

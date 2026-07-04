@@ -3,6 +3,12 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.23.0] - 2026-07-04
+
+### Added (User-Workflow: „Produkt wählen → alle seine Bilder")
+- **Alt-Texte direkt am Produkt**: Bei Objekt-Typ „Produkt" gibt es jetzt den Texttyp **„Alt-Texte (Produktbilder)"** — der Batch verarbeitet automatisch ALLE Bilder der gewählten Produkte (Vision je Bild, Alt + Title, Gate, Dry-Run, Backup). Der Medien-Picker ist dafür nicht mehr nötig; ein defektes Bild reißt die übrigen nicht mit (je Bild eigene Diagnose-Zeile). Dry-Run-Commit schreibt die Bild-Ergebnisse korrekt auf die Medien.
+- **Selbst-diagnostizierende Batch-Ablehnung**: Passt die Auswahl nicht zur Objektart, sagt die Meldung jetzt, was die IDs wirklich sind („018d6f5b… ist ein Produkt").
+
 ## [0.22.2] - 2026-07-04
 
 ### Fixed (Bug aus dem plesk-1-Test: Produkt-ID im Medien-Batch)

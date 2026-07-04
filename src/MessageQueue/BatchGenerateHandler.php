@@ -22,7 +22,7 @@ class BatchGenerateHandler
      * (Teaser fehlt bewusst – siehe ContentWriter.)
      */
     private const WRITABLE = [
-        'product' => [PromptBuilder::TYPE_PRODUCT_DESCRIPTION, PromptBuilder::TYPE_PRODUCT_META, PromptBuilder::TYPE_FAQ],
+        'product' => [PromptBuilder::TYPE_PRODUCT_DESCRIPTION, PromptBuilder::TYPE_PRODUCT_META, PromptBuilder::TYPE_FAQ, PromptBuilder::TYPE_MEDIA_ALT],
         'category' => [PromptBuilder::TYPE_CATEGORY_TEASER, PromptBuilder::TYPE_CATEGORY_DETAIL, PromptBuilder::TYPE_CATEGORY_META, PromptBuilder::TYPE_FAQ],
         'media' => [PromptBuilder::TYPE_MEDIA_ALT],
         'sales_channel' => [PromptBuilder::TYPE_HOME_META],
@@ -76,6 +76,53 @@ class BatchGenerateHandler
             $writable = self::WRITABLE[$entityType] ?? [];
             foreach ($requestedTypes as $type) {
                 if (!\in_array($type, $writable, true)) {
+                    continue;
+                }
+
+                // Produkt-Workflow: "Alt-Texte" am Produkt verarbeitet automatisch
+                // ALLE Bilder des Produkts (kein Medien-Picker nötig)
+                if ($entityType === 'product' && $type === PromptBuilder::TYPE_MEDIA_ALT) {
+                    $mediaIds = $this->connection->fetchFirstColumn(
+                        'SELECT LOWER(HEX(media_id)) FROM product_media
+                         WHERE product_id = UNHEX(:id) AND product_version_id = UNHEX(:live)
+                         ORDER BY position ASC',
+                        ['id' => $itemId, 'live' => \Shopware\Core\Defaults::LIVE_VERSION]
+                    );
+                    foreach ($mediaIds as $mediaId) {
+                        // Ein defektes Bild darf die übrigen nicht mitreißen
+                        try {
+                            $mediaFacts = $this->factLoader->loadMedia($mediaId, $langContext);
+                            $result = $this->generator->generate(
+                                $type,
+                                $langCode,
+                                $mediaFacts,
+                                $job->getProvider(),
+                                $job->getModel(),
+                                $this->effectiveMode($mode, $type, $mediaFacts),
+                                null
+                            );
+                            $inputTokens += (int) ($result['usage']['input'] ?? 0);
+                            $outputTokens += (int) ($result['usage']['output'] ?? 0);
+                            $passedGate = (bool) ($result['quality']['passed'] ?? false);
+
+                            if ($job->getDryRun()) {
+                                $this->storeDryRunResult($jobId, $mediaId, $type, $result, $passedGate);
+                                $passedGate ? $written++ : $rejected++;
+                                continue;
+                            }
+                            if (!$passedGate) {
+                                $rejected++;
+                                $this->storeDryRunResult($jobId, $mediaId, $type, $result, false);
+                                continue;
+                            }
+                            $this->writer->apply('media', $mediaId, (string) ($languageId ?? ''), $type, $result, $langContext);
+                            $written++;
+                        } catch (\Throwable $e) {
+                            $rejected++;
+                            $this->storeDryRunResult($jobId, $mediaId, $type, ['error' => $e->getMessage()], false);
+                        }
+                    }
+
                     continue;
                 }
 
