@@ -3,6 +3,11 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.26.0] - 2026-07-04
+
+### Added (gezieltes Testen pro Produkt)
+- **SEO-Dateinamen in der Generator-Bilder-Karte**: Button „SEO-Dateinamen vorschlagen" lädt die Vorschläge NUR für die Bilder des gewählten Produkts (statt der 300er-Zufallswelle der SEO-Werkzeuge) — je Bild editierbar und einzeln umbenennbar („Nur dieses umbenennen"), inkl. automatischer Redirect-Datei; die Bilderliste lädt nach dem Umbenennen mit neuen URLs neu. Der Scan-Endpoint akzeptiert dafür einen optionalen `productId`-Filter.
+
 ## [0.25.0] - 2026-07-04
 
 ### Added / Changed (GUI-Kritik: „warum nur über die Stapelverarbeitung?")

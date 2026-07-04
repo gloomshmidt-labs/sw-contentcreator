@@ -48,6 +48,7 @@ Component.register('sw-content-creator-generator', {
             serverTeaser: '',
             serverMeta: null,
             productMedia: [],
+            renameSuggestionsLoaded: false,
         };
     },
 
@@ -635,9 +636,51 @@ Component.register('sw-content-creator-generator', {
                         generating: false,
                         result: null,
                         score: null,
+                        suggestedName: null,
                     }));
+                    this.renameSuggestionsLoaded = false;
                 })
                 .catch(() => { this.productMedia = []; });
+        },
+
+        // Dateinamen-Vorschläge gezielt für DIESES Produkt laden
+        loadRenameSuggestions() {
+            this.contentCreatorApiService.mediaRenameScan({
+                languageId: this.languageId || Shopware.Context.api.languageId,
+                productId: this.selectedId,
+            })
+                .then((res) => {
+                    const byId = new Map((res.items || []).map((i) => [i.mediaId, i.suggestedName]));
+                    this.productMedia.forEach((item) => {
+                        item.suggestedName = byId.get(item.mediaId) || null;
+                    });
+                    this.renameSuggestionsLoaded = true;
+                    if (!byId.size) {
+                        this.createNotificationInfo({ message: this.$tc('sw-content-creator.generator.noRenameCandidates') });
+                    }
+                })
+                .catch((err) => this.notifyApiError(err));
+        },
+
+        renameImage(item) {
+            if (!item.suggestedName) {
+                return;
+            }
+            item.generating = true;
+            this.contentCreatorApiService.mediaRenameApply([{
+                mediaId: item.mediaId,
+                newName: item.suggestedName,
+                currentName: item.fileName,
+            }])
+                .then((res) => {
+                    this.createNotificationSuccess({
+                        message: this.$tc('sw-content-creator.rename.done', { renamed: res.renamed, errors: (res.errors || []).length }, res.renamed),
+                    });
+                    // URL + Dateiname haben sich geändert → Bilderliste neu laden
+                    return this.loadProductMedia();
+                })
+                .catch((err) => this.notifyApiError(err))
+                .finally(() => { item.generating = false; this.renameSuggestionsLoaded = false; });
         },
 
         generateAlt(item) {

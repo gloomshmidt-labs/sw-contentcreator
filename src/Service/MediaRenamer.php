@@ -37,21 +37,27 @@ class MediaRenamer
      *
      * @return array{items: list<array{mediaId: string, currentName: string, suggestedName: string, productName: string}>, total: int}
      */
-    public function scan(string $languageId): array
+    public function scan(string $languageId, ?string $productId = null): array
     {
+        $productFilter = $productId !== null ? ' AND pm.product_id = UNHEX(:pid)' : '';
+        $params = ['live' => Defaults::LIVE_VERSION];
+        if ($productId !== null) {
+            $params['pid'] = $productId;
+        }
+
         $total = (int) $this->connection->fetchOne(
             "SELECT COUNT(DISTINCT m.id)
              FROM media m
-             INNER JOIN product_media pm ON pm.media_id = m.id AND pm.product_version_id = UNHEX(:live)
+             INNER JOIN product_media pm ON pm.media_id = m.id AND pm.product_version_id = UNHEX(:live){$productFilter}
              WHERE m.file_name REGEXP '^[0-9][0-9a-zA-Z_-]*$' OR m.file_name REGEXP '^[a-f0-9]{30,}$'",
-            ['live' => Defaults::LIVE_VERSION]
+            $params
         );
 
         $rows = $this->connection->fetchAllAssociative(
             "SELECT DISTINCT LOWER(HEX(m.id)) AS media_id, m.file_name,
                     pt.name AS product_name, mt.alt
              FROM media m
-             INNER JOIN product_media pm ON pm.media_id = m.id AND pm.product_version_id = UNHEX(:live)
+             INNER JOIN product_media pm ON pm.media_id = m.id AND pm.product_version_id = UNHEX(:live){$productFilter}
              INNER JOIN product_translation pt
                 ON pt.product_id = pm.product_id AND pt.product_version_id = pm.product_version_id AND pt.language_id = UNHEX(:lang)
              LEFT JOIN media_translation mt ON mt.media_id = m.id AND mt.language_id = UNHEX(:lang)
@@ -60,7 +66,7 @@ class MediaRenamer
                     OR m.file_name REGEXP '^[a-f0-9]{30,}$'
                )
              LIMIT " . self::MAX_SCAN,
-            ['lang' => $languageId, 'live' => Defaults::LIVE_VERSION]
+            $params + ['lang' => $languageId]
         );
 
         $items = [];

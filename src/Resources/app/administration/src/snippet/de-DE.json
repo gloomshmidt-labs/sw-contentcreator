@@ -102,7 +102,9 @@
             "tabEdit": "Bearbeiten",
             "editHint": "HTML-Quelltext direkt bearbeiten — Änderungen fließen sofort in Vorschau, Diff und „Übernehmen & speichern“ ein.",
             "mediaCard": "Produktbilder & Alt-Texte",
-            "mediaCardHint": "Alt-Text je Bild generieren (die KI sieht sich das Bild an), Ergebnis prüfen/anpassen, übernehmen — schreibt Alt- und Title-Attribut mit Backup."
+            "mediaCardHint": "Alt-Text je Bild generieren (die KI sieht sich das Bild an), Ergebnis prüfen/anpassen, übernehmen — schreibt Alt- und Title-Attribut mit Backup.",
+            "suggestFilenames": "SEO-Dateinamen vorschlagen",
+            "noRenameCandidates": "Alle Dateinamen dieses Produkts sind bereits beschreibend — nichts umzubenennen."
         },
         "levels": {
             "excellent": "Ausgezeichnet",

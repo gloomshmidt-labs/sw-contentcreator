@@ -102,7 +102,9 @@
             "tabEdit": "Edit",
             "editHint": "Edit the HTML source directly — changes flow immediately into preview, diff and “Apply & save”.",
             "mediaCard": "Product images & alt texts",
-            "mediaCardHint": "Generate the alt text per image (the AI looks at the image), review/adjust the result, apply — writes alt and title attribute with backup."
+            "mediaCardHint": "Generate the alt text per image (the AI looks at the image), review/adjust the result, apply — writes alt and title attribute with backup.",
+            "suggestFilenames": "Suggest SEO file names",
+            "noRenameCandidates": "All file names of this product are already descriptive — nothing to rename."
         },
         "levels": {
             "excellent": "Excellent",

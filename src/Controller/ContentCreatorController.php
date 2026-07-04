@@ -519,13 +519,16 @@ class ContentCreatorController extends AbstractController
     #[Route(path: '/api/content-creator/media-rename/scan', name: 'api.content-creator.media-rename.scan', defaults: ['_acl' => ['content_creator.viewer']], methods: ['POST'])]
     public function mediaRenameScan(Request $request): JsonResponse
     {
-        $fields = $this->requireFields($this->jsonBody($request), ['languageId']);
+        $data = $this->jsonBody($request);
+        $fields = $this->requireFields($data, ['languageId']);
         if ($fields instanceof JsonResponse) {
             return $fields;
         }
 
         try {
-            return new JsonResponse(['success' => true] + $this->mediaRenamer->scan($fields['languageId']));
+            $productId = \is_string($data['productId'] ?? null) && $data['productId'] !== '' ? $data['productId'] : null;
+
+            return new JsonResponse(['success' => true] + $this->mediaRenamer->scan($fields['languageId'], $productId));
         } catch (\Throwable $e) {
             return new JsonResponse(['success' => false, 'error' => $e->getMessage()], 400);
         }
