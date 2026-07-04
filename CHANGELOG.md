@@ -3,6 +3,11 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.27.5] - 2026-07-04
+
+### Fixed
+- Generator-Bilder-Karte: „Cannot read properties of undefined" beim Umbenennen behoben — `loadProductMedia()` gibt jetzt sein Promise zurück (die Umbenennung selbst war erfolgreich, nur das Nachladen der Ansicht brach ab).
+
 ## [0.27.4] - 2026-07-04
 
 ### Changed

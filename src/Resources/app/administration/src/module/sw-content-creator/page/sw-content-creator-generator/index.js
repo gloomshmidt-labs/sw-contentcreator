@@ -619,13 +619,13 @@ Component.register('sw-content-creator-generator', {
         loadProductMedia() {
             this.productMedia = [];
             if (this.entityType !== 'product' || !this.selectedId) {
-                return;
+                return Promise.resolve();
             }
             const criteria = new Shopware.Data.Criteria(1, 50);
             criteria.addFilter(Shopware.Data.Criteria.equals('productId', this.selectedId));
             criteria.addAssociation('media');
             criteria.addSorting(Shopware.Data.Criteria.sort('position', 'ASC'));
-            this.repositoryFactory.create('product_media')
+            return this.repositoryFactory.create('product_media')
                 .search(criteria, this.languageContext)
                 .then((result) => {
                     this.productMedia = result.map((pm) => ({
