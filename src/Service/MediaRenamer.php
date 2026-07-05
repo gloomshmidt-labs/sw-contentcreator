@@ -168,8 +168,13 @@ class MediaRenamer
      */
     public function exportNginx(): string
     {
+        // Nur Einträge, deren Medium noch existiert — gelöschte Bilder werden
+        // beim nächsten Schreiben automatisch aus der Datei bereinigt
         $rows = $this->connection->fetchAllAssociative(
-            'SELECT old_path, new_path, thumbnails FROM content_creator_media_rename ORDER BY created_at ASC'
+            'SELECT r.old_path, r.new_path, r.thumbnails
+             FROM content_creator_media_rename r
+             INNER JOIN media m ON m.id = r.media_id
+             ORDER BY r.created_at ASC'
         );
 
         // a→b, b→c ⇒ a→c (und b→c) — gilt für Hauptbild UND jede Thumbnail-Größe

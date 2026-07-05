@@ -3,6 +3,11 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.28.2] - 2026-07-05
+
+### Changed
+- **Redirect-Export bereinigt gelöschte Medien automatisch**: Einträge, deren Medium nicht mehr existiert, werden beim nächsten Schreiben der Datei ausgefiltert (Redirects ins Leere entfallen). Ausgeblendete/deaktivierte Produkte bleiben unberührt — deren Bilder und Redirects sind weiterhin gültig.
+
 ## [0.28.1] - 2026-07-05
 
 ### Fixed
