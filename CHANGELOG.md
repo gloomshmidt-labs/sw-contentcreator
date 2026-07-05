@@ -3,6 +3,11 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.29.0] - 2026-07-05
+
+### Added (Katalog in Gruppen abarbeiten)
+- **Hersteller-Filter im Lücken-Scan** (Produkte + Medien): Optionales Hersteller-Feld auf der Batch-Seite begrenzt missingAlt/weakAlt bzw. die Produkt-Lücken auf eine Marke — so lässt sich der Katalog Hersteller für Hersteller durchgehen und die manuelle Review bleibt überschaubar.
+
 ## [0.28.3] - 2026-07-05
 
 ### Changed

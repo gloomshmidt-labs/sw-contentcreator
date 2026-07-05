@@ -236,7 +236,9 @@
             "missingMeta": "Ohne Meta-Title/-Description",
             "missingAlt": "Produktbilder ohne Alt-Text",
             "weakAlt": "Produktbilder mit generischem Alt-Text (\"Produktbild 2\", nur Produktname, zu kurz, Dateiname)",
-            "fixNow": "Im Generator öffnen"
+            "fixNow": "Im Generator öffnen",
+            "manufacturerFilter": "Hersteller-Filter (optional)",
+            "manufacturerFilterHelp": "Begrenzt den Lücken-Scan auf Produkte/Bilder dieses Herstellers — praktisch, um den Katalog in überschaubaren Gruppen durchzugehen. Leer = alle."
         },
         "variants": {
             "none": "Keine Variante",

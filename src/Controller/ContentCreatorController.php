@@ -498,13 +498,16 @@ class ContentCreatorController extends AbstractController
     #[Route(path: '/api/content-creator/gaps', name: 'api.content-creator.gaps', defaults: ['_acl' => ['content_creator.viewer']], methods: ['POST'])]
     public function gaps(Request $request): JsonResponse
     {
-        $fields = $this->requireFields($this->jsonBody($request), ['entityType', 'languageId']);
+        $data = $this->jsonBody($request);
+        $fields = $this->requireFields($data, ['entityType', 'languageId']);
         if ($fields instanceof JsonResponse) {
             return $fields;
         }
 
         try {
-            return new JsonResponse(['success' => true, 'gaps' => $this->gapScanner->scan($fields['languageId'], $fields['entityType'])]);
+            $manufacturerId = \is_string($data['manufacturerId'] ?? null) && $data['manufacturerId'] !== '' ? $data['manufacturerId'] : null;
+
+            return new JsonResponse(['success' => true, 'gaps' => $this->gapScanner->scan($fields['languageId'], $fields['entityType'], $manufacturerId)]);
         } catch (\Throwable $e) {
             return new JsonResponse(['success' => false, 'error' => $e->getMessage()], 400);
         }

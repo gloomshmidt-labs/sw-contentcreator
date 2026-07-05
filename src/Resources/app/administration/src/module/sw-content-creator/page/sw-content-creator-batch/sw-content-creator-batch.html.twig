@@ -49,6 +49,15 @@
                 <p style="color:#758ca3; font-size:13px; margin-bottom:12px;">
                     {{ $tc('sw-content-creator.gaps.hint') }}
                 </p>
+                <sw-entity-single-select
+                    v-if="['product', 'media'].includes(entityType)"
+                    entity="product_manufacturer"
+                    :label="$tc('sw-content-creator.gaps.manufacturerFilter')"
+                    :helpText="$tc('sw-content-creator.gaps.manufacturerFilterHelp')"
+                    :value="manufacturerFilterId"
+                    @update:value="(v) => { manufacturerFilterId = v; }">
+                </sw-entity-single-select>
+
                 <div style="display:flex; gap:8px; flex-wrap:wrap;">
                     <sw-button :isLoading="gapBusy" @click="scanGaps">
                         {{ $tc('sw-content-creator.gaps.scan') }}

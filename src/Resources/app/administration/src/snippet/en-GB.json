@@ -236,7 +236,9 @@
             "missingMeta": "Without meta title/description",
             "missingAlt": "Product images without alt text",
             "weakAlt": "Product images with generic alt text (\"product image 2\", product name only, too short, file name)",
-            "fixNow": "Open in generator"
+            "fixNow": "Open in generator",
+            "manufacturerFilter": "Manufacturer filter (optional)",
+            "manufacturerFilterHelp": "Limits the gap scan to products/images of this manufacturer — handy for working through the catalogue in manageable groups. Empty = all."
         },
         "variants": {
             "none": "No variant",

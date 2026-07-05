@@ -268,6 +268,7 @@ Component.register('sw-content-creator-batch', {
             this.runBusy('gapBusy', () => this.contentCreatorApiService.gaps({
                 entityType: this.entityType,
                 languageId: this.effectiveLanguageId,
+                manufacturerId: this.manufacturerFilterId || undefined,
             })
                 .then((res) => { this.gapResult = res.gaps; }));
         },

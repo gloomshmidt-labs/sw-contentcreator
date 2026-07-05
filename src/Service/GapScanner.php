@@ -22,20 +22,20 @@ class GapScanner
     /**
      * @return array<string, array{count: int, ids: list<string>}>
      */
-    public function scan(string $languageId, string $entityType): array
+    public function scan(string $languageId, string $entityType, ?string $manufacturerId = null): array
     {
         return match ($entityType) {
             'product' => [
-                'missingDescription' => $this->productGap($languageId, "(pt.description IS NULL OR pt.description = '')"),
-                'missingMeta' => $this->productGap($languageId, "(pt.meta_title IS NULL OR pt.meta_title = '' OR pt.meta_description IS NULL OR pt.meta_description = '')"),
+                'missingDescription' => $this->productGap($languageId, "(pt.description IS NULL OR pt.description = '')", $manufacturerId),
+                'missingMeta' => $this->productGap($languageId, "(pt.meta_title IS NULL OR pt.meta_title = '' OR pt.meta_description IS NULL OR pt.meta_description = '')", $manufacturerId),
             ],
             'category' => [
                 'missingDescription' => $this->categoryGap($languageId, "(ct.description IS NULL OR ct.description = '')"),
                 'missingMeta' => $this->categoryGap($languageId, "(ct.meta_title IS NULL OR ct.meta_title = '' OR ct.meta_description IS NULL OR ct.meta_description = '')"),
             ],
             'media' => [
-                'missingAlt' => $this->mediaGap($languageId),
-                'weakAlt' => $this->weakAltGap($languageId),
+                'missingAlt' => $this->mediaGap($languageId, $manufacturerId),
+                'weakAlt' => $this->weakAltGap($languageId, $manufacturerId),
             ],
             default => throw new \InvalidArgumentException('Unbekannter Entity-Typ: ' . $entityType),
         };
@@ -44,16 +44,21 @@ class GapScanner
     /**
      * @return array{count: int, ids: list<string>}
      */
-    private function productGap(string $languageId, string $condition): array
+    private function productGap(string $languageId, string $condition, ?string $manufacturerId = null): array
     {
+        $manufacturerFilter = $manufacturerId !== null ? ' AND p.product_manufacturer_id = UNHEX(:manufacturer)' : '';
+        $params = ['lang' => $languageId, 'live' => Defaults::LIVE_VERSION];
+        if ($manufacturerId !== null) {
+            $params['manufacturer'] = $manufacturerId;
+        }
         $rows = $this->connection->fetchFirstColumn(
             "SELECT LOWER(HEX(p.id))
              FROM product p
              LEFT JOIN product_translation pt
                 ON pt.product_id = p.id AND pt.product_version_id = p.version_id AND pt.language_id = UNHEX(:lang)
-             WHERE p.version_id = UNHEX(:live) AND p.parent_id IS NULL AND p.active = 1 AND {$condition}
+             WHERE p.version_id = UNHEX(:live) AND p.parent_id IS NULL AND p.active = 1 AND {$condition}{$manufacturerFilter}
              LIMIT " . (self::MAX_IDS + 1),
-            ['lang' => $languageId, 'live' => Defaults::LIVE_VERSION]
+            $params
         );
 
         return $this->result($rows);
@@ -82,16 +87,23 @@ class GapScanner
      *
      * @return array{count: int, ids: list<string>}
      */
-    private function mediaGap(string $languageId): array
+    private function mediaGap(string $languageId, ?string $manufacturerId = null): array
     {
+        $manufacturerJoin = $manufacturerId !== null
+            ? ' INNER JOIN product p ON p.id = pm.product_id AND p.version_id = pm.product_version_id AND p.product_manufacturer_id = UNHEX(:manufacturer)'
+            : '';
+        $params = ['lang' => $languageId, 'live' => Defaults::LIVE_VERSION];
+        if ($manufacturerId !== null) {
+            $params['manufacturer'] = $manufacturerId;
+        }
         $rows = $this->connection->fetchFirstColumn(
-            'SELECT DISTINCT LOWER(HEX(m.id))
+            "SELECT DISTINCT LOWER(HEX(m.id))
              FROM media m
-             INNER JOIN product_media pm ON pm.media_id = m.id AND pm.product_version_id = UNHEX(:live)
+             INNER JOIN product_media pm ON pm.media_id = m.id AND pm.product_version_id = UNHEX(:live){$manufacturerJoin}
              LEFT JOIN media_translation mt ON mt.media_id = m.id AND mt.language_id = UNHEX(:lang)
-             WHERE (mt.alt IS NULL OR mt.alt = \'\')
-             LIMIT ' . (self::MAX_IDS + 1),
-            ['lang' => $languageId, 'live' => Defaults::LIVE_VERSION]
+             WHERE (mt.alt IS NULL OR mt.alt = '')
+             LIMIT " . (self::MAX_IDS + 1),
+            $params
         );
 
         return $this->result($rows);
@@ -103,12 +115,19 @@ class GapScanner
      *
      * @return array{count: int, ids: list<string>}
      */
-    private function weakAltGap(string $languageId): array
+    private function weakAltGap(string $languageId, ?string $manufacturerId = null): array
     {
+        $manufacturerJoin = $manufacturerId !== null
+            ? ' INNER JOIN product p ON p.id = pm.product_id AND p.version_id = pm.product_version_id AND p.product_manufacturer_id = UNHEX(:manufacturer)'
+            : '';
+        $params = ['lang' => $languageId, 'live' => Defaults::LIVE_VERSION];
+        if ($manufacturerId !== null) {
+            $params['manufacturer'] = $manufacturerId;
+        }
         $rows = $this->connection->fetchFirstColumn(
             "SELECT DISTINCT LOWER(HEX(m.id))
              FROM media m
-             INNER JOIN product_media pm ON pm.media_id = m.id AND pm.product_version_id = UNHEX(:live)
+             INNER JOIN product_media pm ON pm.media_id = m.id AND pm.product_version_id = UNHEX(:live){$manufacturerJoin}
              INNER JOIN media_translation mt ON mt.media_id = m.id AND mt.language_id = UNHEX(:lang)
              LEFT JOIN product_translation pt
                 ON pt.product_id = pm.product_id AND pt.product_version_id = pm.product_version_id AND pt.language_id = UNHEX(:lang)
@@ -121,7 +140,7 @@ class GapScanner
                     OR (pt.name IS NOT NULL AND TRIM(mt.alt) = TRIM(pt.name))
                )
              LIMIT " . (self::MAX_IDS + 1),
-            ['lang' => $languageId, 'live' => Defaults::LIVE_VERSION]
+            $params
         );
 
         return $this->result($rows);
