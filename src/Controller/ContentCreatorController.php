@@ -353,6 +353,12 @@ class ContentCreatorController extends AbstractController
             ['job' => $jobId]
         );
 
+        // Anzeigenamen in der Sprache des Jobs (nicht in einer beliebigen)
+        $jobLanguageId = (string) $this->connection->fetchOne(
+            'SELECT LOWER(HEX(language_id)) FROM content_creator_generation_job WHERE id = UNHEX(:job)',
+            ['job' => $jobId]
+        );
+
         $results = [];
         foreach ($rows as $row) {
             $payload = json_decode((string) $row['payload'], true) ?: [];
@@ -363,7 +369,7 @@ class ContentCreatorController extends AbstractController
                 'content' => $payload['content'] ?? null,
                 'meta' => $payload['meta'] ?? null,
                 'score' => $payload['quality']['score'] ?? null,
-                'name' => $this->entityDisplayName((string) $row['type'], (string) $row['entityId']),
+                'name' => $this->entityDisplayName((string) $row['type'], (string) $row['entityId'], $jobLanguageId ?: null),
                 'imagePath' => $row['type'] === \ContentCreator\Service\PromptBuilder::TYPE_MEDIA_ALT
                     ? (string) ($this->connection->fetchOne('SELECT path FROM media WHERE id = UNHEX(:id)', ['id' => $row['entityId']]) ?: '')
                     : '',
@@ -406,7 +412,7 @@ class ContentCreatorController extends AbstractController
     /**
      * Anzeigename fürs Review: Medien → Dateiname, sonst übersetzter Name.
      */
-    private function entityDisplayName(string $type, string $entityId): string
+    private function entityDisplayName(string $type, string $entityId, ?string $languageId = null): string
     {
         if ($type === \ContentCreator\Service\PromptBuilder::TYPE_MEDIA_ALT) {
             return (string) ($this->connection->fetchOne(
@@ -415,6 +421,16 @@ class ContentCreatorController extends AbstractController
             ) ?: '');
         }
         foreach (['product_translation' => 'product_id', 'category_translation' => 'category_id', 'product_manufacturer_translation' => 'product_manufacturer_id'] as $table => $fk) {
+            // Erst die Zielsprache versuchen, dann beliebige (Vererbungs-Fallback)
+            if ($languageId !== null) {
+                $name = $this->connection->fetchOne(
+                    'SELECT name FROM ' . $table . ' WHERE ' . $fk . ' = UNHEX(:id) AND language_id = UNHEX(:lang) AND name IS NOT NULL LIMIT 1',
+                    ['id' => $entityId, 'lang' => $languageId]
+                );
+                if ($name) {
+                    return (string) $name;
+                }
+            }
             $name = $this->connection->fetchOne(
                 'SELECT name FROM ' . $table . ' WHERE ' . $fk . ' = UNHEX(:id) AND name IS NOT NULL LIMIT 1',
                 ['id' => $entityId]

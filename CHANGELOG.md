@@ -3,6 +3,11 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.32.2] - 2026-07-05
+
+### Fixed
+- **Dry-Run-Review zeigt Objektnamen in der Sprache des Laufs**: Die Anzeigenamen (Produkt/Kategorie/Hersteller) wurden bisher aus einer beliebigen Übersetzung gezogen (praktisch immer Deutsch) — jetzt wird zuerst die Job-Sprache versucht, mit Fallback auf die vererbte Übersetzung. Medien zeigen weiterhin den (sprachneutralen) Dateinamen.
+
 ## [0.32.1] - 2026-07-05
 
 ### Changed (Weitergabe-Tauglichkeit)
