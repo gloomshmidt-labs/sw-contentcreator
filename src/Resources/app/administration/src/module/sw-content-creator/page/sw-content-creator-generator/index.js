@@ -94,10 +94,9 @@ Component.register('sw-content-creator-generator', {
             ];
         },
         langOptions() {
-            return [
-                { value: 'de', label: 'Deutsch' },
-                { value: 'en', label: 'English' },
-            ];
+            const labels = { de: 'Deutsch', en: 'English' };
+
+            return this.availableLangs.map((value) => ({ value, label: labels[value] }));
         },
         modeOptions() {
             return [

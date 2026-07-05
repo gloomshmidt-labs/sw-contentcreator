@@ -3,6 +3,11 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.32.1] - 2026-07-05
+
+### Changed (Weitergabe-Tauglichkeit)
+- **Sprach-Auswahl erkennt die installierten Shop-Sprachen automatisch**: Generator, Stapelverarbeitung und SEO-Werkzeuge bieten nur noch Sprachen an, die im Shop existieren (de-DE/en-GB) — in einem rein deutschen Shop verschwindet die englische Option von selbst, keine Einstellung nötig. Ist die vorausgewählte Sprache nicht installiert, springt die Auswahl automatisch auf die erste verfügbare.
+
 ## [0.32.0] - 2026-07-05
 
 ### Added (User-Frage: gehen Dry-Run-Ergebnisse verloren?)
