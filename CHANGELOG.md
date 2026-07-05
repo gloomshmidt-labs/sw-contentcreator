@@ -3,6 +3,11 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.28.3] - 2026-07-05
+
+### Changed
+- **weakAlt-Erkennung erweitert**: Auch gespeicherte Alt-Texte, die exakt dem Produktnamen entsprechen, gelten jetzt als generisch (beschreiben das Bild nicht). Hinweis: Im Storefront angezeigte Produktname-Alts sind oft nur der Theme-FALLBACK bei leerem Alt-Feld — die zählt der Scan korrekt unter „ohne Alt-Text".
+
 ## [0.28.2] - 2026-07-05
 
 ### Changed

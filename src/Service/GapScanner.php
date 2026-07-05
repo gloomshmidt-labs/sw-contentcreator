@@ -110,12 +110,15 @@ class GapScanner
              FROM media m
              INNER JOIN product_media pm ON pm.media_id = m.id AND pm.product_version_id = UNHEX(:live)
              INNER JOIN media_translation mt ON mt.media_id = m.id AND mt.language_id = UNHEX(:lang)
+             LEFT JOIN product_translation pt
+                ON pt.product_id = pm.product_id AND pt.product_version_id = pm.product_version_id AND pt.language_id = UNHEX(:lang)
              WHERE mt.alt IS NOT NULL AND TRIM(mt.alt) != ''
                AND (
                     mt.alt REGEXP '(Produktbild|Product image|Bild|Image) ?[0-9]*$'
                     OR mt.alt REGEXP 'Demo ?[0-9]*$'
                     OR CHAR_LENGTH(TRIM(mt.alt)) < 15
                     OR mt.alt = m.file_name
+                    OR (pt.name IS NOT NULL AND TRIM(mt.alt) = TRIM(pt.name))
                )
              LIMIT " . (self::MAX_IDS + 1),
             ['lang' => $languageId, 'live' => Defaults::LIVE_VERSION]

@@ -235,7 +235,7 @@
             "missingDescription": "Without description",
             "missingMeta": "Without meta title/description",
             "missingAlt": "Product images without alt text",
-            "weakAlt": "Product images with generic alt text (\"product image 2\", too short, file name)",
+            "weakAlt": "Product images with generic alt text (\"product image 2\", product name only, too short, file name)",
             "fixNow": "Open in generator"
         },
         "variants": {
