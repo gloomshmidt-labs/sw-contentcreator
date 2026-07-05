@@ -154,9 +154,17 @@
                                 {{ $tc('sw-content-creator.rename.applySingle') }}
                             </sw-button>
                         </div>
-                        <p v-if="!item.result" style="font-size:13px;">
-                            <strong>Alt:</strong> {{ item.alt || '—' }}
-                        </p>
+                        <div v-if="!item.result" style="display:flex; align-items:center; gap:6px; font-size:13px;">
+                            <strong>Alt:</strong>
+                            <input type="text" :value="item.altEdit" :placeholder="item.alt || '—'" style="flex:1; font-size:13px; padding:4px 6px; border:1px solid #d1d9e0; border-radius:4px;"
+                                @input="(e) => { item.altEdit = e.target.value; }"/>
+                            <sw-button v-if="item.altEdit && item.altEdit !== item.alt" size="small" variant="primary" :isLoading="item.generating" @click="saveAltEdit(item)">
+                                {{ $tc('sw-content-creator.generator.saveAlt') }}
+                            </sw-button>
+                            <sw-button v-if="item.altEdit && item.altEdit !== item.alt && lang === 'de' && availableLangs.includes('en')" size="small" :isLoading="item.generating" @click="saveAltEdit(item, true)">
+                                {{ $tc('sw-content-creator.generator.saveAltWithEn') }}
+                            </sw-button>
+                        </div>
                         <template v-else>
                             <input type="text" :value="item.result" style="width:100%; font-size:13px; padding:4px 6px; border:1px solid #d1d9e0; border-radius:4px;"
                                 @input="(e) => { item.result = e.target.value; }"/>

@@ -3,6 +3,11 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.33.0] - 2026-07-05
+
+### Added (bequeme Nachkorrektur einzelner Alt-Texte)
+- **Bestands-Alt in der Generator-Bilder-Karte direkt editierbar**: Fehler aus der Batch-Welle (z.B. eine Vision-Fehldeutung) lassen sich jetzt an Ort und Stelle korrigieren — Text ändern → „Alt speichern" (schreibt Alt + Title mit Backup). Bei deutscher Sprache zusätzlich **„Speichern + EN nachziehen"**: speichert das korrigierte Deutsch und übersetzt den englischen Alt sofort daraus neu — ein Klick, beide Sprachen konsistent.
+
 ## [0.32.2] - 2026-07-05
 
 ### Fixed

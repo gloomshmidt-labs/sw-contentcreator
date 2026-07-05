@@ -642,6 +642,7 @@ Component.register('sw-content-creator-generator', {
                         url: pm.media?.url || '',
                         fileName: pm.media?.fileName || '',
                         alt: pm.media?.translated?.alt || pm.media?.alt || '',
+                        altEdit: pm.media?.translated?.alt || pm.media?.alt || '',
                         generating: false,
                         result: null,
                         score: null,
@@ -715,6 +716,54 @@ Component.register('sw-content-creator-generator', {
                 })
                 .catch((err) => this.notifyApiError(err))
                 .finally(() => { item.generating = false; });
+        },
+
+        // Bestands-Alt direkt korrigieren (schreibt Alt+Title mit Backup);
+        // optional den englischen Alt gleich aus dem korrigierten Deutsch nachziehen
+        saveAltEdit(item, updateEnglish = false) {
+            const text = (item.altEdit || '').trim();
+            if (!text || text === item.alt) {
+                return;
+            }
+            item.generating = true;
+            this.contentCreatorApiService.apply({
+                entityType: 'media',
+                id: item.mediaId,
+                type: 'media_alt',
+                languageId: this.languageId,
+                result: { content: text },
+            })
+                .then(() => {
+                    item.alt = text;
+                    if (!updateEnglish) {
+                        this.createNotificationSuccess({ message: this.$tc('sw-content-creator.generator.saved') });
+                        return null;
+                    }
+
+                    // Englisch nachziehen: Übersetzungs-Modus liest den soeben
+                    // gespeicherten deutschen Alt
+                    return this.resolveLanguageId('en').then((enId) => this.contentCreatorApiService.generate({
+                        entityType: 'media',
+                        id: item.mediaId,
+                        type: 'media_alt',
+                        languageId: enId,
+                        mode: 'create',
+                    }).then((res) => this.contentCreatorApiService.apply({
+                        entityType: 'media',
+                        id: item.mediaId,
+                        type: 'media_alt',
+                        languageId: enId,
+                        result: { content: res.result?.content || '' },
+                    })).then(() => {
+                        this.createNotificationSuccess({ message: this.$tc('sw-content-creator.generator.savedWithEn') });
+                    }));
+                })
+                .catch((err) => this.notifyApiError(err))
+                .finally(() => {
+                    item.generating = false;
+                    // languageId wieder auf die aktuelle Auswahl zurücksetzen
+                    this.resolveLanguageId(this.lang);
+                });
         },
 
         applyAlt(item) {

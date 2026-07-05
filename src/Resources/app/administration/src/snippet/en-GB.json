@@ -105,7 +105,10 @@
             "mediaCardHint": "Generate the alt text per image (the AI looks at the image), review/adjust the result, apply — writes alt and title attribute with backup.",
             "suggestFilenames": "Suggest SEO file names",
             "noRenameCandidates": "No automatic improvements found — the names remain freely editable.",
-            "nameUnchanged": "Name unchanged — nothing to do."
+            "nameUnchanged": "Name unchanged — nothing to do.",
+            "saveAlt": "Save alt",
+            "saveAltWithEn": "Save + update EN",
+            "savedWithEn": "Saved — the English alt text was re-translated from the corrected German."
         },
         "levels": {
             "excellent": "Excellent",

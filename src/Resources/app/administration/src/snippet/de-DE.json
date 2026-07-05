@@ -105,7 +105,10 @@
             "mediaCardHint": "Alt-Text je Bild generieren (die KI sieht sich das Bild an), Ergebnis prüfen/anpassen, übernehmen — schreibt Alt- und Title-Attribut mit Backup.",
             "suggestFilenames": "SEO-Dateinamen vorschlagen",
             "noRenameCandidates": "Keine automatischen Verbesserungen gefunden — die Namen sind trotzdem frei editierbar.",
-            "nameUnchanged": "Name unverändert — nichts zu tun."
+            "nameUnchanged": "Name unverändert — nichts zu tun.",
+            "saveAlt": "Alt speichern",
+            "saveAltWithEn": "Speichern + EN nachziehen",
+            "savedWithEn": "Gespeichert — englischer Alt-Text wurde aus dem korrigierten Deutsch neu übersetzt."
         },
         "levels": {
             "excellent": "Ausgezeichnet",
