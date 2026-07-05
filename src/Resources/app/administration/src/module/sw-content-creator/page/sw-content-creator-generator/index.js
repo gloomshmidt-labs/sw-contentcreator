@@ -170,13 +170,23 @@ Component.register('sw-content-creator-generator', {
 
         onLangChange(value) {
             this.lang = value;
-            this.selectedId = null;
-            this.entity = null;
             this.generated = {};
             this.serverText = null;
+            this.serverTeaser = '';
+            this.serverMeta = null;
+            this.productMedia = [];
+            this.renameSuggestionsLoaded = false;
+            // Geladenes Objekt in der NEUEN Sprache neu laden (Bestand, Metas,
+            // Alt-Texte der Bilder) statt die Auswahl zu verwerfen
+            const keepId = this.selectedId;
+            this.selectedId = null;
+            this.entity = null;
             this.resolveLanguageId(value).then(() => {
                 if (this.categoryRootId) {
                     this.loadCategoryTree();
+                }
+                if (keepId) {
+                    this.onSelectEntity(keepId);
                 }
             });
         },

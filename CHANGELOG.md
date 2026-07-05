@@ -3,6 +3,11 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.28.1] - 2026-07-05
+
+### Fixed
+- **Sprachwechsel im Generator lädt das geladene Objekt jetzt in der neuen Sprache neu** — Bestandstext, Metas und die Alt-Texte der Bilder-Karte aktualisieren sich sofort (vorher blieben die Bilddaten der alten Sprache stehen). Dateinamen-Vorschläge werden zurückgesetzt und auf Klick in der neuen Sprache geladen. Hinweis: Der DATEINAME selbst ist sprachunabhängig (ein physischer Name pro Bild) — nur Alt/Title sind übersetzbar.
+
 ## [0.28.0] - 2026-07-04
 
 ### Added
