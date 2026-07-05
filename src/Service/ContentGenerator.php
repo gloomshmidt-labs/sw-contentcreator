@@ -91,6 +91,17 @@ class ContentGenerator
             $mode = PromptBuilder::MODE_CREATE;
         }
 
+        // Alt-Texte laufen immer über das (günstigere) Batch-Modell — Vision-
+        // Beschreibungen brauchen kein Premium-Modell, und Generator-Tests
+        // zeigen so exakt die Qualität der späteren Batch-Welle
+        if ($type === PromptBuilder::TYPE_MEDIA_ALT && $model === null
+            && $this->providerRegistry->activeProviderName($providerName) === 'claude') {
+            $batchModel = trim((string) $this->systemConfig->get('ContentCreator.config.batchModel'));
+            if ($batchModel !== '') {
+                $model = $batchModel;
+            }
+        }
+
         $provider = $this->providerRegistry->get($providerName);
         $system = $this->promptBuilder->buildSystem($type, $lang, $mode);
 
@@ -129,6 +140,15 @@ class ContentGenerator
         }
 
         $baseUser = $this->promptBuilder->buildUser($type, $lang, $ctx, $mode, $metaFields);
+
+        // Alt-Text-Übersetzung: existiert der Alt bereits in der Standardsprache,
+        // wird übersetzt statt das Bild erneut per Vision zu analysieren
+        $translateSource = $type === PromptBuilder::TYPE_MEDIA_ALT ? trim((string) ($ctx['translateFromAlt'] ?? '')) : '';
+        if ($translateSource !== '') {
+            $system = $this->promptBuilder->buildAltTranslationSystem($lang);
+            $baseUser = $this->promptBuilder->buildAltTranslationUser($translateSource, $lang, $ctx);
+            $ctx['imageUrl'] = null;
+        }
 
         $threshold = $this->maxScore();
         $maxAttempts = 1 + $this->maxRetries();

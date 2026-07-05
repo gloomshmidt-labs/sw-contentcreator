@@ -3,6 +3,12 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.31.0] - 2026-07-05
+
+### Added (Kosten-Optimierung Alt-Texte, ~95% Ersparnis bei Zweitsprachen)
+- **Übersetzungs-Modus für Alt-Texte**: Existiert der Alt bereits in der Standardsprache (≥20 Zeichen), wird der Alt anderer Sprachen daraus per günstigem Text-Call ÜBERSETZT statt das Bild erneut per Vision zu analysieren — identische Fakten in allen Sprachen, kein Bild-Payload. Automatischer Fallback auf Vision, wenn kein Standardsprachen-Alt existiert. E2E: DE→EN-Übersetzung faktentreu in 3,6s.
+- **Alt-Texte laufen immer über das Batch-Modell** (auch Einzelgenerierung im Generator, nur bei Claude-Provider): Ein-Satz-Bildbeschreibungen brauchen kein Premium-Modell — Generator-Tests kosten ~1 statt ~6 Cent und zeigen exakt die Qualität der späteren Batch-Welle. Opus bleibt für Beschreibungen/Metas/FAQ.
+
 ## [0.30.2] - 2026-07-05
 
 ### Fixed (zwei User-Funde im Liveshop)

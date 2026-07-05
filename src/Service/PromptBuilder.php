@@ -679,4 +679,33 @@ class PromptBuilder
     {
         return str_starts_with(strtolower($lang), 'en') ? 'en' : 'de';
     }
+
+    /**
+     * Alt-Text-Übersetzung (statt Vision): System-Prompt.
+     */
+    public function buildAltTranslationSystem(string $lang): string
+    {
+        return $lang === 'en'
+            ? "You translate German image alt texts for an online shop into natural English. Rules: keep the meaning and all facts EXACTLY (colours, materials, animals, positions — invent nothing, drop nothing). Use natural product terminology (e.g. Handpuppe = hand puppet). One sentence, no quotation marks, no trailing full stop needed, at most about 125 characters. Reply with ONLY the translated alt text."
+            : "Du übersetzt englische Bild-Alt-Texte für einen Onlineshop in natürliches Deutsch. Regeln: Bedeutung und alle Fakten EXAKT erhalten (Farben, Materialien, Tiere, Positionen — nichts erfinden, nichts weglassen). Natürliche Produkt-Terminologie verwenden. Ein Satz, keine Anführungszeichen, maximal ca. 125 Zeichen. Antworte NUR mit dem übersetzten Alt-Text.";
+    }
+
+    /**
+     * Alt-Text-Übersetzung: User-Prompt mit Produkt-Kontext.
+     *
+     * @param array<string, mixed> $ctx
+     */
+    public function buildAltTranslationUser(string $source, string $lang, array $ctx): string
+    {
+        $name = trim((string) ($ctx['name'] ?? ''));
+        $manufacturer = trim((string) ($ctx['manufacturer'] ?? ''));
+        $context = $name !== '' ? ($lang === 'en' ? "Product: {$name}" : "Produkt: {$name}") : '';
+        if ($manufacturer !== '') {
+            $context .= ($context !== '' ? ', ' : '') . ($lang === 'en' ? "brand: {$manufacturer}" : "Marke: {$manufacturer}");
+        }
+
+        return ($context !== '' ? $context . "\n" : '')
+            . ($lang === 'en' ? 'Alt text to translate: ' : 'Zu übersetzender Alt-Text: ')
+            . '"""' . $source . '"""';
+    }
 }

@@ -263,10 +263,24 @@ class FactLoader
      */
     public function loadMedia(string $id, Context $context): array
     {
-        $media = $this->mediaRepository->search(new Criteria([$id]), $context)->first();
+        $criteria = new Criteria([$id]);
+        $criteria->addAssociation('translations');
+        $media = $this->mediaRepository->search($criteria, $context)->first();
 
         if ($media === null) {
             throw new \RuntimeException('Medium nicht gefunden: ' . $id);
+        }
+
+        // Alt der Standardsprache: existiert er, wird der Alt anderer Sprachen
+        // daraus ÜBERSETZT statt per Vision neu beschrieben (identische Fakten,
+        // ~95% günstiger — kein Bild-Payload). Mindestlänge schützt davor,
+        // generische Alt-Reste ("Produktbild 2") in andere Sprachen zu tragen.
+        $translateFromAlt = '';
+        if ($context->getLanguageId() !== Defaults::LANGUAGE_SYSTEM) {
+            $systemAlt = trim((string) (RawTranslation::forLanguage($media, Defaults::LANGUAGE_SYSTEM)?->getAlt() ?? ''));
+            if (mb_strlen($systemAlt) >= 20) {
+                $translateFromAlt = $systemAlt;
+            }
         }
 
         $alt = (string) ($media->getAlt() ?? '');
@@ -291,6 +305,7 @@ class FactLoader
             'imageUrl' => (string) ($media->getUrl() ?? ''),
             'existingText' => $alt,
             '_hasAlt' => trim($alt) !== '',
+            'translateFromAlt' => $translateFromAlt,
         ];
     }
 }
