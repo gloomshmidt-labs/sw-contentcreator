@@ -89,9 +89,7 @@ class GapScanner
      */
     private function mediaGap(string $languageId, ?string $manufacturerId = null): array
     {
-        $manufacturerJoin = $manufacturerId !== null
-            ? ' INNER JOIN product p ON p.id = pm.product_id AND p.version_id = pm.product_version_id AND p.product_manufacturer_id = UNHEX(:manufacturer)'
-            : '';
+        $manufacturerFilter = $manufacturerId !== null ? ' AND p.product_manufacturer_id = UNHEX(:manufacturer)' : '';
         $params = ['lang' => $languageId, 'live' => Defaults::LIVE_VERSION];
         if ($manufacturerId !== null) {
             $params['manufacturer'] = $manufacturerId;
@@ -99,9 +97,12 @@ class GapScanner
         $rows = $this->connection->fetchFirstColumn(
             "SELECT DISTINCT LOWER(HEX(m.id))
              FROM media m
-             INNER JOIN product_media pm ON pm.media_id = m.id AND pm.product_version_id = UNHEX(:live){$manufacturerJoin}
+             INNER JOIN product_media pm ON pm.media_id = m.id AND pm.product_version_id = UNHEX(:live)
+             INNER JOIN product p ON p.id = pm.product_id AND p.version_id = pm.product_version_id{$manufacturerFilter}
+             LEFT JOIN product pp ON pp.id = p.parent_id AND pp.version_id = p.version_id
              LEFT JOIN media_translation mt ON mt.media_id = m.id AND mt.language_id = UNHEX(:lang)
-             WHERE (mt.alt IS NULL OR mt.alt = '')
+             WHERE COALESCE(p.active, pp.active) = 1
+               AND (mt.alt IS NULL OR mt.alt = '')
              LIMIT " . (self::MAX_IDS + 1),
             $params
         );
@@ -117,9 +118,7 @@ class GapScanner
      */
     private function weakAltGap(string $languageId, ?string $manufacturerId = null): array
     {
-        $manufacturerJoin = $manufacturerId !== null
-            ? ' INNER JOIN product p ON p.id = pm.product_id AND p.version_id = pm.product_version_id AND p.product_manufacturer_id = UNHEX(:manufacturer)'
-            : '';
+        $manufacturerFilter = $manufacturerId !== null ? ' AND p.product_manufacturer_id = UNHEX(:manufacturer)' : '';
         $params = ['lang' => $languageId, 'live' => Defaults::LIVE_VERSION];
         if ($manufacturerId !== null) {
             $params['manufacturer'] = $manufacturerId;
@@ -127,11 +126,14 @@ class GapScanner
         $rows = $this->connection->fetchFirstColumn(
             "SELECT DISTINCT LOWER(HEX(m.id))
              FROM media m
-             INNER JOIN product_media pm ON pm.media_id = m.id AND pm.product_version_id = UNHEX(:live){$manufacturerJoin}
+             INNER JOIN product_media pm ON pm.media_id = m.id AND pm.product_version_id = UNHEX(:live)
+             INNER JOIN product p ON p.id = pm.product_id AND p.version_id = pm.product_version_id{$manufacturerFilter}
+             LEFT JOIN product pp ON pp.id = p.parent_id AND pp.version_id = p.version_id
              INNER JOIN media_translation mt ON mt.media_id = m.id AND mt.language_id = UNHEX(:lang)
              LEFT JOIN product_translation pt
                 ON pt.product_id = pm.product_id AND pt.product_version_id = pm.product_version_id AND pt.language_id = UNHEX(:lang)
-             WHERE mt.alt IS NOT NULL AND TRIM(mt.alt) != ''
+             WHERE COALESCE(p.active, pp.active) = 1
+               AND mt.alt IS NOT NULL AND TRIM(mt.alt) != ''
                AND (
                     mt.alt REGEXP '(Produktbild|Product image|Bild|Image) ?[0-9]*$'
                     OR mt.alt REGEXP 'Demo ?[0-9]*$'

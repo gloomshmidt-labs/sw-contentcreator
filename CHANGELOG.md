@@ -3,6 +3,11 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.29.1] - 2026-07-05
+
+### Changed (Token sparen bei ausgeblendeten Artikeln)
+- **Medien-Scans berücksichtigen nur noch AKTIVE Produkte**: Lücken-Scan (missingAlt/weakAlt) und der globale Dateinamen-Scan überspringen Bilder von deaktivierten/ausverkauften Produkten (Varianten erben den Aktiv-Status vom Parent) — keine Tokens mehr für unsichtbare Artikel. Der gezielte Produkt-Scan im Generator zeigt weiterhin alles (bewusst, für Einzelfälle).
+
 ## [0.29.0] - 2026-07-05
 
 ### Added (Katalog in Gruppen abarbeiten)

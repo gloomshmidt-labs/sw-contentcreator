@@ -45,11 +45,18 @@ class MediaRenamer
             $params['pid'] = $productId;
         }
 
+        // Globale Welle: nur Bilder AKTIVER Produkte (gezielter Produkt-Scan: alle)
+        $activeJoin = $productId === null
+            ? ' INNER JOIN product p ON p.id = pm.product_id AND p.version_id = pm.product_version_id
+                LEFT JOIN product pp ON pp.id = p.parent_id AND pp.version_id = p.version_id'
+            : '';
+        $activeWhere = $productId === null ? ' AND COALESCE(p.active, pp.active) = 1' : '';
+
         $total = (int) $this->connection->fetchOne(
             "SELECT COUNT(DISTINCT m.id)
              FROM media m
-             INNER JOIN product_media pm ON pm.media_id = m.id AND pm.product_version_id = UNHEX(:live){$productFilter}
-             WHERE m.file_name REGEXP '^[0-9][0-9a-zA-Z_-]*$' OR m.file_name REGEXP '^[a-f0-9]{30,}$'",
+             INNER JOIN product_media pm ON pm.media_id = m.id AND pm.product_version_id = UNHEX(:live){$productFilter}{$activeJoin}
+             WHERE (m.file_name REGEXP '^[0-9][0-9a-zA-Z_-]*$' OR m.file_name REGEXP '^[a-f0-9]{30,}$'){$activeWhere}",
             $params
         );
 
@@ -66,11 +73,11 @@ class MediaRenamer
                     (SELECT r.old_path FROM content_creator_media_rename r
                      WHERE r.media_id = m.id ORDER BY r.created_at ASC LIMIT 1) AS first_old_path
              FROM media m
-             INNER JOIN product_media pm ON pm.media_id = m.id AND pm.product_version_id = UNHEX(:live){$productFilter}
+             INNER JOIN product_media pm ON pm.media_id = m.id AND pm.product_version_id = UNHEX(:live){$productFilter}{$activeJoin}
              INNER JOIN product_translation pt
                 ON pt.product_id = pm.product_id AND pt.product_version_id = pm.product_version_id AND pt.language_id = UNHEX(:lang)
              LEFT JOIN media_translation mt ON mt.media_id = m.id AND mt.language_id = UNHEX(:lang)
-             WHERE pt.name IS NOT NULL {$nameFilter}
+             WHERE pt.name IS NOT NULL {$nameFilter}{$activeWhere}
              LIMIT " . self::MAX_SCAN,
             $params + ['lang' => $languageId]
         );
