@@ -54,6 +54,12 @@ export default class ContentCreatorApiService extends ApiService {
             .then((response) => ApiService.handleResponse(response));
     }
 
+    batchJobs() {
+        return this.httpClient
+            .get('/content-creator/batch-jobs', { headers: this.getBasicHeaders() })
+            .then((response) => ApiService.handleResponse(response));
+    }
+
     batchStatus(jobId) {
         return this.httpClient
             .get(`/content-creator/batch/${jobId}`, { headers: this.getBasicHeaders() })

@@ -3,6 +3,11 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.32.0] - 2026-07-05
+
+### Added (User-Frage: gehen Dry-Run-Ergebnisse verloren?)
+- **„Frühere Läufe"-Karte** auf der Batch-Seite: Dry-Run-Ergebnisse bleiben in der Datenbank gespeichert, bis sie übernommen werden — die neue Karte (sichtbar, solange kein Lauf geöffnet ist) listet die letzten 10 Jobs mit Status, Fortschritt und Anzahl offener Ergebnisse und öffnet sie per Klick wieder: Seitenwechsel, Logout oder Browser-Absturz kosten keine generierten Daten mehr. Laufende Jobs werden nach dem Öffnen weiter beobachtet. Route `GET batch-jobs`.
+
 ## [0.31.0] - 2026-07-05
 
 ### Added (Kosten-Optimierung Alt-Texte, ~95% Ersparnis bei Zweitsprachen)

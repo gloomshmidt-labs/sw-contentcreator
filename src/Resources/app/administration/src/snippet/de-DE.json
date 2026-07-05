@@ -158,7 +158,11 @@
             "addEntity": "Objekt hinzufügen (Suche)",
             "selectedCount": "{count} Objekt(e) ausgewählt",
             "clearSelection": "Auswahl leeren",
-            "andMore": "… und {count} weitere (werden alle verarbeitet)"
+            "andMore": "… und {count} weitere (werden alle verarbeitet)",
+            "recentJobs": "Frühere Läufe",
+            "recentJobsHelp": "Dry-Run-Ergebnisse bleiben gespeichert, bis sie übernommen werden — auch nach Seitenwechsel, Logout oder Browser-Absturz. Hier lassen sie sich wieder öffnen (laufende Jobs werden weiter beobachtet).",
+            "openResults": "{count} offene Ergebnisse",
+            "openJob": "Öffnen"
         },
         "focus": {
             "label": "Fokus-Keyword",

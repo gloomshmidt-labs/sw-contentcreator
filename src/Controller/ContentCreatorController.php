@@ -289,6 +289,28 @@ class ContentCreatorController extends AbstractController
         return new JsonResponse(['success' => true, 'jobId' => $jobId, 'total' => \count($ids)]);
     }
 
+    #[Route(path: '/api/content-creator/batch-jobs', name: 'api.content-creator.batch.jobs', defaults: ['_acl' => ['content_creator.viewer']], methods: ['GET'])]
+    public function recentJobs(): JsonResponse
+    {
+        $rows = $this->connection->fetchAllAssociative(
+            "SELECT LOWER(HEX(j.id)) AS id, j.status, j.entity_type AS entityType, j.types,
+                    j.dry_run AS dryRun, j.total, j.processed, j.failed, j.rejected, j.created_at AS createdAt,
+                    (SELECT COUNT(*) FROM content_creator_batch_result r
+                      WHERE r.job_id = j.id AND r.passed = 1 AND r.applied = 0) AS openResults
+             FROM content_creator_generation_job j
+             ORDER BY j.created_at DESC
+             LIMIT 10"
+        );
+        foreach ($rows as &$row) {
+            $row['dryRun'] = (bool) $row['dryRun'];
+            foreach (['total', 'processed', 'failed', 'rejected', 'openResults'] as $int) {
+                $row[$int] = (int) $row[$int];
+            }
+        }
+
+        return new JsonResponse(['success' => true, 'jobs' => $rows]);
+    }
+
     #[Route(path: '/api/content-creator/batch/{jobId}', name: 'api.content-creator.batch.status', defaults: ['_acl' => ['content_creator.viewer']], methods: ['GET'])]
     public function status(string $jobId, Context $context): JsonResponse
     {

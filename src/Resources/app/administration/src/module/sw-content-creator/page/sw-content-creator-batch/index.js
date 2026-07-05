@@ -37,6 +37,10 @@ Component.register('sw-content-creator-batch', {
         };
     },
 
+    created() {
+        this.loadRecentJobs();
+    },
+
     watch: {
         selectedIds() {
             clearTimeout(this._namesTimer);
@@ -166,6 +170,37 @@ Component.register('sw-content-creator-batch', {
         // Hook des category-tree-Mixins beim Kanalwechsel
         resetCategorySelection() {
             this.selectedIds = [];
+        },
+
+        loadRecentJobs() {
+            this.contentCreatorApiService.batchJobs()
+                .then((res) => { this.recentJobs = res.jobs || []; })
+                .catch(() => { this.recentJobs = []; });
+        },
+
+        // Früheren Lauf wiederöffnen: Status laden, bei laufenden Jobs weiter
+        // pollen, bei Dry-Runs die offenen Ergebnisse anzeigen
+        openJob(jobEntry) {
+            this.job = {
+                id: jobEntry.id,
+                total: jobEntry.total,
+                processed: jobEntry.processed,
+                failed: jobEntry.failed,
+                rejected: jobEntry.rejected,
+                status: jobEntry.status,
+                dryRun: jobEntry.dryRun,
+            };
+            this.dryRunResults = [];
+            if (['open', 'running'].includes(jobEntry.status)) {
+                this.pollStatus();
+            } else if (jobEntry.dryRun && jobEntry.openResults > 0) {
+                this.loadDryRunResults();
+            }
+        },
+
+        formatJobDate(iso) {
+            if (!iso) { return ''; }
+            return new Date(iso.replace(' ', 'T')).toLocaleString();
         },
 
         onManufacturerFilterChange(id) {
