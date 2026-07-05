@@ -3,6 +3,11 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.30.0] - 2026-07-05
+
+### Changed (User-Feedback: leere Chips bei Medien-Auswahl)
+- **Auswahl-Anzeige komplett neu**: Statt der Chip-Leiste (die bei Medien leere Felder zeigte und bei hunderten Objekten unbrauchbar war) gibt es jetzt ein „Objekt hinzufügen"-Suchfeld plus eine **scrollbare Namensliste** („X Objekt(e) ausgewählt") mit Entfernen-Button je Zeile und „Auswahl leeren". Medien zeigen ihren Dateinamen, Produkte/Kategorien ihren Namen; bei mehr als 500 Einträgen wird der Rest zusammengefasst („… und N weitere — werden alle verarbeitet").
+
 ## [0.29.1] - 2026-07-05
 
 ### Changed (Token sparen bei ausgeblendeten Artikeln)

@@ -154,7 +154,11 @@
             "issuesTitle": "Gründe (abgelehnt/Fehler):",
             "showResults": "Ergebnisse ansehen & bearbeiten",
             "resultsTitle": "Bestandene Ergebnisse (vor dem Übernehmen editierbar):",
-            "resultsHint": "Änderungen werden beim Verlassen eines Feldes automatisch gespeichert — „Übernehmen\" schreibt den editierten Stand."
+            "resultsHint": "Änderungen werden beim Verlassen eines Feldes automatisch gespeichert — „Übernehmen\" schreibt den editierten Stand.",
+            "addEntity": "Objekt hinzufügen (Suche)",
+            "selectedCount": "{count} Objekt(e) ausgewählt",
+            "clearSelection": "Auswahl leeren",
+            "andMore": "… und {count} weitere (werden alle verarbeitet)"
         },
         "focus": {
             "label": "Fokus-Keyword",

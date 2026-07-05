@@ -37,6 +37,13 @@ Component.register('sw-content-creator-batch', {
         };
     },
 
+    watch: {
+        selectedIds() {
+            clearTimeout(this._namesTimer);
+            this._namesTimer = setTimeout(() => this.resolveSelectionNames(), 200);
+        },
+    },
+
     computed: {
         repository() {
             return this.repositoryFactory.create(this.entityType === 'manufacturer' ? 'product_manufacturer' : this.entityType);
@@ -163,6 +170,43 @@ Component.register('sw-content-creator-batch', {
 
         onIdsChange(ids) {
             this.selectedIds = ids || [];
+        },
+
+        // Auswahl-Anzeige: Namen zu den IDs auflösen (Medien: Dateiname)
+        resolveSelectionNames() {
+            const ids = this.selectedIds.slice(0, 500);
+            if (!ids.length) {
+                this.selectionNames = {};
+                return;
+            }
+            const criteria = new Shopware.Data.Criteria(1, 500);
+            criteria.setIds(ids);
+            this.repository.search(criteria, this.languageContext)
+                .then((result) => {
+                    const names = {};
+                    result.forEach((e) => {
+                        names[e.id] = e.translated?.name || e.name || e.fileName || e.translated?.alt || e.id;
+                    });
+                    this.selectionNames = names;
+                })
+                .catch(() => { this.selectionNames = {}; });
+        },
+
+        addEntity(id) {
+            if (id && !this.selectedIds.includes(id)) {
+                this.selectedIds = [...this.selectedIds, id];
+            }
+            // Feld nach dem Hinzufügen leeren (bereit für das nächste Objekt)
+            this.addEntityValue = id;
+            this.$nextTick(() => { this.addEntityValue = null; });
+        },
+
+        removeEntity(id) {
+            this.selectedIds = this.selectedIds.filter((x) => x !== id);
+        },
+
+        clearSelection() {
+            this.selectedIds = [];
         },
 
         typeLabel(type) {

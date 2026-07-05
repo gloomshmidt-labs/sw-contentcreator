@@ -154,7 +154,11 @@
             "issuesTitle": "Reasons (rejected/errors):",
             "showResults": "View & edit results",
             "resultsTitle": "Passing results (editable before applying):",
-            "resultsHint": "Changes are saved automatically when leaving a field — \"Apply\" writes the edited state."
+            "resultsHint": "Changes are saved automatically when leaving a field — \"Apply\" writes the edited state.",
+            "addEntity": "Add entity (search)",
+            "selectedCount": "{count} entitie(s) selected",
+            "clearSelection": "Clear selection",
+            "andMore": "… and {count} more (all will be processed)"
         },
         "focus": {
             "label": "Focus keyword",
