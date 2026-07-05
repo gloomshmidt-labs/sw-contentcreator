@@ -168,6 +168,10 @@ Component.register('sw-content-creator-batch', {
             this.selectedIds = [];
         },
 
+        onManufacturerFilterChange(id) {
+            this.manufacturerFilterId = id || null;
+        },
+
         onIdsChange(ids) {
             this.selectedIds = ids || [];
         },

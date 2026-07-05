@@ -52,10 +52,11 @@
                 <sw-entity-single-select
                     v-if="['product', 'media'].includes(entityType)"
                     entity="product_manufacturer"
+                    :context="languageContext"
                     :label="$tc('sw-content-creator.gaps.manufacturerFilter')"
                     :helpText="$tc('sw-content-creator.gaps.manufacturerFilterHelp')"
                     :value="manufacturerFilterId"
-                    @update:value="(v) => { manufacturerFilterId = v; }">
+                    @update:value="onManufacturerFilterChange">
                 </sw-entity-single-select>
 
                 <div style="display:flex; gap:8px; flex-wrap:wrap;">

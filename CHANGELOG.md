@@ -3,6 +3,12 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.30.2] - 2026-07-05
+
+### Fixed (zwei User-Funde im Liveshop)
+- **Hersteller-Filter zeigt die Auswahl jetzt sofort an**: `sw-entity-single-select` braucht zwingend ein `:context` — ohne registrierte die Komponente die Auswahl nicht zuverlässig (Name erschien erst nach dem Scan-Klick, im Zweifel wurde sogar ungefiltert gescannt). Betraf auch das „Objekt hinzufügen"-Feld. UI-E2E: Auswahl → Label sofort da, Scan-Request enthält die manufacturerId.
+- **Vision-Bilder gehen jetzt als Base64 direkt an die KI** (statt als URL zum Selbstabruf): Der Shop-Server lädt das Bild und bettet es in den API-Call ein. Damit sind robots.txt-Interpretationen des Anthropic-Fetchers („URL is disallowed by robots.txt" trotz offener robots.txt), Bot-Blocker, Wartungsmodus und Firewalls für die Alt-Text-Generierung irrelevant. Fallback auf URL, falls der Server das Bild nicht laden kann (>4,5 MB o.ä.). Nebeneffekt: Alt-Texte funktionieren jetzt auch in Dev-Umgebungen ohne öffentliche Bild-URLs.
+
 ## [0.30.0] - 2026-07-05
 
 ### Changed (User-Feedback: leere Chips bei Medien-Auswahl)

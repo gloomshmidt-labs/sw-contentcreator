@@ -3,6 +3,7 @@
 namespace ContentCreator\Service;
 
 use ContentCreator\Service\Provider\AiRequest;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Shopware\Core\System\SystemConfig\SystemConfigService;
 
 /**
@@ -44,7 +45,8 @@ class ContentGenerator
         private readonly FactGuard $factGuard,
         private readonly FocusKeywordChecker $focusKeywordChecker,
         private readonly ReadabilityChecker $readabilityChecker,
-        private readonly UsageTracker $usageTracker
+        private readonly UsageTracker $usageTracker,
+        private readonly HttpClientInterface $httpClient
     ) {
     }
 
@@ -140,6 +142,12 @@ class ContentGenerator
         $bestWeight = \PHP_INT_MAX;
         $resultModel = $model;
 
+        // Bild einmalig serverseitig laden und als Base64 mitschicken —
+        // unabhängig von robots.txt, Bot-Blockern und Wartungsmodus
+        $image = $type === PromptBuilder::TYPE_MEDIA_ALT
+            ? $this->fetchImage((string) ($ctx['imageUrl'] ?? ''))
+            : [];
+
         for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
             $userPrompt = $baseUser;
             if ($feedback !== []) {
@@ -153,6 +161,8 @@ class ContentGenerator
                 maxTokens: $this->maxTokensFor($type),
                 model: $model,
                 imageUrl: $type === PromptBuilder::TYPE_MEDIA_ALT ? ($ctx['imageUrl'] ?? null) : null,
+                imageB64: $image['b64'] ?? null,
+                imageMime: $image['mime'] ?? null,
                 allowWebSearch: $allowWebSearch
             ));
             $usage['input'] += $result->inputTokens;
@@ -606,5 +616,34 @@ class ContentGenerator
         $t = (string) preg_replace('/\[([^\]]*)\]\((?:https?|utm)[^)]*\)/u', '$1', $t);
 
         return trim($t);
+    }
+
+    /**
+     * Bild für Vision serverseitig laden (max. ~4,5 MB wegen API-Limits).
+     *
+     * @return array{b64?: string, mime?: string} leer = Fallback auf die URL
+     */
+    private function fetchImage(string $url): array
+    {
+        if ($url === '') {
+            return [];
+        }
+
+        try {
+            $response = $this->httpClient->request('GET', $url, ['timeout' => 15, 'verify_peer' => false, 'verify_host' => false]);
+            $data = $response->getContent();
+            if ($data === '' || \strlen($data) > 4_500_000) {
+                return [];
+            }
+            $mime = $response->getHeaders()['content-type'][0] ?? 'image/jpeg';
+            $mime = explode(';', $mime)[0];
+            if (!str_starts_with($mime, 'image/')) {
+                return [];
+            }
+
+            return ['b64' => base64_encode($data), 'mime' => $mime];
+        } catch (\Throwable) {
+            return [];
+        }
     }
 }

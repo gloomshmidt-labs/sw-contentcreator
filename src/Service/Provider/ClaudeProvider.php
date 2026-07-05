@@ -57,7 +57,13 @@ class ClaudeProvider implements AiProviderInterface
         $model = $request->model ?? $this->getDefaultModel();
 
         // User-Content: reiner Text oder Text + Bild (Vision).
-        if ($request->imageUrl !== null && $request->imageUrl !== '') {
+        // Base64 bevorzugt: unabhängig von robots.txt/Bot-Blockern/Wartungsmodus.
+        if ($request->imageB64 !== null && $request->imageB64 !== '') {
+            $userContent = [
+                ['type' => 'image', 'source' => ['type' => 'base64', 'media_type' => $request->imageMime ?? 'image/jpeg', 'data' => $request->imageB64]],
+                ['type' => 'text', 'text' => $request->userPrompt],
+            ];
+        } elseif ($request->imageUrl !== null && $request->imageUrl !== '') {
             $userContent = [
                 ['type' => 'image', 'source' => ['type' => 'url', 'url' => $request->imageUrl]],
                 ['type' => 'text', 'text' => $request->userPrompt],

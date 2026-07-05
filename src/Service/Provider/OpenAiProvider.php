@@ -57,7 +57,10 @@ class OpenAiProvider implements AiProviderInterface
         $model = $request->model ?? $this->getDefaultModel();
 
         $content = [['type' => 'input_text', 'text' => $request->userPrompt]];
-        if ($request->imageUrl !== null && $request->imageUrl !== '') {
+        if ($request->imageB64 !== null && $request->imageB64 !== '') {
+            // Base64 bevorzugt: unabhängig von robots.txt/Bot-Blockern/Wartungsmodus
+            $content[] = ['type' => 'input_image', 'image_url' => 'data:' . ($request->imageMime ?? 'image/jpeg') . ';base64,' . $request->imageB64];
+        } elseif ($request->imageUrl !== null && $request->imageUrl !== '') {
             $content[] = ['type' => 'input_image', 'image_url' => $request->imageUrl];
         }
 

@@ -14,6 +14,9 @@ class AiRequest
         public ?string $model = null,
         /** Optionale Bild-URL für Vision (z.B. Media-Alt-Texte). */
         public ?string $imageUrl = null,
+        /** Bild als Base64 (bevorzugt vor imageUrl — unabhängig von robots.txt/Bot-Blockern). */
+        public ?string $imageB64 = null,
+        public ?string $imageMime = null,
         /** Web-Recherche erlauben (nur Claude: web_search-Server-Tool). */
         public bool $allowWebSearch = false
     ) {
