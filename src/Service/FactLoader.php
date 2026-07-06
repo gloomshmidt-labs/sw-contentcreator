@@ -265,6 +265,7 @@ class FactLoader
     {
         $criteria = new Criteria([$id]);
         $criteria->addAssociation('translations');
+        $criteria->addAssociation('thumbnails');
         $media = $this->mediaRepository->search($criteria, $context)->first();
 
         if ($media === null) {
@@ -299,10 +300,24 @@ class FactLoader
             $manufacturer = (string) ($productMedia->getProduct()->getManufacturer()?->getTranslation('name') ?? '');
         }
 
+        // Vision-Quelle: größtes Thumbnail bis 1920px bevorzugen — Originale
+        // können das Provider-Limit sprengen (>5MB), Thumbnails nie; die KI
+        // skaliert intern ohnehin herunter (kein Qualitätsverlust)
+        $thumbnailUrl = '';
+        $bestWidth = 0;
+        foreach ($media->getThumbnails() ?? [] as $thumbnail) {
+            $width = (int) $thumbnail->getWidth();
+            if ($width > $bestWidth && $width <= 1920) {
+                $bestWidth = $width;
+                $thumbnailUrl = (string) $thumbnail->getUrl();
+            }
+        }
+
         return [
             'name' => $productName !== '' ? $productName : (string) ($media->getFileName() ?? ''),
             'manufacturer' => $manufacturer,
             'imageUrl' => (string) ($media->getUrl() ?? ''),
+            'imageUrlSmall' => $thumbnailUrl,
             'existingText' => $alt,
             '_hasAlt' => trim($alt) !== '',
             'translateFromAlt' => $translateFromAlt,

@@ -164,9 +164,12 @@ class ContentGenerator
 
         // Bild einmalig serverseitig laden und als Base64 mitschicken —
         // unabhängig von robots.txt, Bot-Blockern und Wartungsmodus
-        $image = $type === PromptBuilder::TYPE_MEDIA_ALT
-            ? $this->fetchImage((string) ($ctx['imageUrl'] ?? ''))
-            : [];
+        $image = [];
+        if ($type === PromptBuilder::TYPE_MEDIA_ALT) {
+            // Thumbnail zuerst (immer unter dem Größen-Limit), dann Original
+            $image = $this->fetchImage((string) ($ctx['imageUrlSmall'] ?? ''))
+                ?: $this->fetchImage((string) ($ctx['imageUrl'] ?? ''));
+        }
 
         for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
             $userPrompt = $baseUser;

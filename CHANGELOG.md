@@ -3,6 +3,11 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.33.2] - 2026-07-06
+
+### Fixed (4 robots.txt-Fehler der Folkmanis-Welle)
+- **Vision lädt bevorzugt das größte Thumbnail (≤1920px) statt des Originals**: Bei sehr großen Original-Dateien (>4,5 MB) scheiterte der serverseitige Base64-Download und der URL-Fallback lief in Anthropics robots.txt-Fehlinterpretation. Thumbnails liegen immer unter dem Provider-Limit, und die KI skaliert intern ohnehin auf ~1,15 MP herunter — kein Qualitätsverlust, kleinere Uploads, Original bleibt als zweite Stufe.
+
 ## [0.33.1] - 2026-07-06
 
 ### Fixed
