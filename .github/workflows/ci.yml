@@ -1,0 +1,44 @@
+# Ehrliches CI: nur Schritte, die ohne Shopware-Installation garantiert
+# lauffähig sind (Syntax-Lint + Code-Style-Check).
+#
+# BEWUSST NICHT im CI:
+# - PHPStan: braucht den Shop-Autoloader (/var/www/html/vendor/autoload.php)
+#   für die Shopware-Klassen — läuft lokal im Container:
+#     docker exec -u www-data shopware php /tmp/phpstan.phar analyse \
+#       -c custom/plugins/ContentCreator/phpstan.neon
+# - PHPUnit: es gibt (noch) keine Tests; künftige Tests hängen ebenfalls am
+#   Shop-Autoloader und laufen lokal im Container, nicht hier.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint:
+    name: PHP-Lint & Code-Style
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: PHP 8.4 einrichten
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+
+      - name: Syntax-Check (php -l) über src/
+        run: |
+          set -e
+          find src -name '*.php' -print0 | xargs -0 -n1 -P4 php -l > /dev/null
+          echo "Alle Dateien syntaktisch OK"
+
+      # Phar statt composer install: das Plugin hat bewusst keine
+      # Laufzeit-Dependencies, und shopware/core im CI aufzulösen wäre
+      # unnötig schwer. Version gepinnt für reproduzierbare Läufe.
+      - name: php-cs-fixer (Dry-Run)
+        run: |
+          curl -sSL -o /tmp/php-cs-fixer.phar \
+            https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/releases/download/v3.95.11/php-cs-fixer.phar
+          php /tmp/php-cs-fixer.phar fix src \
+            --config=.php-cs-fixer.dist.php --dry-run --diff
