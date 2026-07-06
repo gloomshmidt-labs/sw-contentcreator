@@ -47,8 +47,6 @@ Component.register('sw-content-creator-generator', {
             serverText: null,
             serverTeaser: '',
             serverMeta: null,
-            productMedia: [],
-            renameSuggestionsLoaded: false,
         };
     },
 
@@ -173,10 +171,9 @@ Component.register('sw-content-creator-generator', {
             this.serverText = null;
             this.serverTeaser = '';
             this.serverMeta = null;
-            this.productMedia = [];
-            this.renameSuggestionsLoaded = false;
             // Geladenes Objekt in der NEUEN Sprache neu laden (Bestand, Metas,
-            // Alt-Texte der Bilder) statt die Auswahl zu verwerfen
+            // Alt-Texte der Bilder) statt die Auswahl zu verwerfen;
+            // die Medien-Karte setzt sich über ihren lang-Watcher selbst zurück
             const keepId = this.selectedId;
             this.selectedId = null;
             this.entity = null;
@@ -236,6 +233,27 @@ Component.register('sw-content-creator-generator', {
             } catch {
                 return null;
             }
+        },
+
+        // v-html-Härtung: LLM-Output/Bestandstexte können via Prompt-Injection
+        // aktive Inhalte tragen — Script/Event-Handler/javascript:-URLs strippen
+        safeHtml(html) {
+            if (!html) {
+                return '';
+            }
+            const doc = new DOMParser().parseFromString(String(html), 'text/html');
+            doc.querySelectorAll('script, style, iframe, object, embed, link, meta').forEach((el) => el.remove());
+            doc.querySelectorAll('*').forEach((el) => {
+                [...el.attributes].forEach((attr) => {
+                    const name = attr.name.toLowerCase();
+                    const value = String(attr.value || '').trim().toLowerCase();
+                    if (name.startsWith('on') || ((name === 'href' || name === 'src' || name === 'xlink:href') && value.startsWith('javascript:'))) {
+                        el.removeAttribute(attr.name);
+                    }
+                });
+            });
+
+            return doc.body.innerHTML;
         },
 
         markedHtml(text) {
@@ -392,7 +410,6 @@ Component.register('sw-content-creator-generator', {
                     const customFields = e?.translated?.customFields || e?.customFields || {};
                     this.focusKeyword = customFields[FOCUS_KEYWORD_FIELD] || '';
                     this.typeButtons.forEach((btn) => this.loadBackupInfo(btn.type));
-                    this.loadProductMedia();
                 })
                 .catch((err) => this.notifyApiError(err))
                 .finally(() => { this.isLoading = false; });
@@ -474,9 +491,10 @@ Component.register('sw-content-creator-generator', {
 
             return this.categoryRepository.get(this.referenceCategoryId, this.languageContext)
                 .then((ref) => {
-                    const div = document.createElement('div');
-                    div.innerHTML = ref?.description || '';
-                    this.referenceText = div.textContent.trim().substring(0, 2000) || null;
+                    // DOMParser statt innerHTML: detached DIVs laden <img src>
+                    // trotzdem (Pingback) und feuern onerror
+                    const doc = new DOMParser().parseFromString(ref?.description || '', 'text/html');
+                    this.referenceText = doc.body.textContent.trim().substring(0, 2000) || null;
 
                     return this.referenceText;
                 })
@@ -622,167 +640,6 @@ Component.register('sw-content-creator-generator', {
 
             return this.repository.get(this.selectedId, this.languageContext)
                 .then((e) => { this.entity = e; });
-        },
-
-        // Produktbilder für die Alt-Text-Karte (nur bei Produkten)
-        loadProductMedia() {
-            this.productMedia = [];
-            if (this.entityType !== 'product' || !this.selectedId) {
-                return Promise.resolve();
-            }
-            const criteria = new Shopware.Data.Criteria(1, 50);
-            criteria.addFilter(Shopware.Data.Criteria.equals('productId', this.selectedId));
-            criteria.addAssociation('media');
-            criteria.addSorting(Shopware.Data.Criteria.sort('position', 'ASC'));
-            return this.repositoryFactory.create('product_media')
-                .search(criteria, this.languageContext)
-                .then((result) => {
-                    this.productMedia = result.map((pm) => ({
-                        mediaId: pm.mediaId,
-                        url: pm.media?.url || '',
-                        fileName: pm.media?.fileName || '',
-                        alt: pm.media?.translated?.alt || pm.media?.alt || '',
-                        altEdit: pm.media?.translated?.alt || pm.media?.alt || '',
-                        generating: false,
-                        result: null,
-                        score: null,
-                        suggestedName: null,
-                    }));
-                    this.renameSuggestionsLoaded = false;
-                })
-                .catch(() => { this.productMedia = []; });
-        },
-
-        // Dateinamen-Vorschläge gezielt für DIESES Produkt laden
-        loadRenameSuggestions() {
-            this.contentCreatorApiService.mediaRenameScan({
-                languageId: this.languageId || Shopware.Context.api.languageId,
-                productId: this.selectedId,
-            })
-                .then((res) => {
-                    const byId = new Map((res.items || []).map((i) => [i.mediaId, i.suggestedName]));
-                    // Immer editierbar: ohne Verbesserungsvorschlag wird der
-                    // aktuelle Name vorbefüllt (freies Umbenennen möglich)
-                    this.productMedia.forEach((item) => {
-                        item.suggestedName = byId.get(item.mediaId) || item.fileName;
-                    });
-                    this.renameSuggestionsLoaded = true;
-                    if (!byId.size) {
-                        this.createNotificationInfo({ message: this.$tc('sw-content-creator.generator.noRenameCandidates') });
-                    }
-                })
-                .catch((err) => this.notifyApiError(err));
-        },
-
-        renameImage(item) {
-            if (!item.suggestedName) {
-                return;
-            }
-            // Unveränderte Namen nicht sinnlos umbenennen/protokollieren
-            if (item.suggestedName === item.fileName) {
-                this.createNotificationInfo({ message: this.$tc('sw-content-creator.generator.nameUnchanged') });
-                return;
-            }
-            item.generating = true;
-            this.contentCreatorApiService.mediaRenameApply([{
-                mediaId: item.mediaId,
-                newName: item.suggestedName,
-                currentName: item.fileName,
-            }])
-                .then((res) => {
-                    this.createNotificationSuccess({
-                        message: this.$tc('sw-content-creator.rename.done', { renamed: res.renamed, errors: (res.errors || []).length }, res.renamed),
-                    });
-                    // URL + Dateiname haben sich geändert → Bilderliste neu laden,
-                    // danach die Vorschläge der ÜBRIGEN Bilder automatisch nachladen
-                    return this.loadProductMedia().then(() => this.loadRenameSuggestions());
-                })
-                .catch((err) => this.notifyApiError(err))
-                .finally(() => { item.generating = false; });
-        },
-
-        generateAlt(item) {
-            item.generating = true;
-            this.contentCreatorApiService.generate({
-                entityType: 'media',
-                id: item.mediaId,
-                type: 'media_alt',
-                languageId: this.languageId,
-                mode: this.mode,
-            })
-                .then((res) => {
-                    item.result = res.result?.content || '';
-                    item.score = res.result?.quality?.score ?? null;
-                })
-                .catch((err) => this.notifyApiError(err))
-                .finally(() => { item.generating = false; });
-        },
-
-        // Bestands-Alt direkt korrigieren (schreibt Alt+Title mit Backup);
-        // optional den englischen Alt gleich aus dem korrigierten Deutsch nachziehen
-        saveAltEdit(item, updateEnglish = false) {
-            const text = (item.altEdit || '').trim();
-            if (!text || text === item.alt) {
-                return;
-            }
-            item.generating = true;
-            this.contentCreatorApiService.apply({
-                entityType: 'media',
-                id: item.mediaId,
-                type: 'media_alt',
-                languageId: this.languageId,
-                result: { content: text },
-            })
-                .then(() => {
-                    item.alt = text;
-                    if (!updateEnglish) {
-                        this.createNotificationSuccess({ message: this.$tc('sw-content-creator.generator.saved') });
-                        return null;
-                    }
-
-                    // Englisch nachziehen: Übersetzungs-Modus liest den soeben
-                    // gespeicherten deutschen Alt
-                    return this.resolveLanguageId('en').then((enId) => this.contentCreatorApiService.generate({
-                        entityType: 'media',
-                        id: item.mediaId,
-                        type: 'media_alt',
-                        languageId: enId,
-                        mode: 'create',
-                    }).then((res) => this.contentCreatorApiService.apply({
-                        entityType: 'media',
-                        id: item.mediaId,
-                        type: 'media_alt',
-                        languageId: enId,
-                        result: { content: res.result?.content || '' },
-                    })).then(() => {
-                        this.createNotificationSuccess({ message: this.$tc('sw-content-creator.generator.savedWithEn') });
-                    }));
-                })
-                .catch((err) => this.notifyApiError(err))
-                .finally(() => {
-                    item.generating = false;
-                    // languageId wieder auf die aktuelle Auswahl zurücksetzen
-                    this.resolveLanguageId(this.lang);
-                });
-        },
-
-        applyAlt(item) {
-            if (!item.result) {
-                return;
-            }
-            this.contentCreatorApiService.apply({
-                entityType: 'media',
-                id: item.mediaId,
-                type: 'media_alt',
-                languageId: this.languageId,
-                result: { content: item.result },
-            })
-                .then(() => {
-                    this.createNotificationSuccess({ message: this.$tc('sw-content-creator.generator.saved') });
-                    item.alt = item.result;
-                    item.result = null;
-                })
-                .catch((err) => this.notifyApiError(err));
         },
 
         // Übernehmen läuft für ALLE Typen über das Backend (ContentWriter):

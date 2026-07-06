@@ -57,7 +57,7 @@ class FocusKeywordChecker
             $checks[] = $this->result(
                 'density',
                 $occurrences > 0 && $density >= self::DENSITY_MIN && $density <= self::DENSITY_MAX,
-                $occurrences . 'x / ' . $density . '%'
+                $occurrences . 'x / ' . $density . '%',
             );
         }
 

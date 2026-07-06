@@ -1,0 +1,19 @@
+{% block sw_cc_recent_jobs %}
+<sw-card :title="$tc('sw-content-creator.batch.recentJobs')">
+    <p style="color:#758ca3; font-size:13px; margin-bottom:8px;">
+        {{ $tc('sw-content-creator.batch.recentJobsHelp') }}
+    </p>
+    <div v-for="j in jobs" :key="j.id" style="display:flex; align-items:center; gap:12px; padding:6px 0; border-bottom:1px solid #f0f2f5; font-size:13px;">
+        <span style="min-width:130px;">{{ formatJobDate(j.createdAt) }}</span>
+        <span style="min-width:80px;">{{ j.entityType }}</span>
+        <span style="min-width:110px;">{{ j.status }}{{ j.dryRun ? ' (Dry-Run)' : '' }}</span>
+        <span style="flex:1;">{{ j.processed }}/{{ j.total }}</span>
+        <span v-if="j.openResults > 0" style="color:#37a04a; font-weight:600;">
+            {{ $tc('sw-content-creator.batch.openResults', { count: j.openResults }, j.openResults) }}
+        </span>
+        <sw-button size="small" @click="$emit('open', j)">
+            {{ $tc('sw-content-creator.batch.openJob') }}
+        </sw-button>
+    </div>
+</sw-card>
+{% endblock %}

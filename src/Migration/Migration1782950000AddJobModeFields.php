@@ -19,25 +19,25 @@ class Migration1782950000AddJobModeFields extends MigrationStep
     public function update(Connection $connection): void
     {
         $columns = array_column($connection->fetchAllAssociative(
-            'SHOW COLUMNS FROM `content_creator_generation_job`'
+            'SHOW COLUMNS FROM `content_creator_generation_job`',
         ), 'Field');
 
         if (!\in_array('mode', $columns, true)) {
             $connection->executeStatement(
                 "ALTER TABLE `content_creator_generation_job`
-                 ADD COLUMN `mode` VARCHAR(32) NOT NULL DEFAULT 'create' AFTER `model`"
+                 ADD COLUMN `mode` VARCHAR(32) NOT NULL DEFAULT 'create' AFTER `model`",
             );
         }
         if (!\in_array('meta_fields', $columns, true)) {
             $connection->executeStatement(
                 'ALTER TABLE `content_creator_generation_job`
-                 ADD COLUMN `meta_fields` JSON NULL AFTER `mode`'
+                 ADD COLUMN `meta_fields` JSON NULL AFTER `mode`',
             );
         }
         if (!\in_array('rejected', $columns, true)) {
             $connection->executeStatement(
                 'ALTER TABLE `content_creator_generation_job`
-                 ADD COLUMN `rejected` INT(11) NOT NULL DEFAULT 0 AFTER `failed`'
+                 ADD COLUMN `rejected` INT(11) NOT NULL DEFAULT 0 AFTER `failed`',
             );
         }
     }

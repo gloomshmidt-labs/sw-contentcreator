@@ -21,7 +21,7 @@ class OpenAiProvider implements AiProviderInterface
     public function __construct(
         private readonly HttpClientInterface $httpClient,
         private readonly SystemConfigService $systemConfig,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
     ) {
     }
 
@@ -96,7 +96,7 @@ class OpenAiProvider implements AiProviderInterface
                     'timeout' => 180,
                 ]),
                 $this->logger,
-                $this->getName()
+                $this->getName(),
             );
         } catch (TransportExceptionInterface $e) {
             $this->logger->error('ContentCreator OpenAI transport error', ['exception' => $e->getMessage()]);
@@ -120,7 +120,7 @@ class OpenAiProvider implements AiProviderInterface
             inputTokens: (int) ($data['usage']['input_tokens'] ?? 0),
             outputTokens: (int) ($data['usage']['output_tokens'] ?? 0),
             stopReason: $data['status'] ?? null,
-            model: $data['model'] ?? $model
+            model: $data['model'] ?? $model,
         );
     }
 

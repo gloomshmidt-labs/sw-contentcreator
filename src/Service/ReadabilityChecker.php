@@ -29,7 +29,7 @@ class ReadabilityChecker
         $isEnglish = str_starts_with(strtolower($lang), 'en');
         $sentences = array_values(array_filter(
             preg_split('/(?<=[.!?])\s+(?=[A-ZÄÖÜ])/u', $plain) ?: [],
-            static fn (string $s) => str_word_count($s) > 2
+            static fn (string $s) => str_word_count($s) > 2,
         ));
         if ($sentences === []) {
             return null;

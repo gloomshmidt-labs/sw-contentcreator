@@ -2,11 +2,18 @@
 
 namespace ContentCreator\Service;
 
+use Shopware\Core\Content\Category\CategoryCollection;
+use Shopware\Core\Content\Media\MediaCollection;
+use Shopware\Core\Content\Product\Aggregate\ProductManufacturer\ProductManufacturerCollection;
+use Shopware\Core\Content\Product\Aggregate\ProductMedia\ProductMediaCollection;
+use Shopware\Core\Content\Product\ProductCollection;
 use Shopware\Core\Defaults;
 use Shopware\Core\Framework\Api\Context\SystemSource;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
+use Shopware\Core\System\Language\LanguageCollection;
+use Shopware\Core\System\SalesChannel\SalesChannelCollection;
 
 /**
  * Lädt die Fakten (Name, Hersteller, MPN, Keywords, Bestandstext, Bild-URL) für
@@ -14,6 +21,15 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
  */
 class FactLoader
 {
+    /**
+     * @param EntityRepository<ProductCollection> $productRepository
+     * @param EntityRepository<CategoryCollection> $categoryRepository
+     * @param EntityRepository<MediaCollection> $mediaRepository
+     * @param EntityRepository<LanguageCollection> $languageRepository
+     * @param EntityRepository<SalesChannelCollection> $salesChannelRepository
+     * @param EntityRepository<ProductManufacturerCollection> $manufacturerRepository
+     * @param EntityRepository<ProductMediaCollection> $productMediaRepository
+     */
     public function __construct(
         private readonly EntityRepository $productRepository,
         private readonly EntityRepository $categoryRepository,
@@ -22,7 +38,7 @@ class FactLoader
         private readonly EntityRepository $salesChannelRepository,
         private readonly EntityRepository $manufacturerRepository,
         private readonly EntityRepository $productMediaRepository,
-        private readonly CmsSlotResolver $slotResolver
+        private readonly CmsSlotResolver $slotResolver,
     ) {
     }
 

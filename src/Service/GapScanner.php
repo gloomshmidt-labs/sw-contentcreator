@@ -58,7 +58,7 @@ class GapScanner
                 ON pt.product_id = p.id AND pt.product_version_id = p.version_id AND pt.language_id = UNHEX(:lang)
              WHERE p.version_id = UNHEX(:live) AND p.parent_id IS NULL AND p.active = 1 AND {$condition}{$manufacturerFilter}
              LIMIT " . (self::MAX_IDS + 1),
-            $params
+            $params,
         );
 
         return $this->result($rows);
@@ -76,7 +76,7 @@ class GapScanner
                 ON ct.category_id = c.id AND ct.category_version_id = c.version_id AND ct.language_id = UNHEX(:lang)
              WHERE c.version_id = UNHEX(:live) AND c.active = 1 AND c.cms_page_id IS NOT NULL AND {$condition}
              LIMIT " . (self::MAX_IDS + 1),
-            ['lang' => $languageId, 'live' => Defaults::LIVE_VERSION]
+            ['lang' => $languageId, 'live' => Defaults::LIVE_VERSION],
         );
 
         return $this->result($rows);
@@ -104,7 +104,7 @@ class GapScanner
              WHERE COALESCE(p.active, pp.active) = 1
                AND (mt.alt IS NULL OR mt.alt = '')
              LIMIT " . (self::MAX_IDS + 1),
-            $params
+            $params,
         );
 
         return $this->result($rows);
@@ -142,7 +142,7 @@ class GapScanner
                     OR (pt.name IS NOT NULL AND TRIM(mt.alt) = TRIM(pt.name))
                )
              LIMIT " . (self::MAX_IDS + 1),
-            $params
+            $params,
         );
 
         return $this->result($rows);

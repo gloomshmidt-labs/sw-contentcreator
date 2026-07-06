@@ -19,13 +19,13 @@ class Migration1782980000AddDryRun extends MigrationStep
     public function update(Connection $connection): void
     {
         $columns = array_column($connection->fetchAllAssociative(
-            'SHOW COLUMNS FROM `content_creator_generation_job`'
+            'SHOW COLUMNS FROM `content_creator_generation_job`',
         ), 'Field');
 
         if (!\in_array('dry_run', $columns, true)) {
             $connection->executeStatement(
-                "ALTER TABLE `content_creator_generation_job`
-                 ADD COLUMN `dry_run` TINYINT(1) NOT NULL DEFAULT 0 AFTER `meta_fields`"
+                'ALTER TABLE `content_creator_generation_job`
+                 ADD COLUMN `dry_run` TINYINT(1) NOT NULL DEFAULT 0 AFTER `meta_fields`',
             );
         }
 

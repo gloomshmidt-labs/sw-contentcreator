@@ -13,7 +13,7 @@ class ProviderRegistry
     public function __construct(
         private readonly ClaudeProvider $claudeProvider,
         private readonly OpenAiProvider $openAiProvider,
-        private readonly SystemConfigService $systemConfig
+        private readonly SystemConfigService $systemConfig,
     ) {
     }
 
@@ -33,7 +33,7 @@ class ProviderRegistry
         if (!$provider->isConfigured()) {
             throw new ProviderException(sprintf(
                 'Der Provider "%s" ist nicht konfiguriert (kein API-Key hinterlegt).',
-                $provider->getName()
+                $provider->getName(),
             ));
         }
 

@@ -1,3 +1,6 @@
+import './component/sw-cc-media-card';
+import './component/sw-cc-selection-list';
+import './component/sw-cc-recent-jobs';
 import './page/sw-content-creator-generator';
 import './page/sw-content-creator-batch';
 import './page/sw-content-creator-tools';

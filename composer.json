@@ -1,7 +1,7 @@
 {
     "name": "gloomshmidt-labs/sw-contentcreator",
     "description": "AI-powered SEO content generation for products, categories and media (Claude & OpenAI)",
-    "version": "0.33.2",
+    "version": "0.34.0",
     "type": "shopware-platform-plugin",
     "license": "LicenseRef-PolyForm-Noncommercial-1.0.0",
     "authors": [
@@ -12,6 +12,11 @@
     ],
     "require": {
         "shopware/core": ">=6.7,<7.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.5",
+        "phpstan/phpstan": "^2.2",
+        "friendsofphp/php-cs-fixer": "^3.95"
     },
     "extra": {
         "shopware-plugin-class": "ContentCreator\\ContentCreator",
@@ -27,6 +32,11 @@
     "autoload": {
         "psr-4": {
             "ContentCreator\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "ContentCreator\\Tests\\": "tests/"
         }
     }
 }

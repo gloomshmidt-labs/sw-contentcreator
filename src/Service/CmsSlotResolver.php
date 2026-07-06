@@ -2,6 +2,8 @@
 
 namespace ContentCreator\Service;
 
+use Shopware\Core\Content\Category\CategoryCollection;
+use Shopware\Core\Content\Cms\CmsPageCollection;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
@@ -20,9 +22,13 @@ class CmsSlotResolver
     /** @var array<string, ?string> */
     private array $cache = [];
 
+    /**
+     * @param EntityRepository<CategoryCollection> $categoryRepository
+     * @param EntityRepository<CmsPageCollection> $cmsPageRepository
+     */
     public function __construct(
         private readonly EntityRepository $categoryRepository,
-        private readonly EntityRepository $cmsPageRepository
+        private readonly EntityRepository $cmsPageRepository,
     ) {
     }
 

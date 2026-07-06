@@ -5,6 +5,7 @@ namespace ContentCreator\ScheduledTask;
 use ContentCreator\Service\BatchDispatcher;
 use ContentCreator\Service\PromptBuilder;
 use Psr\Log\LoggerInterface;
+use Shopware\Core\Content\Product\ProductCollection;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
@@ -15,12 +16,15 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 #[AsMessageHandler(handles: FillMissingContentTask::class)]
 class FillMissingContentTaskHandler extends ScheduledTaskHandler
 {
+    /**
+     * @param EntityRepository<ProductCollection> $productRepository
+     */
     public function __construct(
         EntityRepository $scheduledTaskRepository,
-        LoggerInterface $logger,
+        private readonly LoggerInterface $logger,
         private readonly SystemConfigService $systemConfig,
         private readonly EntityRepository $productRepository,
-        private readonly BatchDispatcher $batchDispatcher
+        private readonly BatchDispatcher $batchDispatcher,
     ) {
         parent::__construct($scheduledTaskRepository, $logger);
     }
@@ -71,7 +75,7 @@ class FillMissingContentTaskHandler extends ScheduledTaskHandler
             null,
             null,
             $model,
-            $context
+            $context,
         );
 
         $this->logger->info('ContentCreator daily fill dispatched', ['job' => $jobId, 'count' => \count($missing)]);

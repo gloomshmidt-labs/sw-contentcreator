@@ -37,7 +37,7 @@ class UsageTracker
                 'model' => mb_substr($model !== '' ? $model : 'default', 0, 64),
                 'input' => $inputTokens,
                 'output' => $outputTokens,
-            ]
+            ],
         );
     }
 
@@ -51,7 +51,7 @@ class UsageTracker
                     input_tokens AS inputTokens, output_tokens AS outputTokens, requests
              FROM content_creator_usage
              ORDER BY `month` DESC, provider ASC, model ASC
-             LIMIT 36'
+             LIMIT 36',
         );
     }
 }

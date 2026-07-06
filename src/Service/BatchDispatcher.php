@@ -2,10 +2,11 @@
 
 namespace ContentCreator\Service;
 
+use ContentCreator\Core\Content\GenerationJob\GenerationJobCollection;
 use ContentCreator\MessageQueue\BatchGenerateMessage;
+use Doctrine\DBAL\Connection;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
-use Doctrine\DBAL\Connection;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Symfony\Component\Messenger\MessageBusInterface;
 
@@ -14,10 +15,13 @@ use Symfony\Component\Messenger\MessageBusInterface;
  */
 class BatchDispatcher
 {
+    /**
+     * @param EntityRepository<GenerationJobCollection> $generationJobRepository
+     */
     public function __construct(
         private readonly EntityRepository $generationJobRepository,
         private readonly MessageBusInterface $messageBus,
-        private readonly Connection $connection
+        private readonly Connection $connection,
     ) {
     }
 
@@ -36,7 +40,7 @@ class BatchDispatcher
         Context $context,
         string $mode = 'create',
         ?array $metaFields = null,
-        bool $dryRun = false
+        bool $dryRun = false,
     ): string {
         $ids = array_values(array_unique(array_filter($ids)));
         $validIds = $this->filterExistingIds($entityType, $ids);
@@ -44,7 +48,7 @@ class BatchDispatcher
             throw new \InvalidArgumentException(sprintf(
                 'Keine der ausgewählten IDs existiert als "%s". %s',
                 $entityType,
-                $this->describeIds(array_slice($ids, 0, 3))
+                $this->describeIds(array_slice($ids, 0, 3)),
             ));
         }
         $ids = $validIds;
@@ -96,7 +100,7 @@ class BatchDispatcher
             foreach ($tables as $table => $label) {
                 $exists = $this->connection->fetchOne(
                     'SELECT 1 FROM ' . $table . ' WHERE id = UNHEX(:id) LIMIT 1',
-                    ['id' => $id]
+                    ['id' => $id],
                 );
                 if ($exists) {
                     $found = $label;
@@ -143,7 +147,7 @@ class BatchDispatcher
         $existing = $this->connection->fetchFirstColumn(
             'SELECT LOWER(HEX(id)) FROM ' . $table . ' WHERE id IN (:ids)',
             ['ids' => $binary],
-            ['ids' => \Doctrine\DBAL\ArrayParameterType::BINARY]
+            ['ids' => \Doctrine\DBAL\ArrayParameterType::BINARY],
         );
 
         return array_values(array_intersect($ids, $existing));

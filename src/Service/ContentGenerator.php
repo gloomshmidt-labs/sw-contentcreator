@@ -3,8 +3,8 @@
 namespace ContentCreator\Service;
 
 use ContentCreator\Service\Provider\AiRequest;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Shopware\Core\System\SystemConfig\SystemConfigService;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
  * Orchestriert die Text-Generierung: baut Prompt, ruft den Provider, normalisiert
@@ -46,7 +46,7 @@ class ContentGenerator
         private readonly FocusKeywordChecker $focusKeywordChecker,
         private readonly ReadabilityChecker $readabilityChecker,
         private readonly UsageTracker $usageTracker,
-        private readonly HttpClientInterface $httpClient
+        private readonly HttpClientInterface $httpClient,
     ) {
     }
 
@@ -63,7 +63,7 @@ class ContentGenerator
         ?string $providerName = null,
         ?string $model = null,
         string $mode = PromptBuilder::MODE_CREATE,
-        ?array $metaFields = null
+        ?array $metaFields = null,
     ): array {
         if (!\in_array($type, PromptBuilder::TYPES, true)) {
             throw new \InvalidArgumentException(sprintf('Unbekannter Texttyp "%s".', $type));
@@ -74,6 +74,83 @@ class ContentGenerator
 
         $isMeta = \in_array($type, PromptBuilder::META_TYPES, true);
 
+        $ctx = $this->aliasExistingText($type, $ctx);
+        $existingText = trim((string) ($ctx['existingText'] ?? ''));
+        $mode = $this->resolveMode($mode, $type, $isMeta, $existingText);
+        $model = $this->resolveModel($model, $type, $providerName);
+        $provider = $this->providerRegistry->get($providerName);
+
+        $focusKeyword = trim((string) ($ctx['focusKeyword'] ?? ''));
+        $allowWebSearch = $this->allowWebSearch($provider, $type);
+        $system = $this->buildSystemPrompt($type, $lang, $mode, $ctx, $focusKeyword, $allowWebSearch);
+        $baseUser = $this->promptBuilder->buildUser($type, $lang, $ctx, $mode, $metaFields);
+
+        $translation = $this->prepareAltTranslation($type, $lang, $ctx);
+        if ($translation !== null) {
+            $system = $translation['system'];
+            $baseUser = $translation['user'];
+        }
+
+        $threshold = $this->maxScore();
+        $whitelist = $this->whitelist();
+        $checkFacts = $mode === PromptBuilder::MODE_OPTIMIZE && !$isMeta && $type !== PromptBuilder::TYPE_MEDIA_ALT;
+        $originalScore = $checkFacts ? $this->qualityChecker->analyse($existingText, $lang, $whitelist)['score'] : null;
+        $image = $this->loadImage($type, $ctx);
+
+        $usage = ['input' => 0, 'output' => 0];
+        $loop = $this->runGateLoop(
+            $provider,
+            $system,
+            $baseUser,
+            $type,
+            $lang,
+            $mode,
+            $ctx,
+            $model,
+            $metaFields,
+            $isMeta,
+            $checkFacts,
+            $existingText,
+            $threshold,
+            $whitelist,
+            $allowWebSearch,
+            $image,
+            $usage,
+        );
+        $best = $this->applyMetaLengthFixes(
+            $loop['best'],
+            $loop['bestWeight'],
+            $isMeta,
+            $provider,
+            $model,
+            $lang,
+            $mode,
+            $metaFields,
+            $threshold,
+            $whitelist,
+            $usage,
+        );
+
+        $this->usageTracker->record(
+            $provider->getName(),
+            (string) ($loop['model'] ?? ''),
+            (int) ($usage['input'] ?? 0),
+            (int) ($usage['output'] ?? 0),
+        );
+
+        return $this->buildResult($type, $lang, $mode, $provider->getName(), $loop['model'], $best, $usage, $threshold, $originalScore, $focusKeyword, $isMeta);
+    }
+
+    /**
+     * Typen, deren Bestandstext nicht in der description liegt, auf den
+     * generischen existingText-Schlüssel abbilden.
+     *
+     * @param array<string, mixed> $ctx
+     *
+     * @return array<string, mixed>
+     */
+    private function aliasExistingText(string $type, array $ctx): array
+    {
         // Teaser lebt im CMS-slotConfig — für diesen Typ ist der Teaser der Bestandstext
         if ($type === PromptBuilder::TYPE_CATEGORY_TEASER && isset($ctx['existingTeaser'])) {
             $ctx['existingText'] = (string) $ctx['existingTeaser'];
@@ -83,14 +160,22 @@ class ContentGenerator
             $ctx['existingText'] = (string) $ctx['existingFaq'];
         }
 
-        $existingText = trim((string) ($ctx['existingText'] ?? ''));
+        return $ctx;
+    }
 
+    private function resolveMode(string $mode, string $type, bool $isMeta, string $existingText): string
+    {
         // Feld-Fallback: Optimieren ohne Bestand für DIESES Feld → automatisch
         // neu erstellen (unabhängig vom Bestand der anderen Felder)
         if ($mode === PromptBuilder::MODE_OPTIMIZE && !$isMeta && $type !== PromptBuilder::TYPE_MEDIA_ALT && $existingText === '') {
-            $mode = PromptBuilder::MODE_CREATE;
+            return PromptBuilder::MODE_CREATE;
         }
 
+        return $mode;
+    }
+
+    private function resolveModel(?string $model, string $type, ?string $providerName): ?string
+    {
         // Alt-Texte laufen immer über das (günstigere) Batch-Modell — Vision-
         // Beschreibungen brauchen kein Premium-Modell, und Generator-Tests
         // zeigen so exakt die Qualität der späteren Batch-Welle
@@ -98,34 +183,52 @@ class ContentGenerator
             && $this->providerRegistry->activeProviderName($providerName) === 'claude') {
             $batchModel = trim((string) $this->systemConfig->get('ContentCreator.config.batchModel'));
             if ($batchModel !== '') {
-                $model = $batchModel;
+                return $batchModel;
             }
         }
 
-        $provider = $this->providerRegistry->get($providerName);
+        return $model;
+    }
+
+    private function allowWebSearch(Provider\AiProviderInterface $provider, string $type): bool
+    {
+        // Web-Recherche (Claude: web_search-Server-Tool, OpenAI: Responses-API-Tool).
+        // filter_var statt (bool): system:config:set speichert Bools als String —
+        // "false" wäre sonst truthy (bekannte Shopware-CLI-Falle).
+        return $provider->supportsWebSearch()
+            && filter_var($this->systemConfig->get('ContentCreator.config.researchEnabled'), \FILTER_VALIDATE_BOOLEAN)
+            && $type !== PromptBuilder::TYPE_MEDIA_ALT;
+    }
+
+    /**
+     * System-Prompt inkl. der optionalen Zusatz-Blöcke: Kanal-Variante,
+     * Fokus-Keyword, SERP-Briefing und Recherche-Anweisung.
+     *
+     * @param array<string, mixed> $ctx
+     */
+    private function buildSystemPrompt(string $type, string $lang, string $mode, array $ctx, string $focusKeyword, bool $allowWebSearch): string
+    {
+        // Fokus-Keyword stammt aus customFields/Request und landet wörtlich im
+        // System-Prompt (Fokus-Block + SERP-Briefing) — gleicher Injection-Schutz
+        // wie im factBlock; die On-Page-Checks beim Aufrufer bleiben unberührt.
+        $focusKeyword = PromptSanitizer::sanitize($focusKeyword);
+
         $system = $this->promptBuilder->buildSystem($type, $lang, $mode);
 
         // Kanal-Variante (nur Kategorie-Typen): Schwerpunkt + Anti-Duplicate-Regeln
         $variantBlock = $this->promptBuilder->buildVariantBlock(
             \is_string($ctx['variantAngle'] ?? null) ? $ctx['variantAngle'] : null,
-            $lang
+            $lang,
         );
         if ($variantBlock !== '' && str_starts_with($type, 'category_')) {
             $system .= "\n\n" . $variantBlock;
         }
 
         // Fokus-Keyword: Pflicht-Platzierungen (Title/H1/erster Absatz/Dichte)
-        $focusKeyword = trim((string) ($ctx['focusKeyword'] ?? ''));
         if ($focusKeyword !== '') {
             $system .= "\n\n" . $this->promptBuilder->buildFocusBlock($focusKeyword, $lang);
         }
 
-        // Web-Recherche (Claude: web_search-Server-Tool, OpenAI: Responses-API-Tool).
-        // filter_var statt (bool): system:config:set speichert Bools als String —
-        // "false" wäre sonst truthy (bekannte Shopware-CLI-Falle).
-        $allowWebSearch = $provider->supportsWebSearch()
-            && filter_var($this->systemConfig->get('ContentCreator.config.researchEnabled'), \FILTER_VALIDATE_BOOLEAN)
-            && $type !== PromptBuilder::TYPE_MEDIA_ALT;
         if ($allowWebSearch && $focusKeyword !== '') {
             // SERP-Briefing (RankMath-Content-AI-Muster): Recherche gezielt auf
             // die Suchlandschaft des Fokus-Keywords richten statt frei zu suchen
@@ -139,37 +242,91 @@ class ContentGenerator
                 : 'RECHERCHE: Recherchiere vor dem Schreiben kurz im Web (Herstellerwebseite, Lexika, Fachseiten), um Fakten zu sammeln (Materialien, Einsatzbereiche, Tier-Fakten). NIEMALS Sätze übernehmen — Fakten in eigenen Worten. Erfinde nichts, was du nicht verifizieren konntest.');
         }
 
-        $baseUser = $this->promptBuilder->buildUser($type, $lang, $ctx, $mode, $metaFields);
+        return $system;
+    }
 
-        // Alt-Text-Übersetzung: existiert der Alt bereits in der Standardsprache,
-        // wird übersetzt statt das Bild erneut per Vision zu analysieren
+    /**
+     * Alt-Text-Übersetzung: existiert der Alt bereits in der Standardsprache,
+     * wird übersetzt statt das Bild erneut per Vision zu analysieren. In dem
+     * Fall werden die Prompts ersetzt und imageUrl im Kontext zurückgesetzt.
+     *
+     * @param array<string, mixed> $ctx
+     *
+     * @return array{system: string, user: string}|null null = keine Übersetzung, reguläre Prompts nutzen
+     */
+    private function prepareAltTranslation(string $type, string $lang, array &$ctx): ?array
+    {
         $translateSource = $type === PromptBuilder::TYPE_MEDIA_ALT ? trim((string) ($ctx['translateFromAlt'] ?? '')) : '';
-        if ($translateSource !== '') {
-            $system = $this->promptBuilder->buildAltTranslationSystem($lang);
-            $baseUser = $this->promptBuilder->buildAltTranslationUser($translateSource, $lang, $ctx);
-            $ctx['imageUrl'] = null;
+        if ($translateSource === '') {
+            return null;
         }
 
-        $threshold = $this->maxScore();
-        $maxAttempts = 1 + $this->maxRetries();
-        $whitelist = $this->whitelist();
-        $checkFacts = $mode === PromptBuilder::MODE_OPTIMIZE && !$isMeta && $type !== PromptBuilder::TYPE_MEDIA_ALT;
-        $originalScore = $checkFacts ? $this->qualityChecker->analyse($existingText, $lang, $whitelist)['score'] : null;
+        $override = [
+            'system' => $this->promptBuilder->buildAltTranslationSystem($lang),
+            'user' => $this->promptBuilder->buildAltTranslationUser($translateSource, $lang, $ctx),
+        ];
+        $ctx['imageUrl'] = null;
 
-        $usage = ['input' => 0, 'output' => 0];
+        return $override;
+    }
+
+    /**
+     * Bild einmalig serverseitig laden und als Base64 mitschicken —
+     * unabhängig von robots.txt, Bot-Blockern und Wartungsmodus.
+     *
+     * @param array<string, mixed> $ctx
+     *
+     * @return array{b64?: string, mime?: string} leer = Fallback auf die URL
+     */
+    private function loadImage(string $type, array $ctx): array
+    {
+        if ($type !== PromptBuilder::TYPE_MEDIA_ALT) {
+            return [];
+        }
+
+        // Thumbnail zuerst (immer unter dem Größen-Limit), dann Original
+        return $this->fetchImage((string) ($ctx['imageUrlSmall'] ?? ''))
+            ?: $this->fetchImage((string) ($ctx['imageUrl'] ?? ''));
+    }
+
+    /**
+     * Gate-/Retry-Schleife: generieren → prüfen → bei Verstoß Regenerierung mit
+     * konkretem Feedback. Liefert den besten Kandidaten (auch wenn nicht
+     * bestanden), dessen Gewicht (für die Längen-Korrektur-Runden danach) und
+     * das tatsächlich genutzte Modell.
+     *
+     * @param array<string, mixed> $ctx
+     * @param list<string>|null $metaFields
+     * @param list<string> $whitelist
+     * @param array{b64?: string, mime?: string} $image
+     * @param array{input: int, output: int} $usage
+     *
+     * @return array{best: array<string, mixed>, bestWeight: int, model: string|null}
+     */
+    private function runGateLoop(
+        Provider\AiProviderInterface $provider,
+        string $system,
+        string $baseUser,
+        string $type,
+        string $lang,
+        string $mode,
+        array $ctx,
+        ?string $model,
+        ?array $metaFields,
+        bool $isMeta,
+        bool $checkFacts,
+        string $existingText,
+        int $threshold,
+        array $whitelist,
+        bool $allowWebSearch,
+        array $image,
+        array &$usage,
+    ): array {
+        $maxAttempts = 1 + $this->maxRetries();
         $feedback = [];
         $best = null;
         $bestWeight = \PHP_INT_MAX;
         $resultModel = $model;
-
-        // Bild einmalig serverseitig laden und als Base64 mitschicken —
-        // unabhängig von robots.txt, Bot-Blockern und Wartungsmodus
-        $image = [];
-        if ($type === PromptBuilder::TYPE_MEDIA_ALT) {
-            // Thumbnail zuerst (immer unter dem Größen-Limit), dann Original
-            $image = $this->fetchImage((string) ($ctx['imageUrlSmall'] ?? ''))
-                ?: $this->fetchImage((string) ($ctx['imageUrl'] ?? ''));
-        }
 
         for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
             $userPrompt = $baseUser;
@@ -186,7 +343,7 @@ class ContentGenerator
                 imageUrl: $type === PromptBuilder::TYPE_MEDIA_ALT ? ($ctx['imageUrl'] ?? null) : null,
                 imageB64: $image['b64'] ?? null,
                 imageMime: $image['mime'] ?? null,
-                allowWebSearch: $allowWebSearch
+                allowWebSearch: $allowWebSearch,
             ));
             $usage['input'] += $result->inputTokens;
             $usage['output'] += $result->outputTokens;
@@ -283,8 +440,33 @@ class ContentGenerator
             throw new \RuntimeException('Generierung fehlgeschlagen: kein verwertbares Ergebnis.');
         }
 
-        // Letzte Stufe für Meta: fokussierte Längen-Korrektur-Calls (Tool-Muster
-        // _fixMetaLengths, "ändere so wenig wie möglich") statt Neugenerierung.
+        return ['best' => $best, 'bestWeight' => $bestWeight, 'model' => $resultModel];
+    }
+
+    /**
+     * Letzte Stufe für Meta: fokussierte Längen-Korrektur-Calls (Tool-Muster
+     * _fixMetaLengths, "ändere so wenig wie möglich") statt Neugenerierung.
+     *
+     * @param array<string, mixed> $best
+     * @param list<string>|null $metaFields
+     * @param list<string> $whitelist
+     * @param array{input: int, output: int} $usage
+     *
+     * @return array<string, mixed> der (ggf. verbesserte) beste Kandidat
+     */
+    private function applyMetaLengthFixes(
+        array $best,
+        int $bestWeight,
+        bool $isMeta,
+        Provider\AiProviderInterface $provider,
+        ?string $model,
+        string $lang,
+        string $mode,
+        ?array $metaFields,
+        int $threshold,
+        array $whitelist,
+        array &$usage,
+    ): array {
         for ($fixRound = 0; $fixRound < 2; $fixRound++) {
             if (!$isMeta || $best['passed'] || $best['lengthIssues'] === [] || $best['analysis']['score'] > $threshold) {
                 break;
@@ -305,18 +487,36 @@ class ContentGenerator
             }
         }
 
-        $this->usageTracker->record(
-            $provider->getName(),
-            (string) ($resultModel ?? ''),
-            (int) ($usage['input'] ?? 0),
-            (int) ($usage['output'] ?? 0)
-        );
+        return $best;
+    }
 
+    /**
+     * Rückgabe-Struktur der Generierung — Feldbestand ist API-Vertrag mit dem
+     * Admin (Qualitäts-Ampel, Batch-Handler), daher zentral an einer Stelle.
+     *
+     * @param array<string, mixed> $best
+     * @param array{input: int, output: int} $usage
+     *
+     * @return array<string, mixed>
+     */
+    private function buildResult(
+        string $type,
+        string $lang,
+        string $mode,
+        string $providerName,
+        ?string $resultModel,
+        array $best,
+        array $usage,
+        int $threshold,
+        ?int $originalScore,
+        string $focusKeyword,
+        bool $isMeta,
+    ): array {
         return [
             'type' => $type,
             'lang' => $lang,
             'mode' => $mode,
-            'provider' => $provider->getName(),
+            'provider' => $providerName,
             'model' => $resultModel,
             'content' => $best['content'],
             'meta' => $best['meta'],
@@ -337,7 +537,7 @@ class ContentGenerator
                         'severity' => $f['severity'],
                         'alternatives' => \array_slice($f['alternatives'], 0, 4),
                     ],
-                    \array_slice($best['analysis']['findings'], 0, 10)
+                    \array_slice($best['analysis']['findings'], 0, 10),
                 ),
                 'lengthIssues' => $best['lengthIssues'],
                 'missingFacts' => $best['missingFacts'],
@@ -382,7 +582,7 @@ class ContentGenerator
     private function whitelist(): array
     {
         return QualityChecker::parseWhitelist(
-            (string) $this->systemConfig->get('ContentCreator.config.qualityWhitelist')
+            (string) $this->systemConfig->get('ContentCreator.config.qualityWhitelist'),
         );
     }
 
@@ -504,7 +704,7 @@ class ContentGenerator
                 $issue['max'],
                 $de
                     ? ($tooShort ? 'z.B. konkreten Nutzen oder Call-to-Action ergänzen' : 'unwichtigste Wörter streichen, Kernaussage behalten')
-                    : ($tooShort ? 'e.g. add a concrete benefit or call-to-action' : 'drop the least important words, keep the core message')
+                    : ($tooShort ? 'e.g. add a concrete benefit or call-to-action' : 'drop the least important words, keep the core message'),
             );
         }
 
@@ -527,7 +727,7 @@ class ContentGenerator
         Provider\AiProviderInterface $provider,
         ?string $model,
         string $lang,
-        array &$usage
+        array &$usage,
     ): ?array {
         $de = !str_starts_with(strtolower($lang), 'en');
         $instructions = [];
@@ -548,7 +748,7 @@ class ContentGenerator
                 $issue['min'],
                 $issue['max'],
                 $de ? ($tooLong ? 'Kürze' : 'Verlängere') : ($tooLong ? 'Shorten' : 'Lengthen'),
-                $meta[$issue['field']]
+                $meta[$issue['field']],
             );
         }
 
@@ -653,7 +853,7 @@ class ContentGenerator
         }
 
         try {
-            $response = $this->httpClient->request('GET', $url, ['timeout' => 15, 'verify_peer' => false, 'verify_host' => false]);
+            $response = $this->httpClient->request('GET', $url, ['timeout' => 15]);
             $data = $response->getContent();
             if ($data === '' || \strlen($data) > 4_500_000) {
                 return [];

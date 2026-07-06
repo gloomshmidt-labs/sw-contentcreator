@@ -36,7 +36,6 @@ Component.register('sw-content-creator-batch', {
             stalledPolls: 0,
             manufacturerFilterId: null,
             selectionNames: {},
-            addEntityValue: null,
             recentJobs: [],
         };
     },
@@ -54,7 +53,11 @@ Component.register('sw-content-creator-batch', {
 
     computed: {
         repository() {
-            return this.repositoryFactory.create(this.entityType === 'manufacturer' ? 'product_manufacturer' : this.entityType);
+            return this.repositoryFactory.create(this.entityDalName);
+        },
+        // UI-Typ → DAL-Entity (nur der Hersteller weicht ab)
+        entityDalName() {
+            return this.entityType === 'manufacturer' ? 'product_manufacturer' : this.entityType;
         },
         // Aufgelöste Sprach-ID mit Admin-Kontext als Fallback (für alle API-Calls)
         effectiveLanguageId() {
@@ -201,11 +204,6 @@ Component.register('sw-content-creator-batch', {
             }
         },
 
-        formatJobDate(iso) {
-            if (!iso) { return ''; }
-            return new Date(iso.replace(' ', 'T')).toLocaleString();
-        },
-
         onManufacturerFilterChange(id) {
             this.manufacturerFilterId = id || null;
         },
@@ -234,13 +232,11 @@ Component.register('sw-content-creator-batch', {
                 .catch(() => { this.selectionNames = {}; });
         },
 
+        // add-Event der Auswahl-Liste (das Leeren des Feldes kapselt die Komponente)
         addEntity(id) {
             if (id && !this.selectedIds.includes(id)) {
                 this.selectedIds = [...this.selectedIds, id];
             }
-            // Feld nach dem Hinzufügen leeren (bereit für das nächste Objekt)
-            this.addEntityValue = id;
-            this.$nextTick(() => { this.addEntityValue = null; });
         },
 
         removeEntity(id) {
@@ -454,7 +450,9 @@ Component.register('sw-content-creator-batch', {
 
     },
 
-    beforeDestroy() {
+    // Vue 3: beforeDestroy existiert nicht mehr (wird still ignoriert) — nur
+    // beforeUnmount stoppt das Polling beim Verlassen der Seite wirklich
+    beforeUnmount() {
         this.stopPolling();
     },
 });

@@ -147,30 +147,16 @@
                     @update:value="onCategoryChannelChange">
                 </sw-entity-single-select>
 
-                <sw-entity-single-select
-                    :entity="entityDalName"
-                    :context="languageContext"
-                    :criteria="entityCriteria"
-                    :label="$tc('sw-content-creator.batch.addEntity')"
-                    :value="addEntityValue"
-                    @update:value="addEntity">
-                </sw-entity-single-select>
-
-                <div v-if="selectedIds.length" style="margin-top:8px;">
-                    <div style="display:flex; align-items:center; gap:12px;">
-                        <span style="font-weight:600;">{{ $tc('sw-content-creator.batch.selectedCount', { count: selectedIds.length }, selectedIds.length) }}</span>
-                        <sw-button size="small" @click="clearSelection">{{ $tc('sw-content-creator.batch.clearSelection') }}</sw-button>
-                    </div>
-                    <div style="max-height:260px; overflow-y:auto; border:1px solid #e5e9f0; border-radius:4px; padding:4px 8px; margin-top:6px;">
-                        <div v-for="id in selectedIds.slice(0, 500)" :key="id" style="display:flex; align-items:center; gap:8px; padding:2px 0; font-size:13px;">
-                            <span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ selectionNames[id] || id }}</span>
-                            <button type="button" style="border:none; background:none; cursor:pointer; color:#758ca3;" @click="removeEntity(id)">✕</button>
-                        </div>
-                        <p v-if="selectedIds.length > 500" style="color:#758ca3; font-size:12px; padding:4px 0;">
-                            {{ $tc('sw-content-creator.batch.andMore', { count: selectedIds.length - 500 }, selectedIds.length - 500) }}
-                        </p>
-                    </div>
-                </div>
+                <sw-cc-selection-list
+                    :selectedIds="selectedIds"
+                    :selectionNames="selectionNames"
+                    :entityDalName="entityDalName"
+                    :languageContext="languageContext"
+                    :entityCriteria="entityCriteria"
+                    @add="addEntity"
+                    @remove="removeEntity"
+                    @clear="clearSelection">
+                </sw-cc-selection-list>
 
                 <div class="sw-content-creator-batch__types" style="margin-top:16px;">
                     <label style="font-weight:600;">{{ $tc('sw-content-creator.batch.types') }}</label>
@@ -282,23 +268,11 @@
                 </template>
             </sw-card>
             {% endblock %}
-            <sw-card v-if="!job && recentJobs.length" :title="$tc('sw-content-creator.batch.recentJobs')">
-                <p style="color:#758ca3; font-size:13px; margin-bottom:8px;">
-                    {{ $tc('sw-content-creator.batch.recentJobsHelp') }}
-                </p>
-                <div v-for="j in recentJobs" :key="j.id" style="display:flex; align-items:center; gap:12px; padding:6px 0; border-bottom:1px solid #f0f2f5; font-size:13px;">
-                    <span style="min-width:130px;">{{ formatJobDate(j.createdAt) }}</span>
-                    <span style="min-width:80px;">{{ j.entityType }}</span>
-                    <span style="min-width:110px;">{{ j.status }}{{ j.dryRun ? ' (Dry-Run)' : '' }}</span>
-                    <span style="flex:1;">{{ j.processed }}/{{ j.total }}</span>
-                    <span v-if="j.openResults > 0" style="color:#37a04a; font-weight:600;">
-                        {{ $tc('sw-content-creator.batch.openResults', { count: j.openResults }, j.openResults) }}
-                    </span>
-                    <sw-button size="small" @click="openJob(j)">
-                        {{ $tc('sw-content-creator.batch.openJob') }}
-                    </sw-button>
-                </div>
-            </sw-card>
+            <sw-cc-recent-jobs
+                v-if="!job && recentJobs.length"
+                :jobs="recentJobs"
+                @open="openJob">
+            </sw-cc-recent-jobs>
 
         </sw-card-view>
     </template>

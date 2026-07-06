@@ -51,12 +51,12 @@ class QualityChecker
         $allPatterns = array_merge(
             $rules['aiPatterns']['strong'] ?? [],
             $rules['aiPatterns']['medium'] ?? [],
-            $rules['aiPatterns']['weak'] ?? []
+            $rules['aiPatterns']['weak'] ?? [],
         );
         $allAlternatives = array_merge(
             $rules['alternatives']['strong'] ?? [],
             $rules['alternatives']['medium'] ?? [],
-            $rules['alternatives']['weak'] ?? []
+            $rules['alternatives']['weak'] ?? [],
         );
 
         $score = 0;

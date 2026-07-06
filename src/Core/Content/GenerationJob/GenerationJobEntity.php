@@ -13,8 +13,10 @@ class GenerationJobEntity extends Entity
 
     protected string $entityType = '';
 
+    /** @var list<string>|null */
     protected ?array $types = null;
 
+    /** @var list<string>|null */
     protected ?array $itemIds = null;
 
     protected ?string $languageId = null;
@@ -25,6 +27,7 @@ class GenerationJobEntity extends Entity
 
     protected ?string $mode = null;
 
+    /** @var list<string>|null */
     protected ?array $metaFields = null;
 
     protected bool $dryRun = false;
@@ -63,21 +66,33 @@ class GenerationJobEntity extends Entity
         $this->entityType = $entityType;
     }
 
+    /**
+     * @return list<string>|null
+     */
     public function getTypes(): ?array
     {
         return $this->types;
     }
 
+    /**
+     * @param list<string>|null $types
+     */
     public function setTypes(?array $types): void
     {
         $this->types = $types;
     }
 
+    /**
+     * @return list<string>|null
+     */
     public function getItemIds(): ?array
     {
         return $this->itemIds;
     }
 
+    /**
+     * @param list<string>|null $itemIds
+     */
     public function setItemIds(?array $itemIds): void
     {
         $this->itemIds = $itemIds;
@@ -153,11 +168,17 @@ class GenerationJobEntity extends Entity
         $this->mode = $mode;
     }
 
+    /**
+     * @return list<string>|null
+     */
     public function getMetaFields(): ?array
     {
         return $this->metaFields;
     }
 
+    /**
+     * @param list<string>|null $metaFields
+     */
     public function setMetaFields(?array $metaFields): void
     {
         $this->metaFields = $metaFields;

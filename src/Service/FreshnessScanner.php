@@ -46,7 +46,7 @@ class FreshnessScanner
              INNER JOIN {$translationTable} t ON t.{$fk} = e.id {$versionJoin} AND t.language_id = UNHEX(:lang)
              WHERE JSON_UNQUOTE(JSON_EXTRACT(t.custom_fields, '$.content_creator_generated_at')) IS NOT NULL {$versionWhere}
              LIMIT " . (self::MAX_ITEMS * 5),
-            $params
+            $params,
         );
 
         $changedSince = [];

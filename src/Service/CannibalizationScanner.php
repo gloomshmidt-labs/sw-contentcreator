@@ -37,7 +37,7 @@ class CannibalizationScanner
                AND TRIM(JSON_UNQUOTE(JSON_EXTRACT(t.custom_fields, '$.content_creator_focus_keyword'))) != ''
              GROUP BY value HAVING count > 1
              ORDER BY count DESC LIMIT " . self::MAX_GROUPS,
-            ['lang' => $languageId]
+            ['lang' => $languageId],
         );
 
         $duplicateTitles = $this->connection->fetchAllAssociative(
@@ -49,7 +49,7 @@ class CannibalizationScanner
                AND t.meta_title IS NOT NULL AND TRIM(t.meta_title) != ''
              GROUP BY value HAVING count > 1
              ORDER BY count DESC LIMIT " . self::MAX_GROUPS,
-            ['lang' => $languageId]
+            ['lang' => $languageId],
         );
 
         return [
@@ -83,7 +83,7 @@ class CannibalizationScanner
              WHERE t.language_id = UNHEX(:lang) {$versionCondition} {$excludeCondition}
                AND LOWER(TRIM(JSON_UNQUOTE(JSON_EXTRACT(t.custom_fields, '$.content_creator_focus_keyword')))) = :kw
              LIMIT 10",
-            $params
+            $params,
         );
     }
 

@@ -18,7 +18,7 @@ Jede Generierung durchläuft serverseitig eine automatische Prüf- und Nachbesse
 - **Neu erstellen:** Texte/Meta werden aus den Produkt-/Kategoriefakten neu generiert (füllt Lücken).
 - **Bestand optimieren:** Der vorhandene Text ist die Basis — Formulierungen werden humanisiert und SEO-optimiert, Fakten und HTML-Struktur bleiben erhalten. Bei Meta-Daten sind die Felder einzeln wählbar (nicht gewählte bleiben unangetastet). Im Stapel werden Objekte ohne Bestandstext automatisch neu erstellt.
 
-Produkte sind kanalneutral: In Produkt-Texten und -Meta erscheint nie der Shopname — Markenbezug läuft über den Hersteller. Nur Kategorietexte verwenden den konfigurierten Shop-/Markennamen.
+Produkte sind kanalneutral: In Produkt-Texten und -Meta erscheint nie der Shopname — Markenbezug läuft über den Hersteller. Der Shopname erscheint ausschließlich im Startseiten-Title und wird automatisch aus der Domain des Verkaufskanals abgeleitet (nichts zu konfigurieren); Kategorie-Titles verzichten bewusst auf ein Shop-Suffix.
 
 ## Funktionen
 
@@ -27,8 +27,10 @@ Produkte sind kanalneutral: In Produkt-Texten und -Meta erscheint nie der Shopna
   - Produktbeschreibung (Hauptteil + optional Tier-Steckbrief + „Wussten Sie"-Fun-Fact)
   - Produkt-Meta (Titel/Description/Keywords, MPN als letztes Keyword)
   - Kategorie-Teaser (wird in den CMS-Slot geschrieben), Kategorie-Detailtext, Kategorie-Meta
+  - Hersteller-Beschreibung
+  - FAQ-Block (Produkt-Zusatzfeld, Storefront-Rendering über mitgelieferte Twig-Funktion)
   - Startseiten-Meta je Verkaufskanal
-  - Media-Alt-Texte (Vision — die KI „sieht" das Bild)
+  - Media-Alt-Texte (Vision — die KI „sieht" das Bild; Zweitsprachen werden kostengünstig aus der Standardsprache übersetzt)
 - **Sicherheitsnetz:** Automatisches Backup vor jedem Überschreiben + Ein-Klick-Wiederherstellen; Dry-Run im Batch (erst prüfen, dann gesammelt übernehmen).
 - **Arbeitsvorrat:** Lücken-Scan (fehlende Beschreibungen/Meta/Alt-Texte) und katalogweiter Qualitäts-Report (schlechteste Bestandstexte) mit Direktübernahme in die Batch-Auswahl.
 - **Kanal-Varianten:** Kategorietexte je Verkaufskanal mit eigenem Schwerpunkt und Anti-Duplicate-Regeln, inkl. Ähnlichkeits-Anzeige gegen die Referenz-Variante.
@@ -52,7 +54,7 @@ Produkte sind kanalneutral: In Produkt-Texten und -Meta erscheint nie der Shopna
 
 ## Konfiguration
 
-**Einstellungen → Erweiterungen → ContentCreator:**
+Die Konfiguration ist eine eigene Seite im Plugin-Modul — erreichbar über den Button „Einstellungen" oben auf den Plugin-Seiten (nicht über Erweiterungen → Konfigurieren):
 
 - **KI-Provider & API-Keys:** aktiver Provider, Anthropic-Key (`sk-ant-…`), Claude-Modell, OpenAI-Key/-Modell, „Verbindung testen".
 - **Stapelverarbeitung & Automatik:** günstigeres Batch-Modell, tägliches Auffüllen an/aus, Limit pro Lauf.
@@ -64,14 +66,15 @@ Produkte sind kanalneutral: In Produkt-Texten und -Meta erscheint nie der Shopna
 
 **Inhalte → ContentCreator**
 
-- **Texte generieren:** Objekt (Produkt/Kategorie) wählen, aktuellen Text + Qualitäts-Score sehen, gewünschten Texttyp generieren, Ergebnis prüfen und „Übernehmen & speichern".
-- **Stapelverarbeitung:** Objekt-Typ + mehrere Objekte + Texttypen wählen, Batch starten, Fortschritt verfolgen.
+- **Texte generieren:** Objekt (Produkt/Kategorie/Hersteller) wählen, aktuellen Text + Qualitäts-Score sehen, gewünschten Texttyp generieren, Ergebnis prüfen und „Übernehmen & speichern"; inkl. Bilder-Karte für Alt-Texte und Dateinamen des Produkts.
+- **Stapelverarbeitung:** Objekt-Typ + mehrere Objekte + Texttypen wählen, Batch starten, Fortschritt verfolgen; Dry-Run-Ergebnisse lassen sich prüfen/editieren und gesammelt übernehmen, frühere Läufe können wieder geöffnet werden.
+- **SEO-Werkzeuge:** Lücken-Scan, Qualitäts-Report, Content-Freshness, Kannibalisierungs-Check, Zeilenumbruch-Bereinigung und SEO-Dateinamen (siehe unten) — Funde lassen sich direkt in die Batch-Auswahl übernehmen.
 
 > Für die Stapelverarbeitung muss ein Message-Worker laufen (Admin-Worker oder `bin/console messenger:consume`).
 
 ## SEO-Dateinamen & Bild-Redirects (Plesk)
 
-Die Batch-Seite kann Produktbilder mit Artikelnummer-/Hash-Dateinamen auf beschreibende Namen umbenennen. **Wichtig:** Dabei ändert sich die komplette Bild-URL — damit alte URLs (Google Bilder, externe Links) erhalten bleiben:
+Die SEO-Werkzeuge-Seite kann Produktbilder mit Artikelnummer-/Hash-Dateinamen auf beschreibende Namen umbenennen. **Wichtig:** Dabei ändert sich die komplette Bild-URL — damit alte URLs (Google Bilder, externe Links) erhalten bleiben:
 
 **Empfohlen — automatische Redirect-Datei (einmalige Einrichtung):**
 1. In den Einstellungen unter „Bild-Redirects" einen Datei-Pfad eintragen (z.B. `<shoproot>/var/media-redirects.conf`). Das Plugin schreibt die komplette, kumulative Redirect-Datei nach jedem Umbenennungs-Lauf automatisch dorthin.
@@ -90,6 +93,21 @@ bin/console content-creator:generate --type=product_description --name="Handpupp
 ```
 
 Optionen: `--type`, `--lang` (de/en), `--provider` (claude/openai), `--model`, `--product-id`/`--category-id`/`--media-id`, `--write`.
+
+## Entwicklung & Tests
+
+Das Plugin hat bewusst keine eigenen Composer-Laufzeit-Abhängigkeiten (nur `shopware/core`) und kein `vendor/`-Verzeichnis. Unit-Tests und Statische Analyse laufen im Kontext einer Shopware-Installation (Shop-Autoloader):
+
+```
+# Unit-Tests (PHPUnit aus dem Shop-vendor, im Shop-Root ausführen)
+vendor/bin/phpunit -c custom/plugins/ContentCreator/phpunit.xml
+
+# Statische Analyse (Level 6)
+php phpstan.phar analyse -c custom/plugins/ContentCreator/phpstan.neon
+
+# Code-Style (PSR-12 + Shopware-Regeln)
+php php-cs-fixer.phar fix --config custom/plugins/ContentCreator/.php-cs-fixer.dist.php
+```
 
 ## Lizenz
 

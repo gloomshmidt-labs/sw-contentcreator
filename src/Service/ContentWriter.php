@@ -2,9 +2,14 @@
 
 namespace ContentCreator\Service;
 
+use Shopware\Core\Content\Category\CategoryCollection;
+use Shopware\Core\Content\Media\MediaCollection;
+use Shopware\Core\Content\Product\Aggregate\ProductManufacturer\ProductManufacturerCollection;
+use Shopware\Core\Content\Product\ProductCollection;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
+use Shopware\Core\System\SalesChannel\SalesChannelCollection;
 
 /**
  * Schreibt generierte Inhalte zurück in Produkte, Kategorien, Medien und
@@ -17,6 +22,13 @@ class ContentWriter
     public const GENERATED_AT_FIELD = 'content_creator_generated_at';
     public const FAQ_FIELD = 'content_creator_faq';
 
+    /**
+     * @param EntityRepository<ProductCollection> $productRepository
+     * @param EntityRepository<CategoryCollection> $categoryRepository
+     * @param EntityRepository<MediaCollection> $mediaRepository
+     * @param EntityRepository<SalesChannelCollection> $salesChannelRepository
+     * @param EntityRepository<ProductManufacturerCollection> $manufacturerRepository
+     */
     public function __construct(
         private readonly EntityRepository $productRepository,
         private readonly EntityRepository $categoryRepository,
@@ -24,7 +36,7 @@ class ContentWriter
         private readonly EntityRepository $salesChannelRepository,
         private readonly EntityRepository $manufacturerRepository,
         private readonly CmsSlotResolver $slotResolver,
-        private readonly ContentBackupService $backupService
+        private readonly ContentBackupService $backupService,
     ) {
     }
 
@@ -72,7 +84,7 @@ class ContentWriter
         if (\in_array($entityType, ['product', 'category', 'manufacturer'], true)) {
             $fields['customFields'] = array_merge(
                 $fields['customFields'] ?? [],
-                [self::GENERATED_AT_FIELD => (new \DateTimeImmutable())->format(\DATE_ATOM)]
+                [self::GENERATED_AT_FIELD => (new \DateTimeImmutable())->format(\DATE_ATOM)],
             );
         }
 

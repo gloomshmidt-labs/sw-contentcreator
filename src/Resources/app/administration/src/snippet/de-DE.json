@@ -272,5 +272,12 @@
             "fixAll": "Alle bereinigen",
             "fixed": "{fixed} Slot(s) bereinigt"
         }
+    },
+    "sw-privileges": {
+        "permissions": {
+            "content_creator": {
+                "label": "ContentCreator (KI-gestützte SEO-Texte)"
+            }
+        }
     }
 }

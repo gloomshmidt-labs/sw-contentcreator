@@ -11,7 +11,7 @@ class BatchGenerateMessage implements LowPriorityMessageInterface
 {
     public function __construct(
         private readonly string $jobId,
-        private readonly string $itemId
+        private readonly string $itemId,
     ) {
     }
 

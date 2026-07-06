@@ -1,0 +1,46 @@
+{% block sw_cc_media_card %}
+<sw-card v-if="entityType === 'product' && productMedia.length" :title="$tc('sw-content-creator.generator.mediaCard')">
+    <p style="color:#758ca3; font-size:13px; margin-bottom:8px;">{{ $tc('sw-content-creator.generator.mediaCardHint') }}</p>
+    <sw-button size="small" style="margin-bottom:8px;" @click="loadRenameSuggestions">
+        {{ $tc('sw-content-creator.generator.suggestFilenames') }}
+    </sw-button>
+    <div v-for="item in productMedia" :key="item.mediaId" style="display:flex; gap:12px; align-items:flex-start; padding:8px 0; border-bottom:1px solid #f0f2f5;">
+        <img :src="item.url" :alt="item.fileName" style="width:64px; height:64px; object-fit:contain; background:#f8f9fb; border-radius:4px; flex-shrink:0;"/>
+        <div style="flex:1;">
+            <p style="font-size:12px; color:#758ca3;">{{ item.fileName }}</p>
+            <div v-if="item.suggestedName" style="display:flex; gap:6px; align-items:center; margin:4px 0;">
+                <span style="font-size:12px;">→</span>
+                <input type="text" :value="item.suggestedName" style="flex:1; font-size:12px; padding:3px 6px; border:1px solid #d1d9e0; border-radius:4px; font-family:monospace;"
+                    @input="(e) => { item.suggestedName = e.target.value; }"/>
+                <sw-button size="small" :isLoading="item.generating" @click="renameImage(item)">
+                    {{ $tc('sw-content-creator.rename.applySingle') }}
+                </sw-button>
+            </div>
+            <div v-if="!item.result" style="display:flex; align-items:center; gap:6px; font-size:13px;">
+                <strong>Alt:</strong>
+                <input type="text" :value="item.altEdit" :placeholder="item.alt || '—'" style="flex:1; font-size:13px; padding:4px 6px; border:1px solid #d1d9e0; border-radius:4px;"
+                    @input="(e) => { item.altEdit = e.target.value; }"/>
+                <sw-button v-if="item.altEdit && item.altEdit !== item.alt" size="small" variant="primary" :isLoading="item.generating" @click="saveAltEdit(item)">
+                    {{ $tc('sw-content-creator.generator.saveAlt') }}
+                </sw-button>
+                <sw-button v-if="item.altEdit && item.altEdit !== item.alt && lang === 'de' && availableLangs.includes('en')" size="small" :isLoading="item.generating" @click="saveAltEdit(item, true)">
+                    {{ $tc('sw-content-creator.generator.saveAltWithEn') }}
+                </sw-button>
+            </div>
+            <template v-else>
+                <input type="text" :value="item.result" style="width:100%; font-size:13px; padding:4px 6px; border:1px solid #d1d9e0; border-radius:4px;"
+                    @input="(e) => { item.result = e.target.value; }"/>
+                <span v-if="item.score !== null" style="font-size:12px; color:#758ca3;">Score {{ item.score }}</span>
+            </template>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:4px;">
+            <sw-button size="small" :isLoading="item.generating" @click="generateAlt(item)">
+                {{ mode === 'optimize' && item.alt ? $tc('sw-content-creator.generator.optimize') : $tc('sw-content-creator.generator.generate') }}
+            </sw-button>
+            <sw-button v-if="item.result" size="small" variant="primary" @click="applyAlt(item)">
+                {{ $tc('sw-content-creator.generator.apply') }}
+            </sw-button>
+        </div>
+    </div>
+</sw-card>
+{% endblock %}

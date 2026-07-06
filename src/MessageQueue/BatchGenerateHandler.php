@@ -2,6 +2,7 @@
 
 namespace ContentCreator\MessageQueue;
 
+use ContentCreator\Core\Content\GenerationJob\GenerationJobCollection;
 use ContentCreator\Service\ContentGenerator;
 use ContentCreator\Service\ContentWriter;
 use ContentCreator\Service\FactLoader;
@@ -29,13 +30,16 @@ class BatchGenerateHandler
         'manufacturer' => [PromptBuilder::TYPE_MANUFACTURER_DESCRIPTION],
     ];
 
+    /**
+     * @param EntityRepository<GenerationJobCollection> $generationJobRepository
+     */
     public function __construct(
         private readonly ContentGenerator $generator,
         private readonly FactLoader $factLoader,
         private readonly ContentWriter $writer,
         private readonly EntityRepository $generationJobRepository,
         private readonly Connection $connection,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
     ) {
     }
 
@@ -86,7 +90,7 @@ class BatchGenerateHandler
                         'SELECT LOWER(HEX(media_id)) FROM product_media
                          WHERE product_id = UNHEX(:id) AND product_version_id = UNHEX(:live)
                          ORDER BY position ASC',
-                        ['id' => $itemId, 'live' => \Shopware\Core\Defaults::LIVE_VERSION]
+                        ['id' => $itemId, 'live' => \Shopware\Core\Defaults::LIVE_VERSION],
                     );
                     foreach ($mediaIds as $mediaId) {
                         // Ein defektes Bild darf die übrigen nicht mitreißen
@@ -99,7 +103,7 @@ class BatchGenerateHandler
                                 $job->getProvider(),
                                 $job->getModel(),
                                 $this->effectiveMode($mode, $type, $mediaFacts),
-                                null
+                                null,
                             );
                             $inputTokens += (int) ($result['usage']['input'] ?? 0);
                             $outputTokens += (int) ($result['usage']['output'] ?? 0);
@@ -136,7 +140,7 @@ class BatchGenerateHandler
                     $job->getProvider(),
                     $job->getModel(),
                     $effectiveMode,
-                    $metaFields
+                    $metaFields,
                 );
                 $inputTokens += (int) ($result['usage']['input'] ?? 0);
                 $outputTokens += (int) ($result['usage']['output'] ?? 0);
@@ -195,7 +199,7 @@ class BatchGenerateHandler
                 'UPDATE content_creator_generation_job
                  SET input_tokens = input_tokens + :in, output_tokens = output_tokens + :out
                  WHERE id = UNHEX(:id)',
-                ['in' => $inputTokens, 'out' => $outputTokens, 'id' => $jobId]
+                ['in' => $inputTokens, 'out' => $outputTokens, 'id' => $jobId],
             );
         }
         $this->maybeComplete($jobId);
@@ -242,7 +246,7 @@ class BatchGenerateHandler
                     'error' => $result['error'] ?? null,
                 ], \JSON_THROW_ON_ERROR),
                 'passed' => $passed ? 1 : 0,
-            ]
+            ],
         );
     }
 
@@ -254,7 +258,7 @@ class BatchGenerateHandler
 
         $this->connection->executeStatement(
             "UPDATE content_creator_generation_job SET {$column} = {$column} + 1, updated_at = NOW(3) WHERE id = UNHEX(:id)",
-            ['id' => $jobId]
+            ['id' => $jobId],
         );
     }
 
@@ -262,7 +266,7 @@ class BatchGenerateHandler
     {
         $row = $this->connection->fetchAssociative(
             'SELECT total, processed, failed, rejected FROM content_creator_generation_job WHERE id = UNHEX(:id)',
-            ['id' => $jobId]
+            ['id' => $jobId],
         );
         if ($row === false) {
             return;
@@ -280,7 +284,7 @@ class BatchGenerateHandler
 
         $this->connection->executeStatement(
             'UPDATE content_creator_generation_job SET status = :status, updated_at = NOW(3) WHERE id = UNHEX(:id)',
-            ['status' => $status, 'id' => $jobId]
+            ['status' => $status, 'id' => $jobId],
         );
     }
 }

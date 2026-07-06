@@ -4,6 +4,7 @@ namespace ContentCreator\Service;
 
 use Doctrine\DBAL\Connection;
 use Shopware\Core\Content\Media\File\FileSaver;
+use Shopware\Core\Content\Media\MediaCollection;
 use Shopware\Core\Defaults;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
@@ -22,11 +23,14 @@ class MediaRenamer
     private const MAX_SCAN = 300;
     private const MAX_NAME_LENGTH = 70;
 
+    /**
+     * @param EntityRepository<MediaCollection> $mediaRepository
+     */
     public function __construct(
         private readonly Connection $connection,
         private readonly EntityRepository $mediaRepository,
         private readonly FileSaver $fileSaver,
-        private readonly SystemConfigService $systemConfig
+        private readonly SystemConfigService $systemConfig,
     ) {
     }
 
@@ -57,7 +61,7 @@ class MediaRenamer
              FROM media m
              INNER JOIN product_media pm ON pm.media_id = m.id AND pm.product_version_id = UNHEX(:live){$productFilter}{$activeJoin}
              WHERE (m.file_name REGEXP '^[0-9][0-9a-zA-Z_-]*$' OR m.file_name REGEXP '^[a-f0-9]{30,}$'){$activeWhere}",
-            $params
+            $params,
         );
 
         // Gezielter Produkt-Scan: ALLE Bilder anbieten (auch bereits umbenannte
@@ -79,7 +83,7 @@ class MediaRenamer
              LEFT JOIN media_translation mt ON mt.media_id = m.id AND mt.language_id = UNHEX(:lang)
              WHERE pt.name IS NOT NULL {$nameFilter}{$activeWhere}
              LIMIT " . self::MAX_SCAN,
-            $params + ['lang' => $languageId]
+            $params + ['lang' => $languageId],
         );
 
         $items = [];
@@ -162,7 +166,7 @@ class MediaRenamer
                 'old' => $before['path'],
                 'new' => $after['path'],
                 'thumbs' => $thumbnailMap === [] ? null : json_encode($thumbnailMap, \JSON_THROW_ON_ERROR),
-            ]
+            ],
         );
 
         return ['oldPath' => $before['path'], 'newPath' => $after['path']];
@@ -181,25 +185,10 @@ class MediaRenamer
             'SELECT r.old_path, r.new_path, r.thumbnails
              FROM content_creator_media_rename r
              INNER JOIN media m ON m.id = r.media_id
-             ORDER BY r.created_at ASC'
+             ORDER BY r.created_at ASC',
         );
 
-        // a→b, b→c ⇒ a→c (und b→c) — gilt für Hauptbild UND jede Thumbnail-Größe
-        $redirects = [];
-        $add = static function (string $old, string $new) use (&$redirects): void {
-            foreach ($redirects as $source => $target) {
-                if ($target === $old) {
-                    $redirects[$source] = $new;
-                }
-            }
-            $redirects[$old] = $new;
-        };
-        foreach ($rows as $row) {
-            $add((string) $row['old_path'], (string) $row['new_path']);
-            foreach (json_decode((string) ($row['thumbnails'] ?? ''), true) ?: [] as $oldThumb => $newThumb) {
-                $add((string) $oldThumb, (string) $newThumb);
-            }
-        }
+        $redirects = $this->flattenRedirects($rows);
 
         $lines = [
             '# ContentCreator: 301-Redirects fuer umbenannte Medien-Dateien',
@@ -213,6 +202,48 @@ class MediaRenamer
         }
 
         return implode("\n", $lines) . "\n";
+    }
+
+    /**
+     * a→b, b→c ⇒ a→c (und b→c) — gilt für Hauptbild UND jede Thumbnail-Größe.
+     * Invariante danach: kein Redirect-Ziel ist zugleich Quelle eines anderen
+     * (Selbst-Redirects wie a→a können entstehen und werden erst bei der
+     * Ausgabe übersprungen).
+     *
+     * @param list<array<string, mixed>> $rows chronologisch (old_path, new_path, thumbnails-JSON)
+     *
+     * @return array<string, string> Quelle => finales Ziel
+     */
+    private function flattenRedirects(array $rows): array
+    {
+        $redirects = [];
+        // Rück-Index Ziel => Quellen-Set: die Ketten-Glättung braucht "alle
+        // Quellen, die aktuell auf $old zeigen" — ein Voll-Scan über $redirects
+        // pro Eintrag wäre quadratisch (bei 15k Bildern à Hauptpfad+Thumbnails
+        // Milliarden Vergleiche pro Export), der Index macht es amortisiert O(1).
+        $sources = [];
+        $add = static function (string $old, string $new) use (&$redirects, &$sources): void {
+            $moved = array_keys($sources[$old] ?? []);
+            unset($sources[$old]);
+            foreach ($moved as $source) {
+                $redirects[$source] = $new;
+                $sources[$new][$source] = true;
+            }
+            // $old zeigte ggf. schon woanders hin — alten Index-Eintrag lösen
+            if (isset($redirects[$old])) {
+                unset($sources[$redirects[$old]][$old]);
+            }
+            $redirects[$old] = $new;
+            $sources[$new][$old] = true;
+        };
+        foreach ($rows as $row) {
+            $add((string) $row['old_path'], (string) $row['new_path']);
+            foreach (json_decode((string) ($row['thumbnails'] ?? ''), true) ?: [] as $oldThumb => $newThumb) {
+                $add((string) $oldThumb, (string) $newThumb);
+            }
+        }
+
+        return $redirects;
     }
 
     /**

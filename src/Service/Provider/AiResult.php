@@ -12,7 +12,7 @@ class AiResult
         public int $inputTokens = 0,
         public int $outputTokens = 0,
         public ?string $stopReason = null,
-        public ?string $model = null
+        public ?string $model = null,
     ) {
     }
 }

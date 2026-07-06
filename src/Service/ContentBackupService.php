@@ -2,12 +2,20 @@
 
 namespace ContentCreator\Service;
 
+use ContentCreator\Core\Content\Backup\ContentBackupCollection;
+use Shopware\Core\Content\Category\CategoryCollection;
+use Shopware\Core\Content\Media\MediaCollection;
+use Shopware\Core\Content\Product\Aggregate\ProductManufacturer\ProductManufacturerCollection;
+use Shopware\Core\Content\Product\ProductCollection;
 use Shopware\Core\Framework\Context;
+use Shopware\Core\Framework\DataAbstractionLayer\Entity;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityCollection;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Sorting\FieldSorting;
 use Shopware\Core\Framework\Uuid\Uuid;
+use Shopware\Core\System\SalesChannel\SalesChannelCollection;
 
 /**
  * Text-Backup vor jedem Überschreiben + Ein-Klick-Wiederherstellen.
@@ -16,6 +24,14 @@ use Shopware\Core\Framework\Uuid\Uuid;
  */
 class ContentBackupService
 {
+    /**
+     * @param EntityRepository<ContentBackupCollection> $backupRepository
+     * @param EntityRepository<ProductCollection> $productRepository
+     * @param EntityRepository<CategoryCollection> $categoryRepository
+     * @param EntityRepository<MediaCollection> $mediaRepository
+     * @param EntityRepository<SalesChannelCollection> $salesChannelRepository
+     * @param EntityRepository<ProductManufacturerCollection> $manufacturerRepository
+     */
     public function __construct(
         private readonly EntityRepository $backupRepository,
         private readonly EntityRepository $productRepository,
@@ -23,7 +39,7 @@ class ContentBackupService
         private readonly EntityRepository $mediaRepository,
         private readonly EntityRepository $salesChannelRepository,
         private readonly EntityRepository $manufacturerRepository,
-        private readonly CmsSlotResolver $slotResolver
+        private readonly CmsSlotResolver $slotResolver,
     ) {
     }
 
@@ -197,6 +213,9 @@ class ContentBackupService
         return $translation->get($field);
     }
 
+    /**
+     * @return EntityRepository<covariant EntityCollection<covariant Entity>>
+     */
     private function repositoryFor(string $entityType): EntityRepository
     {
         return match ($entityType) {

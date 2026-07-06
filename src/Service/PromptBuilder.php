@@ -247,7 +247,7 @@ class PromptBuilder
         };
 
         $base = $de
-            ? "KANAL-VARIANTE: Dieser Text erscheint in einem von mehreren Shops mit ähnlichem Sortiment. Gegen Duplicate Content gilt: GLEICHE FAKTEN, ANDERE FORMULIERUNGEN — nicht nur Synonyme tauschen, sondern andere Perspektive, andere Schwerpunkte, andere Satzstrukturen. Auch Meta-Daten müssen sich von anderen Varianten unterscheiden. Der Text muss allein stehend vollständig sein."
+            ? 'KANAL-VARIANTE: Dieser Text erscheint in einem von mehreren Shops mit ähnlichem Sortiment. Gegen Duplicate Content gilt: GLEICHE FAKTEN, ANDERE FORMULIERUNGEN — nicht nur Synonyme tauschen, sondern andere Perspektive, andere Schwerpunkte, andere Satzstrukturen. Auch Meta-Daten müssen sich von anderen Varianten unterscheiden. Der Text muss allein stehend vollständig sein.'
             : 'CHANNEL VARIANT: This text appears in one of several shops with a similar range. To avoid duplicate content: SAME FACTS, DIFFERENT WORDING — not just synonyms, but a different perspective, different emphases, different sentence structures. Meta data must also differ from other variants. The text must be complete on its own.';
 
         return $angleText === '' ? $base : $base . "\n" . $angleText;
@@ -686,8 +686,8 @@ class PromptBuilder
     public function buildAltTranslationSystem(string $lang): string
     {
         return $lang === 'en'
-            ? "You translate German image alt texts for an online shop into natural English. Rules: keep the meaning and all facts EXACTLY (colours, materials, animals, positions — invent nothing, drop nothing). Use natural product terminology (e.g. Handpuppe = hand puppet). One sentence, no quotation marks, no trailing full stop needed, at most about 125 characters. Reply with ONLY the translated alt text."
-            : "Du übersetzt englische Bild-Alt-Texte für einen Onlineshop in natürliches Deutsch. Regeln: Bedeutung und alle Fakten EXAKT erhalten (Farben, Materialien, Tiere, Positionen — nichts erfinden, nichts weglassen). Natürliche Produkt-Terminologie verwenden. Ein Satz, keine Anführungszeichen, maximal ca. 125 Zeichen. Antworte NUR mit dem übersetzten Alt-Text.";
+            ? 'You translate German image alt texts for an online shop into natural English. Rules: keep the meaning and all facts EXACTLY (colours, materials, animals, positions — invent nothing, drop nothing). Use natural product terminology (e.g. Handpuppe = hand puppet). One sentence, no quotation marks, no trailing full stop needed, at most about 125 characters. Reply with ONLY the translated alt text.'
+            : 'Du übersetzt englische Bild-Alt-Texte für einen Onlineshop in natürliches Deutsch. Regeln: Bedeutung und alle Fakten EXAKT erhalten (Farben, Materialien, Tiere, Positionen — nichts erfinden, nichts weglassen). Natürliche Produkt-Terminologie verwenden. Ein Satz, keine Anführungszeichen, maximal ca. 125 Zeichen. Antworte NUR mit dem übersetzten Alt-Text.';
     }
 
     /**
@@ -697,8 +697,11 @@ class PromptBuilder
      */
     public function buildAltTranslationUser(string $source, string $lang, array $ctx): string
     {
-        $name = trim((string) ($ctx['name'] ?? ''));
-        $manufacturer = trim((string) ($ctx['manufacturer'] ?? ''));
+        // Gleicher Injection-Schutz wie im factBlock: der Quell-Alt kommt aus der
+        // DB (fremd befüllbar) und ein """ darin würde den Delimiter aufbrechen.
+        $source = PromptSanitizer::sanitize($source);
+        $name = PromptSanitizer::sanitize(trim((string) ($ctx['name'] ?? '')));
+        $manufacturer = PromptSanitizer::sanitize(trim((string) ($ctx['manufacturer'] ?? '')));
         $context = $name !== '' ? ($lang === 'en' ? "Product: {$name}" : "Produkt: {$name}") : '';
         if ($manufacturer !== '') {
             $context .= ($context !== '' ? ', ' : '') . ($lang === 'en' ? "brand: {$manufacturer}" : "Marke: {$manufacturer}");

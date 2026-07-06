@@ -16,7 +16,7 @@ class QualityReport
 
     public function __construct(
         private readonly Connection $connection,
-        private readonly QualityChecker $qualityChecker
+        private readonly QualityChecker $qualityChecker,
     ) {
     }
 
@@ -39,7 +39,7 @@ class QualityReport
                  WHERE p.version_id = UNHEX(:live) AND p.parent_id IS NULL AND p.active = 1
                    AND pt.description IS NOT NULL AND pt.description != ''
                  ORDER BY p.id LIMIT {$limit} OFFSET {$offset}",
-                ['lang' => $languageId, 'live' => Defaults::LIVE_VERSION]
+                ['lang' => $languageId, 'live' => Defaults::LIVE_VERSION],
             ),
             'category' => $this->connection->fetchAllAssociative(
                 "SELECT LOWER(HEX(c.id)) id, ct.name, ct.description
@@ -49,7 +49,7 @@ class QualityReport
                  WHERE c.version_id = UNHEX(:live) AND c.active = 1
                    AND ct.description IS NOT NULL AND ct.description != ''
                  ORDER BY c.id LIMIT {$limit} OFFSET {$offset}",
-                ['lang' => $languageId, 'live' => Defaults::LIVE_VERSION]
+                ['lang' => $languageId, 'live' => Defaults::LIVE_VERSION],
             ),
             default => throw new \InvalidArgumentException('Report unterstützt product und category.'),
         };

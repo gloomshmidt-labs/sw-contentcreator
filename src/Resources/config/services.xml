@@ -108,6 +108,11 @@
             <argument type="service" id="Doctrine\DBAL\Connection"/>
         </service>
 
+        <!-- Lese-Schicht Job-Historie/Dry-Run-Ergebnisse fürs Admin -->
+        <service id="ContentCreator\Service\JobHistoryService">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+        </service>
+
         <!-- Zeilenumbruch-Scan/-Fix für CMS-Slots -->
         <service id="ContentCreator\Service\LineBreakScanner">
             <argument type="service" id="category.repository"/>
@@ -165,6 +170,7 @@
             <argument type="service" id="ContentCreator\Service\MediaRenamer"/>
             <argument type="service" id="ContentCreator\Service\UsageTracker"/>
             <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <argument type="service" id="ContentCreator\Service\JobHistoryService"/>
             <call method="setContainer">
                 <argument type="service" id="service_container"/>
             </call>

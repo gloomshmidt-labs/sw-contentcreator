@@ -1,0 +1,58 @@
+# PHPStan-Konfiguration für den Lauf IM Shopware-Container:
+#   docker exec -u www-data shopware php /tmp/phpstan.phar analyse \
+#     -c custom/plugins/ContentCreator/phpstan.neon
+# Die Shopware-Klassen kommen aus dem Shop-Autoloader — außerhalb des
+# Containers (z. B. CI ohne Shop-Installation) ist der Lauf nicht möglich.
+parameters:
+    level: 6
+    paths:
+        - src
+    bootstrapFiles:
+        - /var/www/html/vendor/autoload.php
+    ignoreErrors:
+        # Bewusst defensive ??-Fallbacks auf Array-Shapes, die laut Typ heute
+        # immer belegt sind (usage['input'/'output'], WRITABLE-Map,
+        # preg_match_all-Ergebnis) — Schutz gegen künftige Shape-Änderungen,
+        # kein Verhalten betroffen.
+        -
+            identifier: nullCoalesce.offset
+            path: src/MessageQueue/BatchGenerateHandler.php
+        -
+            identifier: nullCoalesce.offset
+            path: src/Service/ContentGenerator.php
+        -
+            identifier: nullCoalesce.offset
+            path: src/Service/ReadabilityChecker.php
+        # Defensive ??-/Null-Guards auf Entity-Gettern, die in Shopware 6.7
+        # nicht-nullable typisiert sind (getProductNumber, getUrl,
+        # getNavigationCategoryId) — Core-Signaturen können sich ändern.
+        -
+            identifier: nullCoalesce.expr
+            path: src/Service/FactLoader.php
+        -
+            identifier: notIdentical.alwaysTrue
+            path: src/Service/FactLoader.php
+        # is_array-Guard: getBreadcrumb() ist als array typisiert, liefert bei
+        # fehlender Übersetzung aber historisch schon mal null/Unerwartetes.
+        -
+            identifier: function.alreadyNarrowedType
+            path: src/Service/FactLoader.php
+        # Toter Guard nach Early-Return (mb_strlen <= 4 kehrt vorher zurück) —
+        # Bedingung dokumentiert die Regel-Absicht der ert-Flexion, harmlos.
+        -
+            identifier: greater.alwaysTrue
+            path: src/Service/QualityChecker.php
+        # Guard gegen leere SPARING_DE-Konstante — greift erst, falls die
+        # Liste bei einer Regelpflege geleert wird.
+        -
+            identifier: identical.alwaysFalse
+            path: src/Service/ForbiddenPhrases.php
+        # Defensiver Null-Check auf einer im CLI-Ablauf immer gesetzten
+        # String-Variable ($writeEntityType) — dokumentiert die Schreibbedingung.
+        -
+            identifier: notIdentical.alwaysTrue
+            path: src/Command/GenerateCommand.php
+        # HINWEIS: src/ScheduledTask/FillMissingContentTaskHandler.php:81
+        # (property.notFound, $this->logger) wird BEWUSST NICHT ignoriert —
+        # echter Laufzeit-Bug (Parent-Property heißt exceptionLogger), muss
+        # im Code behoben werden.

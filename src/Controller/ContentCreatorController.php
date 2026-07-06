@@ -2,6 +2,7 @@
 
 namespace ContentCreator\Controller;
 
+use ContentCreator\Core\Content\GenerationJob\GenerationJobCollection;
 use ContentCreator\Service\BatchDispatcher;
 use ContentCreator\Service\CannibalizationScanner;
 use ContentCreator\Service\ContentBackupService;
@@ -10,13 +11,14 @@ use ContentCreator\Service\ContentWriter;
 use ContentCreator\Service\FactLoader;
 use ContentCreator\Service\FreshnessScanner;
 use ContentCreator\Service\GapScanner;
+use ContentCreator\Service\JobHistoryService;
 use ContentCreator\Service\LineBreakScanner;
 use ContentCreator\Service\MediaRenamer;
-use ContentCreator\Service\UsageTracker;
 use ContentCreator\Service\Provider\AiRequest;
 use ContentCreator\Service\ProviderRegistry;
 use ContentCreator\Service\QualityChecker;
 use ContentCreator\Service\QualityReport;
+use ContentCreator\Service\UsageTracker;
 use Doctrine\DBAL\Connection;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
@@ -31,6 +33,9 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route(defaults: ['_routeScope' => ['api']])]
 class ContentCreatorController extends AbstractController
 {
+    /**
+     * @param EntityRepository<GenerationJobCollection> $generationJobRepository
+     */
     public function __construct(
         private readonly ContentGenerator $generator,
         private readonly ProviderRegistry $providerRegistry,
@@ -47,7 +52,8 @@ class ContentCreatorController extends AbstractController
         private readonly FreshnessScanner $freshnessScanner,
         private readonly MediaRenamer $mediaRenamer,
         private readonly UsageTracker $usageTracker,
-        private readonly Connection $connection
+        private readonly Connection $connection,
+        private readonly JobHistoryService $jobHistory,
     ) {
     }
 
@@ -184,6 +190,9 @@ class ContentCreatorController extends AbstractController
         $entityType = $data['entityType'] ?? null;
         $id = $data['id'] ?? null;
         $ctx = \is_array($data['context'] ?? null) ? $data['context'] : [];
+        // SSRF-Schutz: Bild-URLs kommen ausschließlich aus den DB-Fakten
+        // (media->getUrl()/Thumbnails), nie aus dem Request
+        unset($ctx['imageUrl'], $ctx['imageUrlSmall'], $ctx['translateFromAlt']);
 
         // Gewählte Sprache steuert Fakten-Sprache + Prompt-Sprache (mit System-Default-Fallback).
         $languageId = (\is_string($data['languageId'] ?? null) && $data['languageId'] !== '') ? $data['languageId'] : null;
@@ -215,7 +224,7 @@ class ContentCreatorController extends AbstractController
                 $data['provider'] ?? null,
                 $data['model'] ?? null,
                 $this->modeFrom($data),
-                $this->metaFieldsFrom($data)
+                $this->metaFieldsFrom($data),
             );
 
             return new JsonResponse(['success' => true, 'result' => $result]);
@@ -234,7 +243,7 @@ class ContentCreatorController extends AbstractController
             $result = $provider->generate(new AiRequest(
                 system: 'Antworte ausschließlich mit dem Wort: OK',
                 userPrompt: 'Bitte antworte mit OK.',
-                maxTokens: 20
+                maxTokens: 20,
             ));
 
             return new JsonResponse([
@@ -280,7 +289,7 @@ class ContentCreatorController extends AbstractController
                 $context,
                 $this->modeFrom($data),
                 $this->metaFieldsFrom($data),
-                (bool) ($data['dryRun'] ?? false)
+                (bool) ($data['dryRun'] ?? false),
             );
         } catch (\InvalidArgumentException $e) {
             return new JsonResponse(['success' => false, 'error' => $e->getMessage()], 400);
@@ -292,23 +301,7 @@ class ContentCreatorController extends AbstractController
     #[Route(path: '/api/content-creator/batch-jobs', name: 'api.content-creator.batch.jobs', defaults: ['_acl' => ['content_creator.viewer']], methods: ['GET'])]
     public function recentJobs(): JsonResponse
     {
-        $rows = $this->connection->fetchAllAssociative(
-            "SELECT LOWER(HEX(j.id)) AS id, j.status, j.entity_type AS entityType, j.types,
-                    j.dry_run AS dryRun, j.total, j.processed, j.failed, j.rejected, j.created_at AS createdAt,
-                    (SELECT COUNT(*) FROM content_creator_batch_result r
-                      WHERE r.job_id = j.id AND r.passed = 1 AND r.applied = 0) AS openResults
-             FROM content_creator_generation_job j
-             ORDER BY j.created_at DESC
-             LIMIT 10"
-        );
-        foreach ($rows as &$row) {
-            $row['dryRun'] = (bool) $row['dryRun'];
-            foreach (['total', 'processed', 'failed', 'rejected', 'openResults'] as $int) {
-                $row[$int] = (int) $row[$int];
-            }
-        }
-
-        return new JsonResponse(['success' => true, 'jobs' => $rows]);
+        return new JsonResponse(['success' => true, 'jobs' => $this->jobHistory->recentJobs()]);
     }
 
     #[Route(path: '/api/content-creator/batch/{jobId}', name: 'api.content-creator.batch.status', defaults: ['_acl' => ['content_creator.viewer']], methods: ['GET'])]
@@ -331,11 +324,8 @@ class ContentCreatorController extends AbstractController
             'model' => $job->getModel(),
             'dryRun' => $job->getDryRun(),
             // Zählt Ergebnis-ZEILEN (je Typ eine) — die Item-Zähler oben zählen Objekte
-            'pendingResults' => $job->getDryRun() ? (int) $this->connection->fetchOne(
-                'SELECT COUNT(*) FROM content_creator_batch_result WHERE job_id = UNHEX(:job) AND passed = 1 AND applied = 0',
-                ['job' => $jobId]
-            ) : 0,
-            'issues' => $this->jobIssues($jobId),
+            'pendingResults' => $job->getDryRun() ? $this->jobHistory->pendingResultCount($jobId) : 0,
+            'issues' => $this->jobHistory->jobIssues($jobId),
         ]]);
     }
 
@@ -345,38 +335,7 @@ class ContentCreatorController extends AbstractController
     #[Route(path: '/api/content-creator/batch/{jobId}/results', name: 'api.content-creator.batch.results', defaults: ['_acl' => ['content_creator.viewer']], methods: ['GET'])]
     public function batchResults(string $jobId): JsonResponse
     {
-        $rows = $this->connection->fetchAllAssociative(
-            'SELECT LOWER(HEX(id)) AS id, LOWER(HEX(entity_id)) AS entityId, content_type AS type, payload
-             FROM content_creator_batch_result
-             WHERE job_id = UNHEX(:job) AND passed = 1 AND applied = 0
-             ORDER BY created_at ASC LIMIT 200',
-            ['job' => $jobId]
-        );
-
-        // Anzeigenamen in der Sprache des Jobs (nicht in einer beliebigen)
-        $jobLanguageId = (string) $this->connection->fetchOne(
-            'SELECT LOWER(HEX(language_id)) FROM content_creator_generation_job WHERE id = UNHEX(:job)',
-            ['job' => $jobId]
-        );
-
-        $results = [];
-        foreach ($rows as $row) {
-            $payload = json_decode((string) $row['payload'], true) ?: [];
-            $results[] = [
-                'id' => (string) $row['id'],
-                'entityId' => (string) $row['entityId'],
-                'type' => (string) $row['type'],
-                'content' => $payload['content'] ?? null,
-                'meta' => $payload['meta'] ?? null,
-                'score' => $payload['quality']['score'] ?? null,
-                'name' => $this->entityDisplayName((string) $row['type'], (string) $row['entityId'], $jobLanguageId ?: null),
-                'imagePath' => $row['type'] === \ContentCreator\Service\PromptBuilder::TYPE_MEDIA_ALT
-                    ? (string) ($this->connection->fetchOne('SELECT path FROM media WHERE id = UNHEX(:id)', ['id' => $row['entityId']]) ?: '')
-                    : '',
-            ];
-        }
-
-        return new JsonResponse(['success' => true, 'results' => $results]);
+        return new JsonResponse(['success' => true, 'results' => $this->jobHistory->batchResults($jobId)]);
     }
 
     /**
@@ -388,7 +347,7 @@ class ContentCreatorController extends AbstractController
         $data = $this->jsonBody($request);
         $payloadJson = $this->connection->fetchOne(
             'SELECT payload FROM content_creator_batch_result WHERE id = UNHEX(:id) AND applied = 0',
-            ['id' => $resultId]
+            ['id' => $resultId],
         );
         if ($payloadJson === false) {
             return new JsonResponse(['success' => false, 'error' => 'Ergebnis nicht gefunden oder bereits übernommen.'], 404);
@@ -403,82 +362,10 @@ class ContentCreatorController extends AbstractController
         }
         $this->connection->executeStatement(
             'UPDATE content_creator_batch_result SET payload = :payload WHERE id = UNHEX(:id)',
-            ['payload' => json_encode($payload, \JSON_THROW_ON_ERROR), 'id' => $resultId]
+            ['payload' => json_encode($payload, \JSON_THROW_ON_ERROR), 'id' => $resultId],
         );
 
         return new JsonResponse(['success' => true]);
-    }
-
-    /**
-     * Anzeigename fürs Review: Medien → Dateiname, sonst übersetzter Name.
-     */
-    private function entityDisplayName(string $type, string $entityId, ?string $languageId = null): string
-    {
-        if ($type === \ContentCreator\Service\PromptBuilder::TYPE_MEDIA_ALT) {
-            return (string) ($this->connection->fetchOne(
-                'SELECT file_name FROM media WHERE id = UNHEX(:id)',
-                ['id' => $entityId]
-            ) ?: '');
-        }
-        foreach (['product_translation' => 'product_id', 'category_translation' => 'category_id', 'product_manufacturer_translation' => 'product_manufacturer_id'] as $table => $fk) {
-            // Erst die Zielsprache versuchen, dann beliebige (Vererbungs-Fallback)
-            if ($languageId !== null) {
-                $name = $this->connection->fetchOne(
-                    'SELECT name FROM ' . $table . ' WHERE ' . $fk . ' = UNHEX(:id) AND language_id = UNHEX(:lang) AND name IS NOT NULL LIMIT 1',
-                    ['id' => $entityId, 'lang' => $languageId]
-                );
-                if ($name) {
-                    return (string) $name;
-                }
-            }
-            $name = $this->connection->fetchOne(
-                'SELECT name FROM ' . $table . ' WHERE ' . $fk . ' = UNHEX(:id) AND name IS NOT NULL LIMIT 1',
-                ['id' => $entityId]
-            );
-            if ($name) {
-                return (string) $name;
-            }
-        }
-
-        return '';
-    }
-
-    /**
-     * Gründe der nicht bestandenen Ergebnis-Zeilen (Gate-Ablehnung oder Fehler)
-     * für die Anzeige im Admin — beantwortet das "Warum?" nach einem Lauf.
-     *
-     * @return list<array{entityId: string, type: string, reason: string}>
-     */
-    private function jobIssues(string $jobId): array
-    {
-        $rows = $this->connection->fetchAllAssociative(
-            'SELECT LOWER(HEX(entity_id)) AS entityId, content_type AS type, payload
-             FROM content_creator_batch_result
-             WHERE job_id = UNHEX(:job) AND passed = 0
-             ORDER BY created_at ASC LIMIT 20',
-            ['job' => $jobId]
-        );
-
-        $issues = [];
-        foreach ($rows as $row) {
-            $payload = json_decode((string) $row['payload'], true) ?: [];
-            if (\is_string($payload['error'] ?? null) && $payload['error'] !== '') {
-                $reason = 'Fehler: ' . mb_substr($payload['error'], 0, 220);
-            } else {
-                $quality = $payload['quality'] ?? [];
-                $parts = ['Score ' . ($quality['score'] ?? '?') . ' > Schwelle ' . ($quality['threshold'] ?? '?')];
-                foreach (($quality['lengthIssues'] ?? []) as $issue) {
-                    $parts[] = ($issue['field'] ?? '?') . ': ' . ($issue['length'] ?? '?') . ' Zeichen';
-                }
-                if (($quality['missingFacts'] ?? []) !== []) {
-                    $parts[] = 'Fehlende Fakten: ' . implode(', ', \array_slice($quality['missingFacts'], 0, 5));
-                }
-                $reason = 'Gate: ' . implode(' | ', $parts);
-            }
-            $issues[] = ['entityId' => (string) $row['entityId'], 'type' => (string) $row['type'], 'reason' => $reason];
-        }
-
-        return $issues;
     }
 
     /**
@@ -499,7 +386,7 @@ class ContentCreatorController extends AbstractController
             'SELECT LOWER(HEX(id)) id, LOWER(HEX(entity_id)) entity_id, content_type, payload
              FROM content_creator_batch_result
              WHERE job_id = UNHEX(:job) AND passed = 1 AND applied = 0',
-            ['job' => $jobId]
+            ['job' => $jobId],
         );
 
         $applied = 0;
@@ -518,11 +405,11 @@ class ContentCreatorController extends AbstractController
                     $languageId,
                     (string) $row['content_type'],
                     $payload,
-                    $langContext
+                    $langContext,
                 );
                 $this->connection->executeStatement(
                     'UPDATE content_creator_batch_result SET applied = 1 WHERE id = UNHEX(:id)',
-                    ['id' => $row['id']]
+                    ['id' => $row['id']],
                 );
                 $applied++;
             } catch (\Throwable) {
@@ -662,7 +549,7 @@ class ContentCreatorController extends AbstractController
                     $fields['entityType'],
                     $fields['languageId'],
                     $data['keyword'],
-                    \is_string($data['excludeId'] ?? null) ? $data['excludeId'] : null
+                    \is_string($data['excludeId'] ?? null) ? $data['excludeId'] : null,
                 )]);
             }
 
@@ -682,7 +569,7 @@ class ContentCreatorController extends AbstractController
         }
 
         $whitelist = QualityChecker::parseWhitelist(
-            (string) $this->systemConfig->get('ContentCreator.config.qualityWhitelist')
+            (string) $this->systemConfig->get('ContentCreator.config.qualityWhitelist'),
         );
 
         try {
@@ -691,7 +578,7 @@ class ContentCreatorController extends AbstractController
                 $fields['languageId'],
                 $this->factLoader->langCode($fields['languageId']),
                 max(0, (int) ($data['offset'] ?? 0)),
-                $whitelist
+                $whitelist,
             );
 
             return new JsonResponse(['success' => true] + $page);

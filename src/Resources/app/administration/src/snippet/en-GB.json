@@ -272,5 +272,12 @@
             "fixAll": "Clean up all",
             "fixed": "{fixed} slot(s) cleaned"
         }
+    },
+    "sw-privileges": {
+        "permissions": {
+            "content_creator": {
+                "label": "ContentCreator (AI-powered SEO texts)"
+            }
+        }
     }
 }

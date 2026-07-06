@@ -2,6 +2,7 @@
 
 namespace ContentCreator\Service;
 
+use Shopware\Core\Content\Category\CategoryCollection;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
@@ -17,6 +18,9 @@ class LineBreakScanner
 {
     private const PAGE_SIZE = 50;
 
+    /**
+     * @param EntityRepository<CategoryCollection> $categoryRepository
+     */
     public function __construct(private readonly EntityRepository $categoryRepository)
     {
     }

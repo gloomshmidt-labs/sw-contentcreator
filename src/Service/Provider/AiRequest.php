@@ -18,7 +18,7 @@ class AiRequest
         public ?string $imageB64 = null,
         public ?string $imageMime = null,
         /** Web-Recherche erlauben (nur Claude: web_search-Server-Tool). */
-        public bool $allowWebSearch = false
+        public bool $allowWebSearch = false,
     ) {
     }
 }

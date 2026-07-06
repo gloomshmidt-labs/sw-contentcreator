@@ -1,0 +1,26 @@
+{% block sw_cc_selection_list %}
+<sw-entity-single-select
+    :entity="entityDalName"
+    :context="languageContext"
+    :criteria="entityCriteria"
+    :label="$tc('sw-content-creator.batch.addEntity')"
+    :value="addEntityValue"
+    @update:value="addEntity">
+</sw-entity-single-select>
+
+<div v-if="selectedIds.length" style="margin-top:8px;">
+    <div style="display:flex; align-items:center; gap:12px;">
+        <span style="font-weight:600;">{{ $tc('sw-content-creator.batch.selectedCount', { count: selectedIds.length }, selectedIds.length) }}</span>
+        <sw-button size="small" @click="$emit('clear')">{{ $tc('sw-content-creator.batch.clearSelection') }}</sw-button>
+    </div>
+    <div style="max-height:260px; overflow-y:auto; border:1px solid #e5e9f0; border-radius:4px; padding:4px 8px; margin-top:6px;">
+        <div v-for="id in selectedIds.slice(0, 500)" :key="id" style="display:flex; align-items:center; gap:8px; padding:2px 0; font-size:13px;">
+            <span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ selectionNames[id] || id }}</span>
+            <button type="button" style="border:none; background:none; cursor:pointer; color:#758ca3;" @click="$emit('remove', id)">✕</button>
+        </div>
+        <p v-if="selectedIds.length > 500" style="color:#758ca3; font-size:12px; padding:4px 0;">
+            {{ $tc('sw-content-creator.batch.andMore', { count: selectedIds.length - 500 }, selectedIds.length - 500) }}
+        </p>
+    </div>
+</div>
+{% endblock %}

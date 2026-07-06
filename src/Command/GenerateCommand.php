@@ -21,14 +21,14 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  */
 #[AsCommand(
     name: 'content-creator:generate',
-    description: 'Generiert einen SEO-Text über den konfigurierten KI-Provider (Test/CLI).'
+    description: 'Generiert einen SEO-Text über den konfigurierten KI-Provider (Test/CLI).',
 )]
 class GenerateCommand extends Command
 {
     public function __construct(
         private readonly ContentGenerator $generator,
         private readonly FactLoader $factLoader,
-        private readonly ContentWriter $writer
+        private readonly ContentWriter $writer,
     ) {
         parent::__construct();
     }
@@ -121,7 +121,7 @@ class GenerateCommand extends Command
                 $input->getOption('provider') ?: null,
                 $input->getOption('model') ?: null,
                 $mode,
-                $metaFields
+                $metaFields,
             );
         } catch (\Throwable $e) {
             $io->error($e->getMessage());
@@ -140,7 +140,7 @@ class GenerateCommand extends Command
             $quality['threshold'],
             $quality['passed'] ? '<info>BESTANDEN</info>' : '<error>NICHT bestanden</error>',
             $quality['attempts'],
-            $quality['originalScore'] !== null ? ' – Original-Score: ' . $quality['originalScore'] : ''
+            $quality['originalScore'] !== null ? ' – Original-Score: ' . $quality['originalScore'] : '',
         ));
         foreach ($quality['findings'] as $finding) {
             $io->writeln(sprintf('  <comment>%s</comment> (%dx, Score %d)', $finding['pattern'], $finding['count'], $finding['score']));

@@ -17,6 +17,7 @@ class ContentBackupEntity extends Entity
 
     protected string $contentType = '';
 
+    /** @var array<string, mixed>|null */
     protected ?array $payload = null;
 
     protected ?\DateTimeInterface $restoredAt = null;
@@ -61,11 +62,17 @@ class ContentBackupEntity extends Entity
         $this->contentType = $contentType;
     }
 
+    /**
+     * @return array<string, mixed>|null
+     */
     public function getPayload(): ?array
     {
         return $this->payload;
     }
 
+    /**
+     * @param array<string, mixed>|null $payload
+     */
     public function setPayload(?array $payload): void
     {
         $this->payload = $payload;

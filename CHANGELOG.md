@@ -3,6 +3,41 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.34.0] - 2026-07-07
+
+### Konsolidierungs-Release (behavior-identisches Refactoring, 9 Spezialisten-Audits)
+
+#### Struktur
+- `ContentGenerator::generate()` in 10 benannte Teilschritte zerlegt (resolveMode/resolveModel/buildSystemPrompt/prepareAltTranslation/loadImage/runGateLoop/applyMetaLengthFixes/buildResult …) — Ablauf jetzt in ~60 Zeilen lesbar, Verhalten identisch
+- NEU `Service/JobHistoryService`: Job-Historie, Batch-Ergebnisse, Ablehnungsgründe und Anzeigenamen-Auflösung aus dem Controller extrahiert
+- Admin: drei neue Komponenten `sw-cc-media-card` (Bilder & Alt-Texte), `sw-cc-selection-list` (Auswahl), `sw-cc-recent-jobs` (Frühere Läufe) — Seiten entsprechend verschlankt
+
+#### Tests & Tooling (neu)
+- 51 PHPUnit-Tests / 97 Assertions für die pure Logik (Dateinamen-Vorschlag, Redirect-Ketten-Glättung, FactGuard, QualityChecker, PromptSanitizer) — Aufruf: `vendor/bin/phpunit -c custom/plugins/ContentCreator/phpunit.xml` im Container
+- PHPStan Level 6 (113 Findings → 0 offene; Repository-Generics als PHPDoc), php-cs-fixer-Konfiguration (kompletter Codebestand einmalig formatiert), ehrliche GitHub-Actions-CI (php -l + cs-fixer-Dry-Run)
+
+#### Security (Audit + Fixes)
+- SSRF-Schutz: Bild-URLs für Vision können nicht mehr per Request-Kontext übersteuert werden (nur DB-abgeleitete media-URLs)
+- Prompt-Injection-Härtung: Alt-Übersetzungsquelle und Fokus-Keyword laufen jetzt durch den PromptSanitizer
+- Admin-XSS-Härtung: alle `v-html`-Ausgaben (LLM-Output, Bestandstexte, Diff) durch `safeHtml()` (Script-/Event-Handler-/javascript:-Stripping); Referenztext-Extraktion via DOMParser statt innerHTML
+- TLS-Verifikation beim serverseitigen Bild-Fetch aktiviert
+
+#### Performance (Audit + Fixes)
+- Redirect-Ketten-Glättung von O(n²) auf O(n): bei 16.500 Einträgen von ~48 s auf 0,08 s (Rück-Index statt Voll-Scan) — byte-identische Ausgabe
+- Dry-Run-Review: Anzeigenamen-N+1 beseitigt (~1.400 → max. 7 Queries bei 200 Zeilen)
+- Polling-Leak behoben: `beforeDestroy` → `beforeUnmount` (Vue 3) — Status-Polling stoppt jetzt wirklich beim Verlassen der Seite
+
+#### Lebenszyklus & i18n
+- `uninstall()` vervollständigt: customField-Keys (JSON_REMOVE aus allen Übersetzungstabellen), ACL-Privilegien aus Rollen, Storefront-Snippet-Overrides, Queue-Reste — bei „Daten behalten" weiterhin unangetastet
+- Fehlendes Privilegien-Label im Rollen-Editor ergänzt (DE/EN); Snippet-Parität verifiziert (244 Keys je Sprache)
+
+#### Bugfixes (bei den Audits gefunden)
+- Daily-Fill-Task: Zugriff auf nicht existierende Logger-Property → Fatal am Task-Ende (Property jetzt korrekt promoted)
+- Batch-Seite: fehlendes `entityDalName`-Computed — das „Objekt hinzufügen"-Feld war latent defekt
+
+#### Doku
+- README + CLAUDE.md auf neue Architektur aktualisiert; verifiziert: An KI-Provider fließen ausschließlich Katalogdaten, nie Kunden-/Bestelldaten
+
 ## [0.33.2] - 2026-07-06
 
 ### Fixed (4 robots.txt-Fehler der Folkmanis-Welle)
