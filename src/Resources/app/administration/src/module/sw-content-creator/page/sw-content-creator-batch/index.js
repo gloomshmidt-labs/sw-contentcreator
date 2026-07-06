@@ -34,6 +34,10 @@ Component.register('sw-content-creator-batch', {
             dryRunResultsBusy: false,
             workerStalled: false,
             stalledPolls: 0,
+            manufacturerFilterId: null,
+            selectionNames: {},
+            addEntityValue: null,
+            recentJobs: [],
         };
     },
 

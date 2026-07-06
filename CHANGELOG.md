@@ -3,6 +3,11 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.33.1] - 2026-07-06
+
+### Fixed
+- **Leere Stapelverarbeitungs-Seite beim Wechsel innerhalb des Plugins** (nur F5 half): Vier Datenfelder (`recentJobs`, `manufacturerFilterId`, `selectionNames`, `addEntityValue`) waren nie in `data()` deklariert — beim Rendern nach einer In-App-Navigation krachte `recentJobs.length` auf undefined und Vue brach den Seitenaufbau ab (Kopfzeile blieb sichtbar). Navigation Generator ↔ Stapelverarbeitung jetzt in beide Richtungen ohne Reload verifiziert.
+
 ## [0.33.0] - 2026-07-05
 
 ### Added (bequeme Nachkorrektur einzelner Alt-Texte)
