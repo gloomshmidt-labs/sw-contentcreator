@@ -68,7 +68,9 @@
             "checkWorker": "Message-Worker: Admin-Tab offen lassen oder messenger:consume auf dem Server (für Stapelverarbeitung)",
             "checkBatchModel": "Batch-Modell konfiguriert (günstigeres Modell für Massenläufe)",
             "checkRedirect": "Redirect-Datei für Bild-Umbenennungen konfiguriert (optional)",
-            "checkRedirectHint": "Nur nötig, wenn SEO-Dateinamen mit 301-Redirects genutzt werden."
+            "checkRedirectHint": "Nur nötig, wenn SEO-Dateinamen mit 301-Redirects genutzt werden.",
+            "animalProfileHelp": "Baustein des Spielwaren-Profils (Lexikon-Absatz zum echten Tier). Bei branchenfremden Shops ausschalten — die Blöcke verschwinden dann vollständig aus den Prompts.",
+            "funFactHelp": "Baustein des Spielwaren-Profils. Bei branchenfremden Shops ausschalten."
         },
         "generator": {
             "title": "Texte generieren",

@@ -68,7 +68,9 @@
             "checkWorker": "Message worker: keep an admin tab open or run messenger:consume on the server (for batch processing)",
             "checkBatchModel": "Batch model configured (cheaper model for bulk runs)",
             "checkRedirect": "Redirect file for image renames configured (optional)",
-            "checkRedirectHint": "Only needed when using SEO file names with 301 redirects."
+            "checkRedirectHint": "Only needed when using SEO file names with 301 redirects.",
+            "animalProfileHelp": "Part of the toy-shop profile (encyclopedia paragraph about the real animal). Disable for other industries — the blocks then disappear from the prompts entirely.",
+            "funFactHelp": "Part of the toy-shop profile. Disable for other industries."
         },
         "generator": {
             "title": "Generate texts",

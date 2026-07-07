@@ -197,11 +197,13 @@
             <sw-card :title="$tc('sw-content-creator.settings.textCard')" :isLoading="isLoading">
                 <sw-switch-field
                     :label="$tc('sw-content-creator.settings.animalProfile')"
+                    :helpText="$tc('sw-content-creator.settings.animalProfileHelp')"
                     :value="get('includeAnimalProfile')"
                     @update:value="(v) => set('includeAnimalProfile', v)">
                 </sw-switch-field>
                 <sw-switch-field
                     :label="$tc('sw-content-creator.settings.funFact')"
+                    :helpText="$tc('sw-content-creator.settings.funFactHelp')"
                     :value="get('includeFunFact')"
                     @update:value="(v) => set('includeFunFact', v)">
                 </sw-switch-field>
