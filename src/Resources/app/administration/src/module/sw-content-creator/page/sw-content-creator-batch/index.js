@@ -345,8 +345,11 @@ Component.register('sw-content-creator-batch', {
                     this.createNotificationSuccess({
                         message: this.$tc('sw-content-creator.batch.committed', { applied: res.applied, errors: res.errors }, res.applied),
                     });
-                    this.job = { ...this.job, committed: true };
+                    // Zurück zur „Frühere Läufe"-Übersicht (User-Wunsch):
+                    // Job-Ansicht schließen und Liste aktualisieren
+                    this.job = null;
                     this.dryRunResults = null;
+                    this.loadRecentJobs();
                 }));
         },
 

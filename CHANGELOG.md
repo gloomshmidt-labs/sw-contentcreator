@@ -3,6 +3,11 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.36.3] - 2026-07-08
+
+### Fixed
+- Nach „Übernehmen" kehrt die Batch-Seite jetzt automatisch zur „Frühere Läufe"-Übersicht zurück (vorher war ein Seiten-Reload nötig).
+
 ## [0.36.2] - 2026-07-08
 
 ### Fixed
