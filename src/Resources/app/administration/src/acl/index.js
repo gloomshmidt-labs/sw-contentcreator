@@ -4,7 +4,9 @@ Shopware.Service('privileges').addPrivilegeMappingEntry({
     key: 'content_creator',
     roles: {
         viewer: {
-            privileges: ['product:read', 'category:read', 'media:read'],
+            // product_manufacturer:read: der Hersteller-Filter der Scans braucht
+            // Lese-Zugriff — auch für Integrationen (eingezäunter API-Betrieb)
+            privileges: ['product:read', 'category:read', 'media:read', 'product_manufacturer:read'],
             dependencies: [],
         },
         editor: {

@@ -3,6 +3,11 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.36.1] - 2026-07-07
+
+### Fixed
+- ACL: `product_manufacturer:read` zu den Viewer-Abhängigkeiten ergänzt — der Hersteller-Filter der Scans braucht Hersteller-Lesezugriff, auch im eingezäunten API-Betrieb (Integrationen). Bestehende Rollen: einmal öffnen und neu speichern, damit die erweiterte Abhängigkeitsliste übernommen wird.
+
 ## [0.36.0] - 2026-07-07
 
 ### Added (Subscription-Betrieb: externe Generierung durch die Gate-Pipeline)
