@@ -72,6 +72,7 @@ KI-gestützte SEO-Texterstellung UND -Optimierung (Produkt/Kategorie/Meta/Media-
 - **Batch braucht einen laufenden Worker** (Admin-Worker oder `messenger:consume`), sonst bleiben Jobs auf `running`.
 - **Meta-Ausgabe** kommt als JSON — `ContentGenerator::extractJson()` toleriert Codeblöcke.
 - **Modellwahl:** Einzeltexte `anthropicModel` (Default Opus 4.8), Batch `batchModel` (Default Sonnet 4.6, günstiger).
+- **Vor jedem Push mit PHP-Änderungen:** `php /tmp/php-cs-fixer.phar fix custom/plugins/ContentCreator/src --config=custom/plugins/ContentCreator/.php-cs-fixer.dist.php` im Container laufen lassen (phar ggf. von GitHub laden) — die CI prüft den Stil im Dry-Run und wird sonst rot.
 - **Vor jedem Push:** Anonymisierungs-Grep (Markennamen/personenbezogene Daten) — seit 0.7.0 gibt es keinen brandName-Default mehr (Shop-Marke kommt aus der Kanal-Domain).
 
 ## Tests & Tooling (seit 0.34.0)
