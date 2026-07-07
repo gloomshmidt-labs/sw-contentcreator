@@ -846,6 +846,77 @@ class ContentGenerator
      * @return array<string, string>|null
      */
     /**
+     * Gate-Prüfung für EXTERN generierte Inhalte (z.B. KI-Assistent über die
+     * Admin-API): dieselben Gates wie die interne Schleife — KI-Muster-Score,
+     * Meta-/Feed-Längen, Fakten-Erhalt — nur ohne LLM-Aufruf. Das Feedback ist
+     * dasselbe, das sonst als Retry-Prompt dient: der externe Erzeuger kann
+     * damit nachbessern und erneut einreichen.
+     *
+     * @param array<string, mixed> $ctx     Fakten der Ziel-Entity (FactLoader)
+     * @param array<string, mixed> $payload {content}|{meta:{...}}|{feed:{...}}
+     *
+     * @return array{passed: bool, score: int, level: string, findings: array, lengthIssues: array, missingFacts: array, feedback: string}
+     */
+    public function validateExternal(string $type, string $lang, string $mode, array $ctx, array $payload): array
+    {
+        $lang = str_starts_with(strtolower($lang), 'en') ? 'en' : 'de';
+        $threshold = $this->maxScore();
+        $whitelist = $this->whitelist();
+        $lengthIssues = [];
+        $missingFacts = [];
+        $feedbackParts = [];
+
+        if ($type === PromptBuilder::TYPE_PRODUCT_FEED) {
+            $feed = [
+                'feedTitle' => trim((string) ($payload['feed']['feedTitle'] ?? '')),
+                'feedDescription' => strip_tags(trim((string) ($payload['feed']['feedDescription'] ?? ''))),
+            ];
+            $scoreText = $feed['feedTitle'] . "\n" . $feed['feedDescription'];
+            $lengthIssues = $this->feedLengthIssues($feed, $lang);
+        } elseif (\in_array($type, PromptBuilder::META_TYPES, true)) {
+            $meta = \is_array($payload['meta'] ?? null) ? $payload['meta'] : [];
+            $scoreText = $this->metaScoreText($meta, $mode, null);
+            $lengthIssues = $this->metaLengthIssues($meta, $lang, $mode, null);
+        } else {
+            $scoreText = trim((string) ($payload['content'] ?? ''));
+            if ($mode === PromptBuilder::MODE_OPTIMIZE && $type !== PromptBuilder::TYPE_MEDIA_ALT) {
+                $existing = trim((string) ($ctx['existingText'] ?? ''));
+                if ($existing !== '') {
+                    $missingFacts = $this->factGuard->missingFacts($existing, $scoreText, isset($ctx['mpn']) ? (string) $ctx['mpn'] : null);
+                }
+            }
+        }
+
+        $analysis = $scoreText !== ''
+            ? $this->qualityChecker->analyse($scoreText, $lang, $whitelist)
+            : ['score' => 100, 'level' => 'kritisch', 'findings' => []];
+        $passed = $scoreText !== '' && $analysis['score'] <= $threshold && $lengthIssues === [] && $missingFacts === [];
+
+        if ($scoreText === '') {
+            $feedbackParts[] = $lang === 'en' ? 'Content is empty.' : 'Inhalt ist leer.';
+        }
+        if ($analysis['score'] > $threshold) {
+            $feedbackParts[] = $this->qualityChecker->promptFeedback($analysis['findings'], $lang);
+        }
+        if ($lengthIssues !== []) {
+            $feedbackParts[] = $this->lengthFeedback($lengthIssues, $lang);
+        }
+        if ($missingFacts !== []) {
+            $feedbackParts[] = $this->factGuard->promptFeedback($missingFacts, $lang);
+        }
+
+        return [
+            'passed' => $passed,
+            'score' => (int) $analysis['score'],
+            'level' => (string) $analysis['level'],
+            'findings' => \array_slice($analysis['findings'], 0, 10),
+            'lengthIssues' => $lengthIssues,
+            'missingFacts' => $missingFacts,
+            'feedback' => implode("\n\n", array_filter($feedbackParts)),
+        ];
+    }
+
+    /**
      * Feed-JSON parsen: beide Felder müssen als nicht-leere Strings vorliegen.
      *
      * @return array{feedTitle: string, feedDescription: string}|null

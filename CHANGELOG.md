@@ -3,6 +3,11 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.36.0] - 2026-07-07
+
+### Added (Subscription-Betrieb: externe Generierung durch die Gate-Pipeline)
+- **`POST /api/content-creator/external-job`**: Extern erzeugte Inhalte (z.B. von einem KI-Assistenten über die Claude-Subscription statt per API-Key) durchlaufen DIESELBEN Server-Gates wie die interne Generierung — KI-Muster-Score, Meta-/Feed-Längen, FactGuard — und landen als normaler Dry-Run-Job in der „Frühere Läufe"-Review (Übernehmen inkl. Backups wie gewohnt). Abgelehnte Entwürfe erhalten das identische Korrektur-Feedback der internen Retry-Schleife zurück, sodass der Erzeuger nachbessern und erneut einreichen kann. Neu: `ContentGenerator::validateExternal()`; cc-Skript-Befehl `submit <datei.json>`.
+
 ## [0.35.0] - 2026-07-07
 
 ### Added (drei Features aus der Innovations-Runde)

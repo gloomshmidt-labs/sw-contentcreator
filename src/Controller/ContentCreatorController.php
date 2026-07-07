@@ -14,6 +14,7 @@ use ContentCreator\Service\GapScanner;
 use ContentCreator\Service\JobHistoryService;
 use ContentCreator\Service\LineBreakScanner;
 use ContentCreator\Service\MediaRenamer;
+use ContentCreator\Service\PromptBuilder;
 use ContentCreator\Service\Provider\AiRequest;
 use ContentCreator\Service\ProviderRegistry;
 use ContentCreator\Service\QualityChecker;
@@ -23,6 +24,7 @@ use Doctrine\DBAL\Connection;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
+use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\System\SystemConfig\SystemConfigService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -296,6 +298,97 @@ class ContentCreatorController extends AbstractController
         }
 
         return new JsonResponse(['success' => true, 'jobId' => $jobId, 'total' => \count($ids)]);
+    }
+
+    /**
+     * Extern generierte Inhalte (z.B. KI-Assistent per Subscription statt
+     * API-Key) durch DIESELBEN Gates in die normale Dry-Run-Review bringen:
+     * Jeder Entwurf wird geprüft (KI-Muster/Längen/Fakten), als batch_result
+     * gespeichert und im Admin unter „Frühere Läufe" reviewt/übernommen —
+     * identischer Weg wie Plugin-eigene Generierung, nur ohne LLM-Kosten.
+     */
+    #[Route(path: '/api/content-creator/external-job', name: 'api.content-creator.external-job', defaults: ['_acl' => ['content_creator.editor']], methods: ['POST'])]
+    public function externalJob(Request $request, Context $context): JsonResponse
+    {
+        $data = $this->jsonBody($request);
+        $fields = $this->requireFields($data, ['entityType', 'languageId']);
+        if ($fields instanceof JsonResponse) {
+            return $fields;
+        }
+        $entityType = (string) $fields['entityType'];
+        $languageId = (string) $fields['languageId'];
+        $mode = \is_string($data['mode'] ?? null) ? $data['mode'] : 'create';
+        // items separat: requireFields ist string-basiert und würde Arrays zerstören
+        $items = \is_array($data['items'] ?? null) ? array_slice($data['items'], 0, 200) : [];
+        if ($items === []) {
+            return new JsonResponse(['success' => false, 'error' => 'items ist leer.'], 400);
+        }
+
+        $factsContext = $this->factLoader->context($languageId);
+        $lang = $this->factLoader->langCode($languageId);
+        $jobId = Uuid::randomHex();
+        $verdicts = [];
+        $passedCount = 0;
+        $failedCount = 0;
+
+        foreach ($items as $item) {
+            $entityId = (string) ($item['entityId'] ?? '');
+            $type = (string) ($item['type'] ?? '');
+            if ($entityId === '' || !\in_array($type, PromptBuilder::TYPES, true)) {
+                $verdicts[] = ['entityId' => $entityId, 'passed' => false, 'feedback' => 'entityId/type ungültig'];
+                $failedCount++;
+                continue;
+            }
+
+            try {
+                $ctx = match ($entityType) {
+                    'product' => $this->factLoader->loadProduct($entityId, $factsContext),
+                    'category' => $this->factLoader->loadCategory($entityId, $factsContext),
+                    'media' => $this->factLoader->loadMedia($entityId, $factsContext),
+                    'manufacturer' => $this->factLoader->loadManufacturer($entityId, $factsContext),
+                    default => [],
+                };
+                $verdict = $this->generator->validateExternal($type, $lang, $mode, $ctx, $item);
+            } catch (\Throwable $e) {
+                $verdict = ['passed' => false, 'score' => 100, 'level' => 'kritisch', 'findings' => [], 'lengthIssues' => [], 'missingFacts' => [], 'feedback' => $e->getMessage()];
+            }
+
+            $payload = [
+                'content' => \is_string($item['content'] ?? null) ? $item['content'] : null,
+                'meta' => \is_array($item['meta'] ?? null) ? $item['meta'] : null,
+                'feed' => \is_array($item['feed'] ?? null) ? $item['feed'] : null,
+                'quality' => ['score' => $verdict['score'], 'level' => $verdict['level'], 'passed' => $verdict['passed'], 'findings' => $verdict['findings'], 'lengthIssues' => $verdict['lengthIssues'], 'missingFacts' => $verdict['missingFacts']],
+                'error' => $verdict['passed'] ? null : $verdict['feedback'],
+            ];
+            $this->connection->executeStatement(
+                'INSERT INTO content_creator_batch_result (id, job_id, entity_id, content_type, payload, passed, applied, created_at)
+                 VALUES (UNHEX(:id), UNHEX(:job), UNHEX(:entity), :type, :payload, :passed, 0, NOW(3))',
+                ['id' => Uuid::randomHex(), 'job' => $jobId, 'entity' => $entityId, 'type' => $type, 'payload' => json_encode($payload, \JSON_THROW_ON_ERROR), 'passed' => $verdict['passed'] ? 1 : 0],
+            );
+            $verdict['passed'] ? $passedCount++ : $failedCount++;
+            $verdicts[] = ['entityId' => $entityId, 'passed' => $verdict['passed'], 'score' => $verdict['score'], 'feedback' => $verdict['passed'] ? '' : $verdict['feedback']];
+        }
+
+        $this->connection->executeStatement(
+            'INSERT INTO content_creator_generation_job (id, status, entity_type, types, item_ids, language_id, provider, model, mode, dry_run, total, processed, failed, rejected, created_at)
+             VALUES (UNHEX(:id), :status, :entityType, :types, :itemIds, UNHEX(:lang), :provider, :model, :mode, 1, :total, :processed, 0, :rejected, NOW(3))',
+            [
+                'id' => $jobId,
+                'status' => 'done',
+                'entityType' => $entityType,
+                'types' => json_encode(array_values(array_unique(array_map(static fn ($i) => (string) ($i['type'] ?? ''), $items)))),
+                'itemIds' => json_encode(array_values(array_unique(array_map(static fn ($i) => (string) ($i['entityId'] ?? ''), $items)))),
+                'lang' => $languageId,
+                'provider' => 'extern',
+                'model' => (string) ($data['source'] ?? 'claude-code'),
+                'mode' => $mode,
+                'total' => \count($items),
+                'processed' => $passedCount,
+                'rejected' => $failedCount,
+            ],
+        );
+
+        return new JsonResponse(['success' => true, 'jobId' => $jobId, 'passed' => $passedCount, 'rejected' => $failedCount, 'verdicts' => $verdicts]);
     }
 
     #[Route(path: '/api/content-creator/batch-jobs', name: 'api.content-creator.batch.jobs', defaults: ['_acl' => ['content_creator.viewer']], methods: ['GET'])]
