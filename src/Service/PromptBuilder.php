@@ -156,7 +156,7 @@ class PromptBuilder
         // den Einstellungen ersetzen das eingebaute Spielwaren-Profil; leer/nicht
         // gesetzt = eingebauter Standard bleibt aktiv
         $custom = $this->systemConfig->get(
-            $lang === 'en' ? 'ContentCreator.config.industryKeywordsEn' : 'ContentCreator.config.industryKeywordsDe'
+            $lang === 'en' ? 'ContentCreator.config.industryKeywordsEn' : 'ContentCreator.config.industryKeywordsDe',
         );
         if (\is_string($custom) && trim($custom) !== '') {
             return ($lang === 'en' ? 'KEYWORD CONVENTIONS (industry profile):' : 'KEYWORD-KONVENTIONEN (Branchen-Profil):')
@@ -215,7 +215,7 @@ class PromptBuilder
     private function industryQa(string $lang): string
     {
         $custom = $this->systemConfig->get(
-            $lang === 'en' ? 'ContentCreator.config.industryQaEn' : 'ContentCreator.config.industryQaDe'
+            $lang === 'en' ? 'ContentCreator.config.industryQaEn' : 'ContentCreator.config.industryQaDe',
         );
         if (\is_string($custom)) {
             $custom = trim($custom);
@@ -224,7 +224,7 @@ class PromptBuilder
             }
             $lines = implode("\n", array_map(
                 static fn (string $l) => '- ' . ltrim(PromptSanitizer::sanitize(trim($l)), '- '),
-                array_filter(explode("\n", $custom), static fn (string $l) => trim($l) !== '')
+                array_filter(explode("\n", $custom), static fn (string $l) => trim($l) !== ''),
             ));
 
             return $lines . "\n";
