@@ -26,7 +26,7 @@ Component.register('sw-content-creator-settings', {
         startupChecklist() {
             const provider = this.config['ContentCreator.config.provider'] || 'claude';
             const key = provider === 'openai'
-                ? this.config['ContentCreator.config.openAiApiKey']
+                ? this.config['ContentCreator.config.openaiApiKey']
                 : this.config['ContentCreator.config.anthropicApiKey'];
 
             return [
