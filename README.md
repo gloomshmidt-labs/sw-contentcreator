@@ -112,3 +112,17 @@ php php-cs-fixer.phar fix --config custom/plugins/ContentCreator/.php-cs-fixer.d
 ## Lizenz
 
 PolyForm Noncommercial License 1.0.0 — siehe [LICENSE](LICENSE).
+
+## Headless-Betrieb (API-Integration)
+
+Alle Plugin-Funktionen sind über die Admin-API erreichbar (`/api/content-creator/*`) und lassen sich damit auch ohne Admin-UI betreiben — z.B. durch Automatisierungen oder KI-Assistenten. Empfohlenes Setup nach dem Least-Privilege-Prinzip:
+
+1. **ACL-Rolle** anlegen (Einstellungen → System → Benutzer & Rechte → Rollen) mit ausschließlich den Privilegien `content_creator.viewer` und `content_creator.editor`.
+2. **Integration** anlegen (Einstellungen → System → Integrationen), *Administrator NICHT aktivieren*, stattdessen die Rolle aus Schritt 1 zuweisen.
+3. Zugriff per OAuth `client_credentials` (Access-Key + Secret). Die Integration erreicht damit NUR die Plugin-Endpoints — Produkte-, Kunden- und Systemverwaltung antworten mit 403.
+
+Empfohlener Arbeitsmodus für Automatisierungen: Batches immer als **Dry-Run** starten und die Übernahme (`commit`) als bewussten zweiten Schritt ausführen.
+
+## Datenschutz
+
+Bei der Generierung werden ausschließlich **Katalogdaten** an den konfigurierten KI-Provider (Anthropic bzw. OpenAI) übertragen: Produkt-/Kategorie-/Herstellernamen, Herstellernummern, vorhandene Beschreibungs- und Meta-Texte, Fokus-Keywords sowie Produktbilder (für Alt-Texte). **Kunden- und Bestelldaten werden nie übertragen** — das Plugin hat auf diese Daten keinerlei Zugriff (in `services.xml` sind ausschließlich Katalog-Repositories verdrahtet).

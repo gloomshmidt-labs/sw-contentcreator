@@ -73,6 +73,7 @@ class ContentGenerator
         }
 
         $isMeta = \in_array($type, PromptBuilder::META_TYPES, true);
+        $isFeed = $type === PromptBuilder::TYPE_PRODUCT_FEED;
 
         $ctx = $this->aliasExistingText($type, $ctx);
         $existingText = trim((string) ($ctx['existingText'] ?? ''));
@@ -109,6 +110,7 @@ class ContentGenerator
             $model,
             $metaFields,
             $isMeta,
+            $isFeed,
             $checkFacts,
             $existingText,
             $threshold,
@@ -167,7 +169,8 @@ class ContentGenerator
     {
         // Feld-Fallback: Optimieren ohne Bestand für DIESES Feld → automatisch
         // neu erstellen (unabhängig vom Bestand der anderen Felder)
-        if ($mode === PromptBuilder::MODE_OPTIMIZE && !$isMeta && $type !== PromptBuilder::TYPE_MEDIA_ALT && $existingText === '') {
+        if ($mode === PromptBuilder::MODE_OPTIMIZE && !$isMeta && $type !== PromptBuilder::TYPE_MEDIA_ALT
+            && $type !== PromptBuilder::TYPE_PRODUCT_FEED && $existingText === '') {
             return PromptBuilder::MODE_CREATE;
         }
 
@@ -314,6 +317,7 @@ class ContentGenerator
         ?string $model,
         ?array $metaFields,
         bool $isMeta,
+        bool $isFeed,
         bool $checkFacts,
         string $existingText,
         int $threshold,
@@ -349,6 +353,47 @@ class ContentGenerator
             $usage['output'] += $result->outputTokens;
             $resultModel = $result->model;
 
+            if ($isFeed) {
+                $feed = $this->tryParseFeed($result->text);
+                if ($feed === null) {
+                    if ($attempt >= $maxAttempts) {
+                        throw new \RuntimeException('Die KI-Antwort war kein gültiges Feed-JSON: ' . $result->text);
+                    }
+                    $feedback[] = $this->jsonFeedback($lang);
+                    continue;
+                }
+
+                $analysis = $this->qualityChecker->analyse($feed['feedTitle'] . "\n" . $feed['feedDescription'], $lang, $whitelist);
+                $lengthIssues = $this->feedLengthIssues($feed, $lang);
+                $passed = $analysis['score'] <= $threshold && $lengthIssues === [];
+
+                $weight = \count($lengthIssues) * 1000 + $analysis['score'];
+                if ($weight < $bestWeight) {
+                    $bestWeight = $weight;
+                    $best = [
+                        'meta' => null,
+                        'feed' => $feed,
+                        'content' => null,
+                        'analysis' => $analysis,
+                        'lengthIssues' => $lengthIssues,
+                        'missingFacts' => [],
+                        'passed' => $passed,
+                        'attempt' => $attempt,
+                        'raw' => $result->text,
+                    ];
+                }
+
+                if ($passed) {
+                    break;
+                }
+
+                $feedback[] = $this->lengthFeedback($lengthIssues, $lang);
+                if ($analysis['score'] > $threshold) {
+                    $feedback[] = $this->qualityChecker->promptFeedback($analysis['findings'], $lang);
+                }
+                continue;
+            }
+
             if ($isMeta) {
                 $meta = $this->tryParseMeta($result->text);
                 if ($meta === null) {
@@ -371,6 +416,7 @@ class ContentGenerator
                     $bestWeight = $weight;
                     $best = [
                         'meta' => $meta,
+                        'feed' => null,
                         'content' => null,
                         'analysis' => $analysis,
                         'lengthIssues' => $lengthIssues,
@@ -414,6 +460,7 @@ class ContentGenerator
                 $bestWeight = $weight;
                 $best = [
                     'meta' => null,
+                    'feed' => null,
                     'content' => $content,
                     'analysis' => $analysis,
                     'lengthIssues' => [],
@@ -520,6 +567,7 @@ class ContentGenerator
             'model' => $resultModel,
             'content' => $best['content'],
             'meta' => $best['meta'],
+            'feed' => $best['feed'] ?? null,
             'usage' => $usage,
             'raw' => $best['raw'],
             'quality' => [
@@ -797,6 +845,49 @@ class ContentGenerator
     /**
      * @return array<string, string>|null
      */
+    /**
+     * Feed-JSON parsen: beide Felder müssen als nicht-leere Strings vorliegen.
+     *
+     * @return array{feedTitle: string, feedDescription: string}|null
+     */
+    private function tryParseFeed(string $text): ?array
+    {
+        $data = json_decode($this->extractJson($text), true);
+        if (!\is_array($data)) {
+            return null;
+        }
+        $title = trim((string) ($data['feedTitle'] ?? ''));
+        $description = trim((string) ($data['feedDescription'] ?? ''));
+        if ($title === '' || $description === '') {
+            return null;
+        }
+
+        return ['feedTitle' => $title, 'feedDescription' => strip_tags($description)];
+    }
+
+    /**
+     * Feed-Längen-Gate: Google-Limits (Titel max. 150, Beschreibung max. 5000)
+     * plus eigene Qualitäts-Untergrenzen; bewusst weiter als die Meta-Pixel-Gates.
+     *
+     * @param array{feedTitle: string, feedDescription: string} $feed
+     *
+     * @return list<array{field: string, length: int, min: int, max: int}>
+     */
+    private function feedLengthIssues(array $feed, string $lang): array
+    {
+        $issues = [];
+        $titleLen = mb_strlen($feed['feedTitle']);
+        if ($titleLen < 30 || $titleLen > 150) {
+            $issues[] = ['field' => 'feedTitle', 'length' => $titleLen, 'min' => 30, 'max' => 150];
+        }
+        $descLen = mb_strlen($feed['feedDescription']);
+        if ($descLen < 200 || $descLen > 1200) {
+            $issues[] = ['field' => 'feedDescription', 'length' => $descLen, 'min' => 200, 'max' => 1200];
+        }
+
+        return $issues;
+    }
+
     private function tryParseMeta(string $text): ?array
     {
         $json = $this->extractJson($text);

@@ -23,7 +23,7 @@ class BatchGenerateHandler
      * (Teaser fehlt bewusst – siehe ContentWriter.)
      */
     private const WRITABLE = [
-        'product' => [PromptBuilder::TYPE_PRODUCT_DESCRIPTION, PromptBuilder::TYPE_PRODUCT_META, PromptBuilder::TYPE_FAQ, PromptBuilder::TYPE_MEDIA_ALT],
+        'product' => [PromptBuilder::TYPE_PRODUCT_DESCRIPTION, PromptBuilder::TYPE_PRODUCT_META, PromptBuilder::TYPE_FAQ, PromptBuilder::TYPE_MEDIA_ALT, PromptBuilder::TYPE_PRODUCT_FEED],
         'category' => [PromptBuilder::TYPE_CATEGORY_TEASER, PromptBuilder::TYPE_CATEGORY_DETAIL, PromptBuilder::TYPE_CATEGORY_META, PromptBuilder::TYPE_FAQ],
         'media' => [PromptBuilder::TYPE_MEDIA_ALT],
         'sales_channel' => [PromptBuilder::TYPE_HOME_META],
@@ -242,6 +242,7 @@ class BatchGenerateHandler
                 'payload' => json_encode([
                     'content' => $result['content'] ?? null,
                     'meta' => $result['meta'] ?? null,
+                    'feed' => $result['feed'] ?? null,
                     'quality' => $result['quality'] ?? null,
                     'error' => $result['error'] ?? null,
                 ], \JSON_THROW_ON_ERROR),

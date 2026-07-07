@@ -127,6 +127,7 @@ Component.register('sw-content-creator-generator', {
                     { type: 'product_description', kind: 'html' },
                     { type: 'product_meta', kind: 'meta' },
                     { type: 'faq', kind: 'html' },
+                    { type: 'product_feed', kind: 'feed' },
                 ];
             }
             if (this.entityType === 'sales_channel') {
@@ -644,6 +645,13 @@ Component.register('sw-content-creator-generator', {
 
         // Übernehmen läuft für ALLE Typen über das Backend (ContentWriter):
         // so ist das automatische Backup vor jedem Überschreiben garantiert.
+        onEditFeed(type, field, value) {
+            const res = this.generated[type];
+            if (res?.feed) {
+                res.feed = { ...res.feed, [field]: value };
+            }
+        },
+
         apply(type) {
             const res = this.generated[type];
             if (!res || !this.selectedId) {
@@ -655,7 +663,7 @@ Component.register('sw-content-creator-generator', {
                 id: this.selectedId,
                 type,
                 languageId: this.languageId,
-                result: { content: res.content, meta: res.meta },
+                result: { content: res.content, meta: res.meta, feed: res.feed },
             })
                 .then(() => {
                     this.createNotificationSuccess({ message: this.$tc('sw-content-creator.generator.saved') });

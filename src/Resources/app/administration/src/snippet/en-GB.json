@@ -52,7 +52,23 @@
             "redirectCard": "Image redirects (automatic file)",
             "redirectFile": "Redirect file path (empty = disabled)",
             "redirectFileHelp": "Absolute path, e.g. /var/www/vhosts/DOMAIN/shop/var/media-redirects.conf. After every rename run the plugin automatically writes the complete (cumulative) redirect file there.",
-            "redirectSetup": "One-time setup: (1) Enter the file path here and save. (2) In Plesk under \"Apache & nginx settings → Additional nginx directives\" add once: include <PATH>; (3) Create a daily root cron \"systemctl reload nginx\" — nginx reads includes only on reload; uncritical for freshly renamed images since their old URLs are not indexed yet. A reload with a broken file keeps the running configuration active."
+            "redirectSetup": "One-time setup: (1) Enter the file path here and save. (2) In Plesk under \"Apache & nginx settings → Additional nginx directives\" add once: include <PATH>; (3) Create a daily root cron \"systemctl reload nginx\" — nginx reads includes only on reload; uncritical for freshly renamed images since their old URLs are not indexed yet. A reload with a broken file keeps the running configuration active.",
+            "industryCard": "Industry profile",
+            "industryIntro": "The plugin ships with a toy-shop profile (keyword conventions + quality rules). For other catalogues, define your own rules here — leave fields empty to keep the built-in default profile.",
+            "industryKeywordsDe": "Keyword conventions (German)",
+            "industryKeywordsEn": "Keyword conventions (English)",
+            "industryQaDe": "Industry quality rules (German)",
+            "industryQaEn": "Industry quality rules (English)",
+            "industryQaHelp": "One rule per line — e.g. domain-specific pitfalls the AI must know.",
+            "industryEmptyHint": "Empty = built-in toy-shop profile stays active.",
+            "industryDefaultPlaceholder": "Leave empty for the built-in default profile …",
+            "checklistCard": "First-time setup — checklist",
+            "checkKey": "API key of the active provider configured",
+            "checkKeyHint": "Enter it above and use \"Test connection\".",
+            "checkWorker": "Message worker: keep an admin tab open or run messenger:consume on the server (for batch processing)",
+            "checkBatchModel": "Batch model configured (cheaper model for bulk runs)",
+            "checkRedirect": "Redirect file for image renames configured (optional)",
+            "checkRedirectHint": "Only needed when using SEO file names with 301 redirects."
         },
         "generator": {
             "title": "Generate texts",
@@ -126,7 +142,8 @@
             "media_alt": "Alt texts (product images)",
             "home_meta": "Homepage meta",
             "manufacturer_description": "Manufacturer portrait",
-            "faq": "FAQ block"
+            "faq": "FAQ block",
+            "product_feed": "Shopping feed texts (title + description)"
         },
         "batch": {
             "title": "Batch processing",
@@ -249,7 +266,8 @@
             "weakAlt": "Product images with generic alt text (\"product image 2\", product name only, too short, file name)",
             "fixNow": "Open in generator",
             "manufacturerFilter": "Manufacturer filter (optional)",
-            "manufacturerFilterHelp": "Limits the gap scan to products/images of this manufacturer — handy for working through the catalogue in manageable groups. Empty = all."
+            "manufacturerFilterHelp": "Limits the gap scan to products/images of this manufacturer — handy for working through the catalogue in manageable groups. Empty = all.",
+            "missingFeed": "Products without feed texts"
         },
         "variants": {
             "none": "No variant",

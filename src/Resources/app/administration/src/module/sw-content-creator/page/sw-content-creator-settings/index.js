@@ -23,6 +23,20 @@ Component.register('sw-content-creator-settings', {
     },
 
     computed: {
+        startupChecklist() {
+            const provider = this.config['ContentCreator.config.provider'] || 'claude';
+            const key = provider === 'openai'
+                ? this.config['ContentCreator.config.openAiApiKey']
+                : this.config['ContentCreator.config.anthropicApiKey'];
+
+            return [
+                { ok: !!(key && String(key).length > 20), label: this.$tc('sw-content-creator.settings.checkKey'), hint: this.$tc('sw-content-creator.settings.checkKeyHint') },
+                { ok: true, label: this.$tc('sw-content-creator.settings.checkWorker'), hint: '' },
+                { ok: !!this.config['ContentCreator.config.batchModel'] || provider !== 'claude', label: this.$tc('sw-content-creator.settings.checkBatchModel'), hint: '' },
+                { ok: !!this.config['ContentCreator.config.redirectFile'], label: this.$tc('sw-content-creator.settings.checkRedirect'), hint: this.$tc('sw-content-creator.settings.checkRedirectHint') },
+            ];
+        },
+
         providerOptions() {
             return [
                 { value: 'claude', label: 'Anthropic Claude' },
@@ -104,6 +118,14 @@ Component.register('sw-content-creator-settings', {
 
         save() {
             this.isSaving = true;
+            // Branchen-Profil: leerer String bedeutet "eingebauter Standard" —
+            // als null speichern, sonst würde der Standard dauerhaft überschrieben
+            ['industryKeywordsDe', 'industryKeywordsEn', 'industryQaDe', 'industryQaEn'].forEach((k) => {
+                const key = `ContentCreator.config.${k}`;
+                if (typeof this.config[key] === 'string' && this.config[key].trim() === '') {
+                    this.config[key] = null;
+                }
+            });
             this.systemConfigApiService.saveValues(this.config)
                 .then(() => {
                     this.createNotificationSuccess({ message: this.$tc('sw-content-creator.settings.saved') });

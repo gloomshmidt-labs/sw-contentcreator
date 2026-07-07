@@ -72,6 +72,48 @@
             {% endblock %}
 
             {% block sw_content_creator_settings_automation %}
+            <sw-card :title="$tc('sw-content-creator.settings.industryCard')" :isLoading="isLoading">
+                <p style="color:#758ca3; font-size:13px; margin-bottom:12px;">
+                    {{ $tc('sw-content-creator.settings.industryIntro') }}
+                </p>
+                <sw-textarea-field
+                    :label="$tc('sw-content-creator.settings.industryKeywordsDe')"
+                    :helpText="$tc('sw-content-creator.settings.industryEmptyHint')"
+                    :placeholder="$tc('sw-content-creator.settings.industryDefaultPlaceholder')"
+                    :value="config['ContentCreator.config.industryKeywordsDe']"
+                    @update:value="(v) => { config['ContentCreator.config.industryKeywordsDe'] = v; }">
+                </sw-textarea-field>
+                <sw-textarea-field
+                    :label="$tc('sw-content-creator.settings.industryKeywordsEn')"
+                    :helpText="$tc('sw-content-creator.settings.industryEmptyHint')"
+                    :placeholder="$tc('sw-content-creator.settings.industryDefaultPlaceholder')"
+                    :value="config['ContentCreator.config.industryKeywordsEn']"
+                    @update:value="(v) => { config['ContentCreator.config.industryKeywordsEn'] = v; }">
+                </sw-textarea-field>
+                <sw-textarea-field
+                    :label="$tc('sw-content-creator.settings.industryQaDe')"
+                    :helpText="$tc('sw-content-creator.settings.industryQaHelp')"
+                    :placeholder="$tc('sw-content-creator.settings.industryDefaultPlaceholder')"
+                    :value="config['ContentCreator.config.industryQaDe']"
+                    @update:value="(v) => { config['ContentCreator.config.industryQaDe'] = v; }">
+                </sw-textarea-field>
+                <sw-textarea-field
+                    :label="$tc('sw-content-creator.settings.industryQaEn')"
+                    :helpText="$tc('sw-content-creator.settings.industryQaHelp')"
+                    :placeholder="$tc('sw-content-creator.settings.industryDefaultPlaceholder')"
+                    :value="config['ContentCreator.config.industryQaEn']"
+                    @update:value="(v) => { config['ContentCreator.config.industryQaEn'] = v; }">
+                </sw-textarea-field>
+            </sw-card>
+
+            <sw-card :title="$tc('sw-content-creator.settings.checklistCard')" :isLoading="isLoading">
+                <div v-for="item in startupChecklist" :key="item.label" style="display:flex; gap:8px; padding:3px 0; font-size:13px; align-items:center;">
+                    <span :style="{ color: item.ok ? '#37a04a' : '#de294c', fontWeight: 700 }">{{ item.ok ? '✓' : '✗' }}</span>
+                    <span>{{ item.label }}</span>
+                    <span v-if="item.hint && !item.ok" style="color:#758ca3;">— {{ item.hint }}</span>
+                </div>
+            </sw-card>
+
             <sw-card :title="$tc('sw-content-creator.settings.redirectCard')" :isLoading="isLoading">
                 <sw-text-field
                     :label="$tc('sw-content-creator.settings.redirectFile')"

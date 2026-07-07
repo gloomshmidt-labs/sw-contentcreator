@@ -28,6 +28,7 @@ class GapScanner
             'product' => [
                 'missingDescription' => $this->productGap($languageId, "(pt.description IS NULL OR pt.description = '')", $manufacturerId),
                 'missingMeta' => $this->productGap($languageId, "(pt.meta_title IS NULL OR pt.meta_title = '' OR pt.meta_description IS NULL OR pt.meta_description = '')", $manufacturerId),
+                'missingFeed' => $this->productGap($languageId, "(pt.custom_fields IS NULL OR JSON_UNQUOTE(JSON_EXTRACT(pt.custom_fields, '$.content_creator_feed_title')) IS NULL OR JSON_UNQUOTE(JSON_EXTRACT(pt.custom_fields, '$.content_creator_feed_title')) = '')", $manufacturerId),
             ],
             'category' => [
                 'missingDescription' => $this->categoryGap($languageId, "(ct.description IS NULL OR ct.description = '')"),

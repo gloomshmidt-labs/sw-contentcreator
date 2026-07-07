@@ -102,6 +102,7 @@ class JobHistoryService
                 'type' => (string) $row['type'],
                 'content' => $payload['content'] ?? null,
                 'meta' => $payload['meta'] ?? null,
+                'feed' => $payload['feed'] ?? null,
                 'score' => $payload['quality']['score'] ?? null,
                 'name' => $isMedia
                     ? (string) (($mediaInfo[$entityId]['fileName'] ?? '') ?: '')

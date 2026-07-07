@@ -20,6 +20,7 @@ class PromptBuilder
     public const TYPE_HOME_META = 'home_meta';
     public const TYPE_MANUFACTURER_DESCRIPTION = 'manufacturer_description';
     public const TYPE_FAQ = 'faq';
+    public const TYPE_PRODUCT_FEED = 'product_feed';
 
     public const TYPES = [
         self::TYPE_PRODUCT_DESCRIPTION,
@@ -31,6 +32,7 @@ class PromptBuilder
         self::TYPE_HOME_META,
         self::TYPE_MANUFACTURER_DESCRIPTION,
         self::TYPE_FAQ,
+        self::TYPE_PRODUCT_FEED,
     ];
 
     public const MODE_CREATE = 'create';
@@ -52,7 +54,7 @@ class PromptBuilder
         // das Suffix verschenkter Title-Platz. Produkte/Medien sind zudem KANALNEUTRAL.
         $shopRef = $lang === 'en' ? 'an online shop' : 'einen Online-Shop';
         $neutralRule = '';
-        if (\in_array($type, [self::TYPE_PRODUCT_DESCRIPTION, self::TYPE_PRODUCT_META, self::TYPE_MEDIA_ALT, self::TYPE_MANUFACTURER_DESCRIPTION], true)) {
+        if (\in_array($type, [self::TYPE_PRODUCT_DESCRIPTION, self::TYPE_PRODUCT_META, self::TYPE_MEDIA_ALT, self::TYPE_MANUFACTURER_DESCRIPTION, self::TYPE_PRODUCT_FEED], true)) {
             $neutralRule = $lang === 'en'
                 ? "\n- The content is used across MULTIPLE sales channels: NEVER mention a shop name or domain — brand references only via the manufacturer."
                 : "\n- Der Content wird in MEHREREN Verkaufskanälen verwendet: erwähne NIEMALS einen Shopnamen oder eine Domain — Markenbezug nur über den Hersteller.";
@@ -150,6 +152,17 @@ class PromptBuilder
      */
     private function keywordConventions(string $lang): string
     {
+        // Branchen-Profil (Weitergabe-Feature): eigene Keyword-Konventionen aus
+        // den Einstellungen ersetzen das eingebaute Spielwaren-Profil; leer/nicht
+        // gesetzt = eingebauter Standard bleibt aktiv
+        $custom = $this->systemConfig->get(
+            $lang === 'en' ? 'ContentCreator.config.industryKeywordsEn' : 'ContentCreator.config.industryKeywordsDe'
+        );
+        if (\is_string($custom) && trim($custom) !== '') {
+            return ($lang === 'en' ? 'KEYWORD CONVENTIONS (industry profile):' : 'KEYWORD-KONVENTIONEN (Branchen-Profil):')
+                . "\n" . PromptSanitizer::sanitize(trim($custom));
+        }
+
         if ($lang === 'en') {
             return <<<TXT
                 KEYWORD CONVENTIONS (en-GB):
@@ -182,9 +195,7 @@ class PromptBuilder
                 - Does every sentence make sense and add value?
                 - Would a real human write it this way — or does it sound artificial?
                 - Do all statements match the provided facts?
-                - Take animal/breed/species names EXACTLY from the product name — never replace them with related or umbrella terms (a "Bobtail" does not become a "sheepdog"; add qualifiers only when factually unambiguous).
-                - Describe the product type's mechanics correctly and never invent mechanics it does not have (a hand puppet is guided by the hand — there are no strings; strings belong to marionettes only).
-                - Is the text individual, or could it fit 10 other products/categories? Does anything repeat? Then cut it.
+                {$this->industryQa('en')}- Is the text individual, or could it fit 10 other products/categories? Does anything repeat? Then cut it.
                 TXT;
         }
 
@@ -193,10 +204,35 @@ class PromptBuilder
             - Ergibt jeder Satz Sinn und bringt er Mehrwert?
             - Würde ein echter Mensch das so schreiben — oder klingt es künstlich?
             - Stimmen alle Aussagen mit den gelieferten Fakten überein?
-            - Tier-/Rasse-/Artbezeichnungen EXAKT aus dem Produktnamen übernehmen — nie durch verwandte Begriffe oder Oberbegriffe ersetzen (ein "Bobtail" wird nicht zum "Schäferhund"; Zusätze nur, wenn sie fachlich eindeutig sind).
-            - Beschreibe die Funktionsweise der Produktart korrekt und erfinde keine Mechanik, die sie nicht hat (eine Handpuppe wird mit der Hand geführt — es gibt keine Fäden; Fäden nur bei Marionetten).
-            - Ist der Text individuell, oder könnte er auf 10 andere Produkte/Kategorien passen? Wiederholt sich etwas? Dann kürzen.
+            {$this->industryQa('de')}- Ist der Text individuell, oder könnte er auf 10 andere Produkte/Kategorien passen? Wiederholt sich etwas? Dann kürzen.
             TXT;
+    }
+
+    /**
+     * Branchen-spezifische QA-Zeilen (Weitergabe-Feature): konfigurierbar,
+     * Default = eingebautes Spielwaren-Wissen. Leerer Config-Wert = bewusst keine.
+     */
+    private function industryQa(string $lang): string
+    {
+        $custom = $this->systemConfig->get(
+            $lang === 'en' ? 'ContentCreator.config.industryQaEn' : 'ContentCreator.config.industryQaDe'
+        );
+        if (\is_string($custom)) {
+            $custom = trim($custom);
+            if ($custom === '') {
+                return '';
+            }
+            $lines = implode("\n", array_map(
+                static fn (string $l) => '- ' . ltrim(PromptSanitizer::sanitize(trim($l)), '- '),
+                array_filter(explode("\n", $custom), static fn (string $l) => trim($l) !== '')
+            ));
+
+            return $lines . "\n";
+        }
+
+        return $lang === 'en'
+            ? "- Take animal/breed/species names EXACTLY from the product name — never replace them with related or umbrella terms (a \"Bobtail\" does not become a \"sheepdog\"; add qualifiers only when factually unambiguous).\n- Describe the product type's mechanics correctly and never invent mechanics it does not have (a hand puppet is guided by the hand — there are no strings; strings belong to marionettes only).\n"
+            : "- Tier-/Rasse-/Artbezeichnungen EXAKT aus dem Produktnamen übernehmen — nie durch verwandte Begriffe oder Oberbegriffe ersetzen (ein \"Bobtail\" wird nicht zum \"Schäferhund\"; Zusätze nur, wenn sie fachlich eindeutig sind).\n- Beschreibe die Funktionsweise der Produktart korrekt und erfinde keine Mechanik, die sie nicht hat (eine Handpuppe wird mit der Hand geführt — es gibt keine Fäden; Fäden nur bei Marionetten).\n";
     }
 
     /**
@@ -301,6 +337,7 @@ class PromptBuilder
             self::TYPE_CATEGORY_DETAIL => $this->categoryDetailRules($de),
             self::TYPE_CATEGORY_META => $this->metaRules($de, false),
             self::TYPE_HOME_META => $this->homeMetaRules($de),
+            self::TYPE_PRODUCT_FEED => $this->feedRules($de),
             self::TYPE_MEDIA_ALT => $this->mediaAltRules($de),
             self::TYPE_MANUFACTURER_DESCRIPTION => $this->manufacturerRules($de),
             self::TYPE_FAQ => $this->faqRules($de),
@@ -627,6 +664,7 @@ class PromptBuilder
             return match ($type) {
                 self::TYPE_PRODUCT_META, self::TYPE_CATEGORY_META, self::TYPE_HOME_META => $de ? 'Optimiere jetzt die Meta-Daten.' : 'Now optimise the meta data.',
                 self::TYPE_MEDIA_ALT => $de ? 'Optimiere jetzt den Alt-Text.' : 'Now optimise the alt text.',
+                self::TYPE_PRODUCT_FEED => $de ? 'Optimiere jetzt Feed-Titel und Feed-Beschreibung als JSON.' : 'Now optimise the feed title and feed description as JSON.',
                 default => $de ? 'Optimiere jetzt den bestehenden Text.' : 'Now optimise the existing text.',
             };
         }
@@ -639,6 +677,7 @@ class PromptBuilder
             self::TYPE_MANUFACTURER_DESCRIPTION => $de ? 'Schreibe jetzt das Hersteller-Portrait.' : 'Now write the manufacturer portrait.',
             self::TYPE_FAQ => $de ? 'Schreibe jetzt den FAQ-Block.' : 'Now write the FAQ block.',
             self::TYPE_MEDIA_ALT => $de ? 'Schreibe jetzt den Alt-Text.' : 'Now write the alt text.',
+            self::TYPE_PRODUCT_FEED => $de ? 'Erzeuge jetzt Feed-Titel und Feed-Beschreibung als JSON.' : 'Now generate the feed title and feed description as JSON.',
             default => $de ? 'Erstelle jetzt den Text.' : 'Now create the text.',
         };
     }
@@ -710,5 +749,51 @@ class PromptBuilder
         return ($context !== '' ? $context . "\n" : '')
             . ($lang === 'en' ? 'Alt text to translate: ' : 'Zu übersetzender Alt-Text: ')
             . '"""' . $source . '"""';
+    }
+
+    /**
+     * Shopping-Feed-Texte (Merchant Center/ChatGPT-Shopping): eigene Gesetze —
+     * Feed-Titel attributgetrieben statt klick-psychologisch, Beschreibung
+     * sachlich-attributreich statt erzählerisch.
+     */
+    private function feedRules(bool $de): string
+    {
+        if ($de) {
+            return <<<'RULES'
+AUFGABE: Erzeuge Feed-Titel und Feed-Beschreibung für Google Shopping / Produkt-Feeds.
+AUSGABEFORMAT: NUR striktes JSON, keine Erklärungen, kein Codeblock:
+{"feedTitle": "...", "feedDescription": "..."}
+
+FEED-TITEL (Pflichtregeln):
+- Muster: Marke + Produktart + unterscheidende Schlüsselattribute (z.B. Tier/Motiv, Material, Größe/Alter).
+- 50-140 Zeichen; die WICHTIGSTEN Wörter in die ersten 70 Zeichen (Google schneidet dort ab).
+- KEINE Werbephrasen, KEINE Ausrufezeichen, KEIN Preis, KEINE Versandaussagen, KEINE Großschreibung ganzer Wörter.
+- Keine Wiederholung identischer Wörter.
+
+FEED-BESCHREIBUNG (Pflichtregeln):
+- 300-1000 Zeichen Fließtext, reiner Text OHNE HTML.
+- Sachlich und attributreich: Produktart, Material, Maße, Altersempfehlung, Pflege, Besonderheiten — alles NUR aus den Fakten.
+- Der erste Satz nennt Marke + Produktart + Hauptmerkmal.
+- KEINE Meta-Description-Kopie, keine Handlungsaufforderungen ("Jetzt kaufen"), keine Shop-/Versand-/Preisangaben.
+RULES;
+        }
+
+        return <<<'RULES'
+TASK: Produce a feed title and feed description for Google Shopping / product feeds.
+OUTPUT FORMAT: STRICT JSON only, no explanations, no code fences:
+{"feedTitle": "...", "feedDescription": "..."}
+
+FEED TITLE (hard rules):
+- Pattern: brand + product type + distinguishing key attributes (e.g. animal/motif, material, size/age).
+- 50-140 characters; put the MOST important words within the first 70 characters (Google truncates there).
+- NO promotional phrases, NO exclamation marks, NO price, NO shipping claims, NO all-caps words.
+- Do not repeat identical words.
+
+FEED DESCRIPTION (hard rules):
+- 300-1000 characters of plain text WITHOUT HTML.
+- Factual and attribute-rich: product type, material, dimensions, age recommendation, care, special features — strictly from the facts.
+- The first sentence names brand + product type + main feature.
+- NO copy of the meta description, no calls to action ("buy now"), no shop/shipping/price statements.
+RULES;
     }
 }

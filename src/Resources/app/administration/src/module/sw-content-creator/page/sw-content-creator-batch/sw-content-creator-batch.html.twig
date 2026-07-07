@@ -258,6 +258,12 @@
                                     <input type="text" :value="result.meta.metaKeywords" style="width:100%; font-size:13px; padding:4px 6px; margin-top:4px; border:1px solid #d1d9e0; border-radius:4px;"
                                         @input="(e) => { result.meta.metaKeywords = e.target.value; }" @blur="saveDryRunEdit(result)" placeholder="Keywords"/>
                                 </template>
+                                <template v-else-if="result.feed">
+                                    <input type="text" :value="result.feed.feedTitle" style="width:100%; font-size:13px; padding:4px 6px; margin-top:4px; border:1px solid #d1d9e0; border-radius:4px;"
+                                        @input="(e) => { result.feed.feedTitle = e.target.value; }" @blur="saveDryRunEdit(result)" placeholder="Feed-Titel"/>
+                                    <textarea :value="result.feed.feedDescription" rows="3" style="width:100%; font-size:13px; padding:4px 6px; margin-top:4px; border:1px solid #d1d9e0; border-radius:4px;"
+                                        @input="(e) => { result.feed.feedDescription = e.target.value; }" @blur="saveDryRunEdit(result)" placeholder="Feed-Beschreibung"></textarea>
+                                </template>
                                 <textarea v-else :value="result.content" :rows="result.type === 'media_alt' ? 2 : 6"
                                     style="width:100%; font-size:13px; padding:4px 6px; margin-top:4px; border:1px solid #d1d9e0; border-radius:4px; font-family:inherit;"
                                     @input="(e) => { result.content = e.target.value; }" @blur="saveDryRunEdit(result)"></textarea>

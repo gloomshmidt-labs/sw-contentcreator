@@ -262,6 +262,18 @@
                                 @update:value="(v) => onEditMeta(btn.type, 'metaKeywords', v)">
                             </sw-text-field>
                         </template>
+                        <template v-else-if="btn.kind === 'feed' && generated[btn.type].feed">
+                            <sw-text-field
+                                :label="'Feed-Titel (' + generated[btn.type].feed.feedTitle.length + ' ' + $tc('sw-content-creator.generator.chars') + ', Ziel 50-140, wichtigste Wörter in die ersten 70)'"
+                                :value="generated[btn.type].feed.feedTitle"
+                                @update:value="(v) => onEditFeed(btn.type, 'feedTitle', v)">
+                            </sw-text-field>
+                            <sw-textarea-field
+                                :label="'Feed-Beschreibung (' + generated[btn.type].feed.feedDescription.length + ' ' + $tc('sw-content-creator.generator.chars') + ', Ziel 300-1000)'"
+                                :value="generated[btn.type].feed.feedDescription"
+                                @update:value="(v) => onEditFeed(btn.type, 'feedDescription', v)">
+                            </sw-textarea-field>
+                        </template>
                         <template v-else>
                             <div style="display:flex; gap:12px; align-items:center; margin-bottom:8px; flex-wrap:wrap;">
                                 <span v-if="fleschOf(generated[btn.type].content)" :style="{ color: fleschOf(generated[btn.type].content).level.color, fontWeight: 600, fontSize: '12px' }">

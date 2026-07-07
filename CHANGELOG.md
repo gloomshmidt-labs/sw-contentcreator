@@ -3,6 +3,13 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.35.0] - 2026-07-07
+
+### Added (drei Features aus der Innovations-Runde)
+- **Shopping-Feed-Texttyp** (`product_feed`): generiert Feed-Titel (50-140 Zeichen, attributgetrieben, wichtigste Wörter in den ersten 70) und Feed-Beschreibung (300-1000 Zeichen, sachlich-attributreich) für Google Shopping/ChatGPT-Shopping — mit eigenen Prompt-Regeln, Längen-Gates und Retry-Feedback. Gespeichert in translatable customFields `content_creator_feed_title`/`content_creator_feed_description` (Feed-Systeme lesen sie als Feld-Mapping, keine Plugin-Kopplung). Generator-Karte mit editierbaren Feldern, Batch-Unterstützung inkl. Dry-Run-Review-Edit, neue Lückenart „Produkte ohne Feed-Texte", Backup/Restore.
+- **Branchen-Profil (Weitergabe-Paket)**: Keyword-Konventionen und branchenspezifische Qualitätsregeln (bisher hartkodiertes Spielwaren-Wissen) sind jetzt je Sprache in den Einstellungen konfigurierbar — leer = eingebautes Spielwaren-Profil bleibt aktiv (bestehende Installationen unverändert). Eingaben laufen durch den Prompt-Injection-Filter. Dazu eine **Erst-Einrichtungs-Checkliste** in den Einstellungen (Key, Worker, Batch-Modell, Redirect-Datei).
+- **Headless-/API-Betrieb dokumentiert**: README-Anleitung für eine eingezäunte Integration (eigene ACL-Rolle nur mit content_creator-Privilegien, admin=false) — verifiziert: Plugin-Endpoints erreichbar, Produkt-/Kunden-/Systemzugriffe antworten 403. Neuer README-Datenschutzabschnitt (nur Katalogdaten an KI-Provider, nie Kunden-/Bestelldaten).
+
 ## [0.34.0] - 2026-07-07
 
 ### Konsolidierungs-Release (behavior-identisches Refactoring, 9 Spezialisten-Audits)
@@ -177,7 +184,7 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ## [0.22.2] - 2026-07-04
 
-### Fixed (Bug aus dem plesk-1-Test: Produkt-ID im Medien-Batch)
+### Fixed (Bug aus dem Staging-Test: Produkt-ID im Medien-Batch)
 - **Scan-Ergebnisse werden beim Objekt-Typ-Wechsel geleert**: Lücken-/Report-/Aktualitäts-Ergebnisse blieben stehen und ihre „Übernehmen"-Buttons konnten IDs der alten Objektart in die neue Auswahl spülen (→ „Medium nicht gefunden" mit einer Produkt-ID).
 - **Server-Schutznetz**: Der Batch-Start prüft alle IDs gegen die Ziel-Entity; fremde IDs fliegen raus, und eine komplett unpassende Auswahl wird mit klarer Meldung abgelehnt statt einen Fehler-Lauf zu produzieren.
 
@@ -194,7 +201,7 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ## [0.21.1] - 2026-07-04
 
-### Changed (User-Feedback aus dem plesk-1-Test)
+### Changed (User-Feedback aus dem Staging-Test)
 - **Namensvorschläge sind jetzt editierbar** — jede Zeile ist ein Eingabefeld; der bearbeitete Name wird beim Übernehmen verwendet (Server bereinigt erneut zu einem gültigen Slug).
 - **Alle gescannten Bilder sichtbar** (scrollbare Liste) statt nur der ersten 50.
 - **Stoppwort-Liste erweitert** (fuers, vom, zum, zur, beim, im, am, ins, auf, bei, als …) — kein „…-fuers-20930" mehr am Namensende.
@@ -217,7 +224,7 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ## [0.19.0] - 2026-07-04
 
-### Fixed (Praxis-Feedback vom plesk-1-Test)
+### Fixed (Praxis-Feedback vom Staging-Test)
 - **Feld-Fallback im Optimieren-Modus**: Hat das konkrete Feld keinen Bestand (z.B. FAQ, Teaser, Beschreibung), wird automatisch neu erstellt — unabhängig vom Bestand der anderen Felder. Vorher: Fehlermeldung. Der blockierende Client-Guard ist entfernt; die Logik liegt zentral im Generator (gilt für Einzeltexte, Batch, CLI, Cron).
 - **Prompt-Regeln gegen Fakten-Schnitzer**: (1) Tier-/Rasse-/Artbezeichnungen werden EXAKT aus dem Produktnamen übernommen — nie durch verwandte oder Oberbegriffe ersetzt (ein „Bobtail" wird nicht zum „Schäferhund"); (2) die Funktionsweise der Produktart muss stimmen — eine Handpuppe hat keine Fäden, Fäden gehören zu Marionetten.
 

@@ -360,6 +360,9 @@ class ContentCreatorController extends AbstractController
         if (\is_array($data['meta'] ?? null)) {
             $payload['meta'] = array_merge($payload['meta'] ?? [], $data['meta']);
         }
+        if (\is_array($data['feed'] ?? null)) {
+            $payload['feed'] = array_merge($payload['feed'] ?? [], $data['feed']);
+        }
         $this->connection->executeStatement(
             'UPDATE content_creator_batch_result SET payload = :payload WHERE id = UNHEX(:id)',
             ['payload' => json_encode($payload, \JSON_THROW_ON_ERROR), 'id' => $resultId],

@@ -96,7 +96,7 @@ Component.register('sw-content-creator-batch', {
         },
         typeOptions() {
             if (this.entityType === 'product') {
-                return ['product_description', 'product_meta', 'faq', 'media_alt'];
+                return ['product_description', 'product_meta', 'faq', 'media_alt', 'product_feed'];
             }
             if (this.entityType === 'category') {
                 return ['category_teaser', 'category_detail', 'category_meta', 'faq'];
@@ -329,6 +329,7 @@ Component.register('sw-content-creator-batch', {
             this.contentCreatorApiService.updateBatchResult(result.id, {
                 content: typeof result.content === 'string' ? result.content : undefined,
                 meta: result.meta || undefined,
+                feed: result.feed || undefined,
             }).catch((err) => this.notifyApiError(err));
         },
 

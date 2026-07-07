@@ -182,6 +182,14 @@ class ContentBackupService
 
             return ['customFields' => [ContentWriter::FAQ_FIELD => $customFields[ContentWriter::FAQ_FIELD] ?? null]];
         }
+        if ($type === PromptBuilder::TYPE_PRODUCT_FEED) {
+            $customFields = $this->rawField($entityType, $entityId, $languageId, 'customFields', $context) ?? [];
+
+            return ['customFields' => [
+                ContentWriter::FEED_TITLE_FIELD => $customFields[ContentWriter::FEED_TITLE_FIELD] ?? null,
+                ContentWriter::FEED_DESCRIPTION_FIELD => $customFields[ContentWriter::FEED_DESCRIPTION_FIELD] ?? null,
+            ]];
+        }
         if ($fields === []) {
             return null;
         }

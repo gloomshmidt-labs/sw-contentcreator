@@ -119,6 +119,8 @@ class FactLoader
             'existingText' => trim(strip_tags($description)),
             'existingHtml' => trim($description),
             'existingFaq' => $this->existingFaq($product),
+            'existingFeedTitle' => trim((string) (($product->getTranslation('customFields') ?? [])[ContentWriter::FEED_TITLE_FIELD] ?? '')),
+            'existingFeedDescription' => trim((string) (($product->getTranslation('customFields') ?? [])[ContentWriter::FEED_DESCRIPTION_FIELD] ?? '')),
             '_hasDescription' => trim($description) !== '',
         ];
     }

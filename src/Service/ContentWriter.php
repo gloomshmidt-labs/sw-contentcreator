@@ -21,6 +21,8 @@ class ContentWriter
 {
     public const GENERATED_AT_FIELD = 'content_creator_generated_at';
     public const FAQ_FIELD = 'content_creator_faq';
+    public const FEED_TITLE_FIELD = 'content_creator_feed_title';
+    public const FEED_DESCRIPTION_FIELD = 'content_creator_feed_description';
 
     /**
      * @param EntityRepository<ProductCollection> $productRepository
@@ -143,6 +145,7 @@ class ContentWriter
             PromptBuilder::TYPE_MANUFACTURER_DESCRIPTION => $content !== '' ? ['description' => $content] : [],
             PromptBuilder::TYPE_MEDIA_ALT => $content !== '' ? ['alt' => $content, 'title' => $content] : [],
             PromptBuilder::TYPE_FAQ => $content !== '' ? ['customFields' => [self::FAQ_FIELD => $content]] : [],
+            PromptBuilder::TYPE_PRODUCT_FEED => $this->feedFields($result),
             PromptBuilder::TYPE_PRODUCT_META,
             PromptBuilder::TYPE_CATEGORY_META => $this->metaFields($result),
             PromptBuilder::TYPE_HOME_META => $this->homeMetaFields($result),
@@ -192,5 +195,26 @@ class ContentWriter
         }
 
         return $fields;
+    }
+
+    /**
+     * Feed-Texte in neutrale translatable customFields — MerchantCenterApi/
+     * Afterbuy lesen sie als Feld-Mapping (keine Plugin-zu-Plugin-Kopplung).
+     *
+     * @param array<string, mixed> $result
+     *
+     * @return array<string, mixed>
+     */
+    private function feedFields(array $result): array
+    {
+        $feed = $result['feed'] ?? null;
+        if (!\is_array($feed) || trim((string) ($feed['feedTitle'] ?? '')) === '') {
+            return [];
+        }
+
+        return ['customFields' => [
+            self::FEED_TITLE_FIELD => trim((string) $feed['feedTitle']),
+            self::FEED_DESCRIPTION_FIELD => trim((string) ($feed['feedDescription'] ?? '')),
+        ]];
     }
 }

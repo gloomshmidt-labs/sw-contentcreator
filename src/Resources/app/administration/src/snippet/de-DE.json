@@ -52,7 +52,23 @@
             "redirectCard": "Bild-Redirects (automatische Datei)",
             "redirectFile": "Pfad der Redirect-Datei (leer = deaktiviert)",
             "redirectFileHelp": "Absoluter Pfad, z.B. /var/www/vhosts/DOMAIN/shop/var/media-redirects.conf. Nach jedem Umbenennungs-Lauf schreibt das Plugin die komplette (kumulative) Redirect-Datei automatisch dorthin.",
-            "redirectSetup": "Einmalige Einrichtung: (1) Datei-Pfad hier eintragen und speichern. (2) In Plesk unter „Apache & nginx Einstellungen → Zusätzliche nginx-Anweisungen\" einmalig eintragen: include <PFAD>; (3) Täglichen Root-Cron „systemctl reload nginx\" anlegen — nginx liest Includes nur beim Reload; für frisch umbenannte Bilder ist das unkritisch, da deren alte URLs noch nicht indexiert sind. Ein Reload mit fehlerhafter Datei lässt die laufende Konfiguration aktiv."
+            "redirectSetup": "Einmalige Einrichtung: (1) Datei-Pfad hier eintragen und speichern. (2) In Plesk unter „Apache & nginx Einstellungen → Zusätzliche nginx-Anweisungen\" einmalig eintragen: include <PFAD>; (3) Täglichen Root-Cron „systemctl reload nginx\" anlegen — nginx liest Includes nur beim Reload; für frisch umbenannte Bilder ist das unkritisch, da deren alte URLs noch nicht indexiert sind. Ein Reload mit fehlerhafter Datei lässt die laufende Konfiguration aktiv.",
+            "industryCard": "Branchen-Profil",
+            "industryIntro": "Das Plugin bringt ein Spielwaren-Profil mit (Keyword-Konventionen + Qualitätsregeln). Für andere Sortimente hier eigene Regeln hinterlegen — Felder leer lassen = eingebautes Standard-Profil.",
+            "industryKeywordsDe": "Keyword-Konventionen (Deutsch)",
+            "industryKeywordsEn": "Keyword-Konventionen (Englisch)",
+            "industryQaDe": "Branchen-Qualitätsregeln (Deutsch)",
+            "industryQaEn": "Branchen-Qualitätsregeln (Englisch)",
+            "industryQaHelp": "Eine Regel pro Zeile — z.B. Fach-Fallen der Branche, die die KI kennen muss.",
+            "industryEmptyHint": "Leer = eingebautes Spielwaren-Profil bleibt aktiv.",
+            "industryDefaultPlaceholder": "Leer lassen für das eingebaute Standard-Profil …",
+            "checklistCard": "Erst-Einrichtung — Checkliste",
+            "checkKey": "API-Key des aktiven Providers hinterlegt",
+            "checkKeyHint": "Oben eintragen und „Verbindung testen\" nutzen.",
+            "checkWorker": "Message-Worker: Admin-Tab offen lassen oder messenger:consume auf dem Server (für Stapelverarbeitung)",
+            "checkBatchModel": "Batch-Modell konfiguriert (günstigeres Modell für Massenläufe)",
+            "checkRedirect": "Redirect-Datei für Bild-Umbenennungen konfiguriert (optional)",
+            "checkRedirectHint": "Nur nötig, wenn SEO-Dateinamen mit 301-Redirects genutzt werden."
         },
         "generator": {
             "title": "Texte generieren",
@@ -126,7 +142,8 @@
             "media_alt": "Alt-Texte (Produktbilder)",
             "home_meta": "Startseiten-Meta",
             "manufacturer_description": "Hersteller-Portrait",
-            "faq": "FAQ-Block"
+            "faq": "FAQ-Block",
+            "product_feed": "Shopping-Feed-Texte (Titel + Beschreibung)"
         },
         "batch": {
             "title": "Stapelverarbeitung",
@@ -249,7 +266,8 @@
             "weakAlt": "Produktbilder mit generischem Alt-Text (\"Produktbild 2\", nur Produktname, zu kurz, Dateiname)",
             "fixNow": "Im Generator öffnen",
             "manufacturerFilter": "Hersteller-Filter (optional)",
-            "manufacturerFilterHelp": "Begrenzt den Lücken-Scan auf Produkte/Bilder dieses Herstellers — praktisch, um den Katalog in überschaubaren Gruppen durchzugehen. Leer = alle."
+            "manufacturerFilterHelp": "Begrenzt den Lücken-Scan auf Produkte/Bilder dieses Herstellers — praktisch, um den Katalog in überschaubaren Gruppen durchzugehen. Leer = alle.",
+            "missingFeed": "Produkte ohne Feed-Texte"
         },
         "variants": {
             "none": "Keine Variante",
