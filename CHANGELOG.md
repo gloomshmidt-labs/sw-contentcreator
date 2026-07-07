@@ -3,6 +3,11 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.36.2] - 2026-07-08
+
+### Fixed
+- **Wiedereröffnete Dry-Run-Jobs zeigten weder Ergebnisse noch Übernehmen-Button**: Beim Öffnen aus „Frühere Läufe" fehlte das `pendingResults`-Feld (die Job-Liste liefert es als `openResults`) — Review-Buttons und Zähler blieben deshalb bei 0. Betraf auch extern eingereichte Jobs.
+
 ## [0.36.1] - 2026-07-07
 
 ### Fixed

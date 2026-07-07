@@ -195,6 +195,9 @@ Component.register('sw-content-creator-batch', {
                 rejected: jobEntry.rejected,
                 status: jobEntry.status,
                 dryRun: jobEntry.dryRun,
+                // Wiedereröffnete Jobs: die Review-Buttons hängen an pendingResults
+                // (Status-Endpoint-Name) — die Job-Liste liefert es als openResults
+                pendingResults: jobEntry.openResults,
             };
             this.dryRunResults = [];
             if (['open', 'running'].includes(jobEntry.status)) {
