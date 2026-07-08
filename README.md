@@ -35,6 +35,7 @@ Produkte sind kanalneutral: In Produkt-Texten und -Meta erscheint nie der Shopna
 - **Arbeitsvorrat:** Lücken-Scan (fehlende Beschreibungen/Meta/Alt-Texte) und katalogweiter Qualitäts-Report (schlechteste Bestandstexte) mit Direktübernahme in die Batch-Auswahl.
 - **Kanal-Varianten:** Kategorietexte je Verkaufskanal mit eigenem Schwerpunkt und Anti-Duplicate-Regeln, inkl. Ähnlichkeits-Anzeige gegen die Referenz-Variante.
 - **Extras:** Markiert-/Diff-Ansicht, Flesch-Lesbarkeit, Scoring-Whitelist, Kosten-Schätzung (Tokens), Zeilenumbruch-Bereinigung für CMS-Slots, optionale Web-Recherche (Claude).
+- **Prompt-Caching (Claude):** Der stabile System-Prompt wird per `cache_control` gecacht — bei Batch-Läufen lesen Folge-Requests ihn zu ~10 % des Input-Preises aus dem Cache (TTL 5 Minuten). Die Verbrauchs-Karte weist Cache-Reads/-Writes separat aus und rechnet sie in die Kosten-Schätzung ein. OpenAI cached automatisch (Rabatt bereits im Preis).
 - **SEO-Regeln:** Meta-Title 50–60 Zeichen, Meta-Description 140–155 Zeichen, Keyword-Konventionen, umfangreiche Verbotsliste für KI-typische Floskeln.
 - **Qualitäts-Ampel:** Client-seitiges Scoring (grün → rot) für bestehende und generierte Texte.
 - **Stapelverarbeitung:** Mehrere Produkte/Kategorien/Medien auf einmal, asynchron über die Message-Queue, mit Fortschrittsanzeige.

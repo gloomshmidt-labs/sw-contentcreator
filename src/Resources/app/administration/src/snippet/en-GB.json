@@ -47,6 +47,7 @@
             "researchHelp": "The AI researches the web before writing (manufacturer sites, specialist info) — like the research requirement of the SEO skills. Works with Claude and OpenAI; incurs extra cost per text.",
             "usageCard": "API usage (via this plugin)",
             "usageHint": "Cumulative tokens and estimated cost of all generations through this plugin, per month/provider/model. Account BALANCE cannot be queried with regular API keys — it is only visible in the Anthropic Console (console.anthropic.com → Billing) or the OpenAI dashboard (platform.openai.com → Usage).",
+            "usageCacheHint": "Prompt cache (Anthropic): tokens read / written. Reads cost ~0.1x, writes ~1.25x of the input price — both are included in the cost estimate.",
             "usageEmpty": "No usage recorded yet (tracking starts with this version).",
             "usageMonth": "Month",
             "redirectCard": "Image redirects (automatic file)",

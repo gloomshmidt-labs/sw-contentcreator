@@ -3,6 +3,20 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.38.0] - 2026-07-08
+
+### Added
+- **Prompt-Caching (Anthropic)**: Der stabile System-Prompt (Regelwerk je Texttyp/Sprache/Modus inkl. Kanal-Variante und Recherche-Anweisung) wird mit einem `cache_control`-Breakpoint markiert. Innerhalb eines Laufs (TTL 5 Minuten) lesen alle Folge-Requests ihn zu ~0,1x des Input-Preises aus dem Cache — bei Batch-Wellen mit hunderten Objekten eine deutliche Ersparnis. Variable Anteile (Fokus-Keyword, SERP-Briefing) wandern als eigener System-Block HINTER den Breakpoint, damit sie den Cache-Prefix nicht invalidieren.
+- Verbrauchs-Karte: neue Spalte „Cache r/w" (gelesene/geschriebene Cache-Tokens, neue Spalten `cache_creation_tokens`/`cache_read_tokens` in `content_creator_usage`); die Kosten-Schätzung rechnet Cache-Writes mit ~1,25x und Cache-Reads mit ~0,1x des Input-Preises ein.
+- PHPUnit-Tests für den `ClaudeProvider` (Request-Format mit Cache-Breakpoint, Suffix-Block, Usage-Übernahme).
+
+### Changed
+- Kosten-Schätzung (`pricing.js`): Preise aktualisiert — Claude Opus 4.5+ kostet $5/$25 pro 1M Tokens (bisher wurde mit den alten Opus-4.0/4.1-Preisen $15/$75 gerechnet und damit ~3x überschätzt); Claude Sonnet 5 und Claude Fable 5 ergänzt.
+- OpenAI: keine Verhaltensänderung — die Responses API cached Prompts ab 1024 Tokens automatisch, der Rabatt steckt bereits im abgerechneten Input-Preis.
+
+### Fixed
+- PHPStan-Altlasten: fehlende Werttypen in den Rückgabe-Docblocks von `validateExternal()` und `tryParseMeta()` (Level 6 wieder fehlerfrei).
+
 ## [0.37.0] - 2026-07-08
 
 ### Added

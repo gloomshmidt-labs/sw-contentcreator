@@ -72,7 +72,13 @@ Component.register('sw-content-creator-settings', {
         },
 
         usageCost(row) {
-            const cost = estimateCost(row.model, Number(row.inputTokens) || 0, Number(row.outputTokens) || 0);
+            const cost = estimateCost(
+                row.model,
+                Number(row.inputTokens) || 0,
+                Number(row.outputTokens) || 0,
+                Number(row.cacheCreationTokens) || 0,
+                Number(row.cacheReadTokens) || 0,
+            );
             return cost === null ? '—' : formatCost(cost);
         },
 

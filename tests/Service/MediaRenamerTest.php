@@ -40,7 +40,7 @@ class MediaRenamerTest extends TestCase
     {
         self::assertSame(
             'folkmanis-handpuppe-schnecke-15601a',
-            $this->suggestName('Folkmanis Handpuppe Schnecke', 'egal', '15601a')
+            $this->suggestName('Folkmanis Handpuppe Schnecke', 'egal', '15601a'),
         );
     }
 
@@ -48,7 +48,7 @@ class MediaRenamerTest extends TestCase
     {
         self::assertSame(
             'handpuppe-schnecke-haus-123',
-            $this->suggestName('Die Handpuppe mit der Schnecke und dem Haus', '', '123')
+            $this->suggestName('Die Handpuppe mit der Schnecke und dem Haus', '', '123'),
         );
     }
 
@@ -74,7 +74,7 @@ class MediaRenamerTest extends TestCase
         $result = $this->suggestName(
             'Wunderschoenes Holzspielzeug Kinderzimmer Dekoration Extralang',
             '',
-            'abcdefghij1234567890xyz'
+            'abcdefghij1234567890xyz',
         );
 
         // Anker (auf 20 gekappt) muss VOLLSTÄNDIG am Ende stehen, Gesamtlänge ≤ 70
@@ -90,7 +90,7 @@ class MediaRenamerTest extends TestCase
         $longWord = str_repeat('x', 65);
         self::assertSame(
             'handpuppe-15601a',
-            $this->suggestName('Handpuppe ' . $longWord . ' Fuchs', '', '15601a')
+            $this->suggestName('Handpuppe ' . $longWord . ' Fuchs', '', '15601a'),
         );
     }
 

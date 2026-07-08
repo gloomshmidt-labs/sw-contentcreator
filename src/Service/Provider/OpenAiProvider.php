@@ -64,10 +64,18 @@ class OpenAiProvider implements AiProviderInterface
             $content[] = ['type' => 'input_image', 'image_url' => $request->imageUrl];
         }
 
+        // OpenAI cached Prompts automatisch (Responses API, Prefix >=1024 Tokens,
+        // Rabatt steckt bereits im input_tokens-Preis) — der variable Zusatz wird
+        // hier schlicht angehängt; ein expliziter Cache-Breakpoint existiert nicht.
+        $instructions = $request->system;
+        if ($request->systemSuffix !== null && trim($request->systemSuffix) !== '') {
+            $instructions .= "\n\n" . $request->systemSuffix;
+        }
+
         $body = [
             'model' => $model,
             'max_output_tokens' => $request->maxTokens,
-            'instructions' => $request->system,
+            'instructions' => $instructions,
             'input' => [
                 ['role' => 'user', 'content' => $content],
             ],

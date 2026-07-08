@@ -38,7 +38,7 @@ class ContentGeneratorTest extends TestCase
     {
         self::assertSame(
             '{"metaTitle":"X"}',
-            $this->extractJson("```json\n{\"metaTitle\":\"X\"}\n```")
+            $this->extractJson("```json\n{\"metaTitle\":\"X\"}\n```"),
         );
     }
 
@@ -46,7 +46,7 @@ class ContentGeneratorTest extends TestCase
     {
         self::assertSame(
             '{"a": {"b": 2}}',
-            $this->extractJson('Hier ist das gewünschte JSON: {"a": {"b": 2}} Viel Erfolg!')
+            $this->extractJson('Hier ist das gewünschte JSON: {"a": {"b": 2}} Viel Erfolg!'),
         );
     }
 
@@ -65,7 +65,7 @@ class ContentGeneratorTest extends TestCase
         // web_search-Zitate: "([domain](url))" fliegt komplett raus
         self::assertSame(
             'Handpuppen fördern das Rollenspiel.',
-            $this->cleanContent('Handpuppen fördern das Rollenspiel ([example.com](https://example.com/quelle)).')
+            $this->cleanContent('Handpuppen fördern das Rollenspiel ([example.com](https://example.com/quelle)).'),
         );
     }
 
@@ -73,7 +73,7 @@ class ContentGeneratorTest extends TestCase
     {
         self::assertSame(
             'Siehe Handpuppen im Sortiment.',
-            $this->cleanContent('Siehe [Handpuppen](https://shop.example/handpuppen) im Sortiment.')
+            $this->cleanContent('Siehe [Handpuppen](https://shop.example/handpuppen) im Sortiment.'),
         );
     }
 

@@ -83,12 +83,13 @@ class ContentGenerator
 
         $focusKeyword = trim((string) ($ctx['focusKeyword'] ?? ''));
         $allowWebSearch = $this->allowWebSearch($provider, $type);
-        $system = $this->buildSystemPrompt($type, $lang, $mode, $ctx, $focusKeyword, $allowWebSearch);
+        [$system, $systemSuffix] = $this->buildSystemPrompt($type, $lang, $mode, $ctx, $focusKeyword, $allowWebSearch);
         $baseUser = $this->promptBuilder->buildUser($type, $lang, $ctx, $mode, $metaFields);
 
         $translation = $this->prepareAltTranslation($type, $lang, $ctx);
         if ($translation !== null) {
             $system = $translation['system'];
+            $systemSuffix = null;
             $baseUser = $translation['user'];
         }
 
@@ -98,10 +99,11 @@ class ContentGenerator
         $originalScore = $checkFacts ? $this->qualityChecker->analyse($existingText, $lang, $whitelist)['score'] : null;
         $image = $this->loadImage($type, $ctx);
 
-        $usage = ['input' => 0, 'output' => 0];
+        $usage = ['input' => 0, 'output' => 0, 'cacheCreation' => 0, 'cacheRead' => 0];
         $loop = $this->runGateLoop(
             $provider,
             $system,
+            $systemSuffix,
             $baseUser,
             $type,
             $lang,
@@ -138,6 +140,8 @@ class ContentGenerator
             (string) ($loop['model'] ?? ''),
             (int) ($usage['input'] ?? 0),
             (int) ($usage['output'] ?? 0),
+            (int) ($usage['cacheCreation'] ?? 0),
+            (int) ($usage['cacheRead'] ?? 0),
         );
 
         return $this->buildResult($type, $lang, $mode, $provider->getName(), $loop['model'], $best, $usage, $threshold, $originalScore, $focusKeyword, $isMeta);
@@ -204,12 +208,16 @@ class ContentGenerator
     }
 
     /**
-     * System-Prompt inkl. der optionalen Zusatz-Blöcke: Kanal-Variante,
-     * Fokus-Keyword, SERP-Briefing und Recherche-Anweisung.
+     * System-Prompt, aufgeteilt für Prompt-Caching: [stabiler Teil, variabler Zusatz].
+     * Stabil (je Texttyp/Sprache/Modus identisch → Cache-Prefix): Regelwerk,
+     * Kanal-Variante, Recherche-Anweisung. Variabel (je Objekt): Fokus-Keyword
+     * und SERP-Briefing — sie landen als Suffix HINTER dem Cache-Breakpoint.
      *
      * @param array<string, mixed> $ctx
+     *
+     * @return array{0: string, 1: ?string}
      */
-    private function buildSystemPrompt(string $type, string $lang, string $mode, array $ctx, string $focusKeyword, bool $allowWebSearch): string
+    private function buildSystemPrompt(string $type, string $lang, string $mode, array $ctx, string $focusKeyword, bool $allowWebSearch): array
     {
         // Fokus-Keyword stammt aus customFields/Request und landet wörtlich im
         // System-Prompt (Fokus-Block + SERP-Briefing) — gleicher Injection-Schutz
@@ -227,25 +235,29 @@ class ContentGenerator
             $system .= "\n\n" . $variantBlock;
         }
 
-        // Fokus-Keyword: Pflicht-Platzierungen (Title/H1/erster Absatz/Dichte)
-        if ($focusKeyword !== '') {
-            $system .= "\n\n" . $this->promptBuilder->buildFocusBlock($focusKeyword, $lang);
-        }
-
-        if ($allowWebSearch && $focusKeyword !== '') {
-            // SERP-Briefing (RankMath-Content-AI-Muster): Recherche gezielt auf
-            // die Suchlandschaft des Fokus-Keywords richten statt frei zu suchen
-            $system .= "\n\n" . ($lang === 'en'
-                ? "SERP BRIEFING: First analyse the top web results for \"{$focusKeyword}\": which related terms, typical questions (who/what/how/why) and topics do they cover? Use this as a briefing — cover the relevant aspects better and more concretely, without copying anything."
-                : "SERP-BRIEFING: Analysiere zuerst die Top-Suchergebnisse zu \"{$focusKeyword}\": Welche verwandten Begriffe, typischen Fragen (wer/was/wie/warum) und Themen decken sie ab? Nutze das als Briefing — behandle die relevanten Aspekte besser und konkreter, ohne etwas zu kopieren.");
-        }
         if ($allowWebSearch) {
             $system .= "\n\n" . ($lang === 'en'
                 ? 'RESEARCH: Before writing, briefly research the web (manufacturer website, encyclopaedias, specialist sites) to gather facts (materials, use cases, animal facts). NEVER copy sentences — facts in your own words. Do not invent anything you could not verify.'
                 : 'RECHERCHE: Recherchiere vor dem Schreiben kurz im Web (Herstellerwebseite, Lexika, Fachseiten), um Fakten zu sammeln (Materialien, Einsatzbereiche, Tier-Fakten). NIEMALS Sätze übernehmen — Fakten in eigenen Worten. Erfinde nichts, was du nicht verifizieren konntest.');
         }
 
-        return $system;
+        // Variabler Suffix je Objekt (invalidiert den Cache-Prefix nicht)
+        $suffixParts = [];
+
+        // Fokus-Keyword: Pflicht-Platzierungen (Title/H1/erster Absatz/Dichte)
+        if ($focusKeyword !== '') {
+            $suffixParts[] = $this->promptBuilder->buildFocusBlock($focusKeyword, $lang);
+        }
+
+        if ($allowWebSearch && $focusKeyword !== '') {
+            // SERP-Briefing (RankMath-Content-AI-Muster): Recherche gezielt auf
+            // die Suchlandschaft des Fokus-Keywords richten statt frei zu suchen
+            $suffixParts[] = $lang === 'en'
+                ? "SERP BRIEFING: First analyse the top web results for \"{$focusKeyword}\": which related terms, typical questions (who/what/how/why) and topics do they cover? Use this as a briefing — cover the relevant aspects better and more concretely, without copying anything."
+                : "SERP-BRIEFING: Analysiere zuerst die Top-Suchergebnisse zu \"{$focusKeyword}\": Welche verwandten Begriffe, typischen Fragen (wer/was/wie/warum) und Themen decken sie ab? Nutze das als Briefing — behandle die relevanten Aspekte besser und konkreter, ohne etwas zu kopieren.";
+        }
+
+        return [$system, $suffixParts !== [] ? implode("\n\n", $suffixParts) : null];
     }
 
     /**
@@ -302,13 +314,14 @@ class ContentGenerator
      * @param list<string>|null $metaFields
      * @param list<string> $whitelist
      * @param array{b64?: string, mime?: string} $image
-     * @param array{input: int, output: int} $usage
+     * @param array{input: int, output: int, cacheCreation: int, cacheRead: int} $usage
      *
      * @return array{best: array<string, mixed>, bestWeight: int, model: string|null}
      */
     private function runGateLoop(
         Provider\AiProviderInterface $provider,
         string $system,
+        ?string $systemSuffix,
         string $baseUser,
         string $type,
         string $lang,
@@ -348,9 +361,12 @@ class ContentGenerator
                 imageB64: $image['b64'] ?? null,
                 imageMime: $image['mime'] ?? null,
                 allowWebSearch: $allowWebSearch,
+                systemSuffix: $systemSuffix,
             ));
             $usage['input'] += $result->inputTokens;
             $usage['output'] += $result->outputTokens;
+            $usage['cacheCreation'] = ($usage['cacheCreation'] ?? 0) + $result->cacheCreationTokens;
+            $usage['cacheRead'] = ($usage['cacheRead'] ?? 0) + $result->cacheReadTokens;
             $resultModel = $result->model;
 
             if ($isFeed) {
@@ -497,7 +513,7 @@ class ContentGenerator
      * @param array<string, mixed> $best
      * @param list<string>|null $metaFields
      * @param list<string> $whitelist
-     * @param array{input: int, output: int} $usage
+     * @param array{input: int, output: int, cacheCreation?: int, cacheRead?: int} $usage
      *
      * @return array<string, mixed> der (ggf. verbesserte) beste Kandidat
      */
@@ -542,7 +558,7 @@ class ContentGenerator
      * Admin (Qualitäts-Ampel, Batch-Handler), daher zentral an einer Stelle.
      *
      * @param array<string, mixed> $best
-     * @param array{input: int, output: int} $usage
+     * @param array{input: int, output: int, cacheCreation?: int, cacheRead?: int} $usage
      *
      * @return array<string, mixed>
      */
@@ -765,7 +781,7 @@ class ContentGenerator
      *
      * @param array<string, string> $meta
      * @param list<array{field:string, length:int, min:int, max:int}> $issues
-     * @param array{input:int, output:int} $usage
+     * @param array{input:int, output:int, cacheCreation?:int, cacheRead?:int} $usage
      *
      * @return array<string, string>|null
      */
@@ -818,6 +834,8 @@ class ContentGenerator
         }
         $usage['input'] += $result->inputTokens;
         $usage['output'] += $result->outputTokens;
+        $usage['cacheCreation'] = ($usage['cacheCreation'] ?? 0) + $result->cacheCreationTokens;
+        $usage['cacheRead'] = ($usage['cacheRead'] ?? 0) + $result->cacheReadTokens;
 
         $data = json_decode($this->extractJson($result->text), true);
         if (!\is_array($data)) {
@@ -855,7 +873,7 @@ class ContentGenerator
      * @param array<string, mixed> $ctx     Fakten der Ziel-Entity (FactLoader)
      * @param array<string, mixed> $payload {content}|{meta:{...}}|{feed:{...}}
      *
-     * @return array{passed: bool, score: int, level: string, findings: array, lengthIssues: array, missingFacts: array, feedback: string}
+     * @return array{passed: bool, score: int, level: string, findings: list<array<string, mixed>>, lengthIssues: list<array<string, mixed>>, missingFacts: list<string>, feedback: string}
      */
     public function validateExternal(string $type, string $lang, string $mode, array $ctx, array $payload): array
     {
@@ -959,6 +977,9 @@ class ContentGenerator
         return $issues;
     }
 
+    /**
+     * @return array<string, string>|null
+     */
     private function tryParseMeta(string $text): ?array
     {
         $json = $this->extractJson($text);

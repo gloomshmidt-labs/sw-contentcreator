@@ -47,6 +47,7 @@
             "researchHelp": "Die KI recherchiert vor dem Schreiben im Web (Hersteller-Seiten, Fachinfos) — wie die Recherche-Pflicht der SEO-Skills. Funktioniert mit Claude und OpenAI; verursacht Zusatzkosten pro Text.",
             "usageCard": "API-Verbrauch (über dieses Plugin)",
             "usageHint": "Kumulierte Tokens und geschätzte Kosten aller Generierungen über dieses Plugin, je Monat/Provider/Modell. Das Konto-GUTHABEN lässt sich mit normalen API-Keys nicht abfragen — es ist nur in der Anthropic Console (console.anthropic.com → Billing) bzw. im OpenAI-Dashboard (platform.openai.com → Usage) einsehbar.",
+            "usageCacheHint": "Prompt-Cache (Anthropic): gelesene / geschriebene Tokens. Reads kosten ~0,1x, Writes ~1,25x des Input-Preises — beides ist in der Kosten-Schätzung berücksichtigt.",
             "usageEmpty": "Noch kein Verbrauch erfasst (Zählung beginnt mit dieser Version).",
             "usageMonth": "Monat",
             "redirectCard": "Bild-Redirects (automatische Datei)",

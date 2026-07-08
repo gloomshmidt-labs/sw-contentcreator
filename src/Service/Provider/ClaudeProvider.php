@@ -72,10 +72,24 @@ class ClaudeProvider implements AiProviderInterface
             $userContent = $request->userPrompt;
         }
 
+        // Prompt-Caching: Der stabile System-Prompt (Regelwerk je Texttyp/Sprache)
+        // wird als Cache-Breakpoint markiert — innerhalb eines Laufs (TTL 5 Min)
+        // lesen alle Folge-Requests ihn zu ~0,1x des Input-Preises aus dem Cache
+        // (Write einmalig ~1,25x). Unterhalb der Modell-Mindestgröße (1024-4096
+        // Tokens je nach Modell) ignoriert die API den Marker stillschweigend.
+        // Variable Anteile (Fokus-Keyword/SERP-Briefing) kommen als eigener
+        // Block DAHINTER, damit sie den Cache-Prefix nicht invalidieren.
+        $systemBlocks = [
+            ['type' => 'text', 'text' => $request->system, 'cache_control' => ['type' => 'ephemeral']],
+        ];
+        if ($request->systemSuffix !== null && trim($request->systemSuffix) !== '') {
+            $systemBlocks[] = ['type' => 'text', 'text' => $request->systemSuffix];
+        }
+
         $body = [
             'model' => $model,
             'max_tokens' => $request->maxTokens,
-            'system' => $request->system,
+            'system' => $systemBlocks,
             'messages' => [
                 ['role' => 'user', 'content' => $userContent],
             ],
@@ -131,6 +145,8 @@ class ClaudeProvider implements AiProviderInterface
             outputTokens: (int) ($data['usage']['output_tokens'] ?? 0),
             stopReason: $stopReason,
             model: $data['model'] ?? $model,
+            cacheCreationTokens: (int) ($data['usage']['cache_creation_input_tokens'] ?? 0),
+            cacheReadTokens: (int) ($data['usage']['cache_read_input_tokens'] ?? 0),
         );
     }
 

@@ -27,3 +27,4 @@ Thumbs.db
 # Lokale Konfiguration
 .env
 .env.local
+.php-cs-fixer.cache

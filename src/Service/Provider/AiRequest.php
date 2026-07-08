@@ -19,6 +19,12 @@ class AiRequest
         public ?string $imageMime = null,
         /** Web-Recherche erlauben (nur Claude: web_search-Server-Tool). */
         public bool $allowWebSearch = false,
+        /**
+         * Variabler System-Zusatz (z.B. Fokus-Keyword-Block): landet HINTER dem
+         * Prompt-Cache-Breakpoint, damit der stabile Teil in `system` über alle
+         * Objekte eines Laufs hinweg cachebar bleibt (Prefix-Match!).
+         */
+        public ?string $systemSuffix = null,
     ) {
     }
 }

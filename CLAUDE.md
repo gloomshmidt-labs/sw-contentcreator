@@ -1,6 +1,14 @@
 # CLAUDE.md — ContentCreator
 
-Technischer Steckbrief für die Arbeit an diesem Plugin. Stand: 2026-07-06, Version 0.34.0.
+Technischer Steckbrief für die Arbeit an diesem Plugin. Stand: 2026-07-08, Version 0.38.0.
+
+## Stand 0.38.0 — Prompt-Caching (Anthropic)
+- `ClaudeProvider` sendet `system` als Block-Array: stabiler Block (Regelwerk) mit `cache_control: {type: ephemeral}` + optionaler variabler Block aus `AiRequest::systemSuffix` (Fokus-Keyword/SERP-Briefing) DAHINTER. Regel: Alles Objekt-spezifische gehört in den Suffix oder den User-Prompt, sonst invalidiert es den Cache-Prefix (Prefix-Match!).
+- `ContentGenerator::buildSystemPrompt()` liefert deshalb `[stabil, suffix|null]`; die Recherche-Anweisung steht seit 0.38.0 VOR dem Fokus-Block (stabiler Teil).
+- Cache-Mindestgrößen je Modell (darunter ignoriert die API den Marker still): Sonnet 4.5 ≈1024, Sonnet 4.6/5 ≈2048, Opus 4.7/4.8 ≈4096 Tokens. TTL 5 Minuten — Batch-Wellen profitieren, vereinzelte Einzel-Generierungen kaum.
+- Abrechnung: Cache-Write ~1,25x, Cache-Read ~0,1x des Input-Preises; `input_tokens` der API ist NUR der ungecachte Rest. Erfassung: `AiResult::cacheCreationTokens/cacheReadTokens` → `UsageTracker` (Spalten `cache_creation_tokens`/`cache_read_tokens`, Migration 1783010000) → Verbrauchs-Karte + `pricing.js` (`estimateCost` hat zwei neue Parameter).
+- OpenAI: kein expliziter Breakpoint — Responses API cached automatisch (Prefix ≥1024 Tokens, Rabatt im Preis); `systemSuffix` wird dort schlicht angehängt.
+- Verifikation ohne Anthropic-Key im Dev: `tests/Service/ClaudeProviderTest.php` (MockHttpClient prüft Request-Format + Usage-Parsing). Live-Check: Verbrauchs-Karte, Spalte „Cache r/w" muss bei Batch-Läufen Reads zeigen — sonst invalidiert etwas den Prefix.
 
 ## Stand 0.34.0
 Reines Struktur-Refactoring (Verhalten 100% identisch): `JobHistoryService` aus dem Controller extrahiert, `ContentGenerator::generate()` in benannte Schritte zerlegt, Batch-/Generator-Seite in `sw-cc-*`-Komponenten aufgeteilt, PHPUnit/PHPStan/CS-Fixer-Tooling eingerichtet. Features seit 0.11 (Details im CHANGELOG): Backups + Wiederherstellen, Dry-Run mit Review/Commit, Lücken-Scan + Qualitäts-Report, Kanal-Varianten, SEO-Dateinamen + nginx-Redirects (`MediaRenamer`), Usage-/Kosten-Tracking, Alt-Text-Übersetzungsmodus, Job-Historie („Frühere Läufe").

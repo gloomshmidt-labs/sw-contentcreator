@@ -66,7 +66,7 @@ class FactGuardTest extends TestCase
     {
         self::assertSame(
             [],
-            $this->guard->missingFacts('Eine schöne Handpuppe.', 'Ganz neuer Text.', 'XYZA')
+            $this->guard->missingFacts('Eine schöne Handpuppe.', 'Ganz neuer Text.', 'XYZA'),
         );
     }
 

@@ -139,6 +139,7 @@
                         <span style="width:90px; text-align:right;">Requests</span>
                         <span style="width:110px; text-align:right;">Tokens in</span>
                         <span style="width:110px; text-align:right;">Tokens out</span>
+                        <span style="width:110px; text-align:right;" :title="$tc('sw-content-creator.settings.usageCacheHint')">Cache r/w</span>
                         <span style="width:80px; text-align:right;">~Kosten</span>
                     </div>
                     <div v-for="row in usageRows" :key="row.month + row.provider + row.model" style="display:flex; gap:12px; padding:4px 0; font-size:13px;">
@@ -148,6 +149,7 @@
                         <span style="width:90px; text-align:right;">{{ row.requests }}</span>
                         <span style="width:110px; text-align:right;">{{ Number(row.inputTokens).toLocaleString() }}</span>
                         <span style="width:110px; text-align:right;">{{ Number(row.outputTokens).toLocaleString() }}</span>
+                        <span style="width:110px; text-align:right;">{{ Number(row.cacheReadTokens || 0).toLocaleString() }} / {{ Number(row.cacheCreationTokens || 0).toLocaleString() }}</span>
                         <span style="width:80px; text-align:right;">{{ usageCost(row) }}</span>
                     </div>
                 </div>

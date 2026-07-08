@@ -141,7 +141,7 @@ class QualityCheckerTest extends TestCase
     {
         self::assertSame(
             ['hochwertig', 'perfekt', 'ideal'],
-            QualityChecker::parseWhitelist(' hochwertig , perfekt ,,ideal ')
+            QualityChecker::parseWhitelist(' hochwertig , perfekt ,,ideal '),
         );
         self::assertSame([], QualityChecker::parseWhitelist(''));
     }
