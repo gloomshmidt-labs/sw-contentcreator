@@ -3,6 +3,15 @@
 Alle nennenswerten Änderungen an diesem Plugin werden hier dokumentiert.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.37.0] - 2026-07-08
+
+### Added
+- „Frühere Läufe": Aktualisieren-Button und Blättern durch alle Läufe (10 pro Seite, Gesamtzahl vom Server).
+- Job-Ansicht: „Zurück zur Übersicht"-Button — auch bei bereits übernommenen oder fehlgeschlagenen Läufen.
+
+### Changed
+- `GET /api/content-creator/batch-jobs` liefert jetzt `total` und akzeptiert `page`/`limit` (max. 50).
+
 ## [0.36.3] - 2026-07-08
 
 ### Fixed

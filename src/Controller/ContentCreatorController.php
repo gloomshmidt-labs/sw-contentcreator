@@ -392,9 +392,13 @@ class ContentCreatorController extends AbstractController
     }
 
     #[Route(path: '/api/content-creator/batch-jobs', name: 'api.content-creator.batch.jobs', defaults: ['_acl' => ['content_creator.viewer']], methods: ['GET'])]
-    public function recentJobs(): JsonResponse
+    public function recentJobs(Request $request): JsonResponse
     {
-        return new JsonResponse(['success' => true, 'jobs' => $this->jobHistory->recentJobs()]);
+        $limit = (int) $request->query->get('limit', 10);
+        $page = max(1, (int) $request->query->get('page', 1));
+        $result = $this->jobHistory->recentJobs($limit, ($page - 1) * max(1, min(50, $limit)));
+
+        return new JsonResponse(['success' => true, 'jobs' => $result['jobs'], 'total' => $result['total']]);
     }
 
     #[Route(path: '/api/content-creator/batch/{jobId}', name: 'api.content-creator.batch.status', defaults: ['_acl' => ['content_creator.viewer']], methods: ['GET'])]

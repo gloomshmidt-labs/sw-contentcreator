@@ -194,6 +194,9 @@
 
             {% block sw_content_creator_batch_progress %}
             <sw-card v-if="job" :title="$tc('sw-content-creator.batch.progress')">
+                <sw-button v-if="!isRunning" size="small" style="margin-bottom:12px;" @click="closeJob">
+                    ← {{ $tc('sw-content-creator.batch.backToOverview') }}
+                </sw-button>
                 <sw-progress-bar :value="progressDone" :maxValue="job.total"></sw-progress-bar>
                 <p style="margin-top:12px;">
                     {{ progressDone }} / {{ job.total }} ({{ progressPercent }}%)
@@ -275,9 +278,13 @@
             </sw-card>
             {% endblock %}
             <sw-cc-recent-jobs
-                v-if="!job && recentJobs.length"
+                v-if="!job"
                 :jobs="recentJobs"
-                @open="openJob">
+                :page="jobsPage"
+                :total="jobsTotal"
+                @open="openJob"
+                @reload="loadRecentJobs()"
+                @page-change="loadRecentJobs($event)">
             </sw-cc-recent-jobs>
 
         </sw-card-view>

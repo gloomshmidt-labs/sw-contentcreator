@@ -15,6 +15,22 @@ Component.register('sw-cc-recent-jobs', {
             type: Array,
             required: true,
         },
+        page: {
+            type: Number,
+            required: false,
+            default: 1,
+        },
+        total: {
+            type: Number,
+            required: false,
+            default: 0,
+        },
+    },
+
+    computed: {
+        pageCount() {
+            return Math.max(1, Math.ceil(this.total / 10));
+        },
     },
 
     methods: {

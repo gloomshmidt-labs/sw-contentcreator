@@ -37,6 +37,8 @@ Component.register('sw-content-creator-batch', {
             manufacturerFilterId: null,
             selectionNames: {},
             recentJobs: [],
+            jobsPage: 1,
+            jobsTotal: 0,
         };
     },
 
@@ -178,10 +180,29 @@ Component.register('sw-content-creator-batch', {
             this.selectedIds = [];
         },
 
-        loadRecentJobs() {
-            this.contentCreatorApiService.batchJobs()
-                .then((res) => { this.recentJobs = res.jobs || []; })
-                .catch(() => { this.recentJobs = []; });
+        loadRecentJobs(page = null) {
+            if (page !== null) {
+                this.jobsPage = page;
+            }
+            this.contentCreatorApiService.batchJobs(this.jobsPage)
+                .then((res) => {
+                    this.recentJobs = res.jobs || [];
+                    this.jobsTotal = res.total || 0;
+                    // Leere Seite nach Löschungen: eine Seite zurückblättern
+                    if (!this.recentJobs.length && this.jobsPage > 1) {
+                        this.loadRecentJobs(this.jobsPage - 1);
+                    }
+                })
+                .catch(() => { this.recentJobs = []; this.jobsTotal = 0; });
+        },
+
+        // Zurück zur „Frühere Läufe"-Übersicht — auch bei bereits
+        // übernommenen oder fehlgeschlagenen Jobs (User-Wunsch)
+        closeJob() {
+            this.stopPolling();
+            this.job = null;
+            this.dryRunResults = null;
+            this.loadRecentJobs();
         },
 
         // Früheren Lauf wiederöffnen: Status laden, bei laufenden Jobs weiter
@@ -345,11 +366,7 @@ Component.register('sw-content-creator-batch', {
                     this.createNotificationSuccess({
                         message: this.$tc('sw-content-creator.batch.committed', { applied: res.applied, errors: res.errors }, res.applied),
                     });
-                    // Zurück zur „Frühere Läufe"-Übersicht (User-Wunsch):
-                    // Job-Ansicht schließen und Liste aktualisieren
-                    this.job = null;
-                    this.dryRunResults = null;
-                    this.loadRecentJobs();
+                    this.closeJob();
                 }));
         },
 

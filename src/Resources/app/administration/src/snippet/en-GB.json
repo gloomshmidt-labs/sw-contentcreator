@@ -184,7 +184,11 @@
             "recentJobs": "Previous runs",
             "recentJobsHelp": "Dry-run results are kept until applied — even after leaving the page, logging out or a browser crash. Reopen them here (running jobs resume being monitored).",
             "openResults": "{count} open results",
-            "openJob": "Open"
+            "openJob": "Open",
+            "backToOverview": "Back to overview",
+            "reloadJobs": "Reload",
+            "noJobs": "No runs yet.",
+            "pageOf": "Page {page} of {pages}"
         },
         "focus": {
             "label": "Focus keyword",

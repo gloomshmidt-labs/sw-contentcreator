@@ -19,13 +19,16 @@ class JobHistoryService
     }
 
     /**
-     * Die letzten 10 Jobs inkl. Zahl der offenen (bestandenen, noch nicht
-     * übernommenen) Dry-Run-Ergebnisse.
+     * Jobs seitenweise (neueste zuerst) inkl. Zahl der offenen (bestandenen,
+     * noch nicht übernommenen) Dry-Run-Ergebnisse und der Gesamtzahl fürs
+     * Blättern in der Admin-Liste.
      *
-     * @return list<array<string, mixed>>
+     * @return array{jobs: list<array<string, mixed>>, total: int}
      */
-    public function recentJobs(): array
+    public function recentJobs(int $limit = 10, int $offset = 0): array
     {
+        $limit = max(1, min(50, $limit));
+        $offset = max(0, $offset);
         $rows = $this->connection->fetchAllAssociative(
             'SELECT LOWER(HEX(j.id)) AS id, j.status, j.entity_type AS entityType, j.types,
                     j.dry_run AS dryRun, j.total, j.processed, j.failed, j.rejected, j.created_at AS createdAt,
@@ -33,7 +36,7 @@ class JobHistoryService
                       WHERE r.job_id = j.id AND r.passed = 1 AND r.applied = 0) AS openResults
              FROM content_creator_generation_job j
              ORDER BY j.created_at DESC
-             LIMIT 10',
+             LIMIT ' . $limit . ' OFFSET ' . $offset,
         );
         foreach ($rows as &$row) {
             $row['dryRun'] = (bool) $row['dryRun'];
@@ -42,7 +45,10 @@ class JobHistoryService
             }
         }
 
-        return $rows;
+        return [
+            'jobs' => $rows,
+            'total' => (int) $this->connection->fetchOne('SELECT COUNT(*) FROM content_creator_generation_job'),
+        ];
     }
 
     /**

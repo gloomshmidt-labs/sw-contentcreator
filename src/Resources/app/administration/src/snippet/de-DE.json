@@ -184,7 +184,11 @@
             "recentJobs": "Frühere Läufe",
             "recentJobsHelp": "Dry-Run-Ergebnisse bleiben gespeichert, bis sie übernommen werden — auch nach Seitenwechsel, Logout oder Browser-Absturz. Hier lassen sie sich wieder öffnen (laufende Jobs werden weiter beobachtet).",
             "openResults": "{count} offene Ergebnisse",
-            "openJob": "Öffnen"
+            "openJob": "Öffnen",
+            "backToOverview": "Zurück zur Übersicht",
+            "reloadJobs": "Aktualisieren",
+            "noJobs": "Noch keine Läufe vorhanden.",
+            "pageOf": "Seite {page} von {pages}"
         },
         "focus": {
             "label": "Fokus-Keyword",

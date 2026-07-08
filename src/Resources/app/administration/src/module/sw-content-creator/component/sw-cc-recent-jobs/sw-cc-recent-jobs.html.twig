@@ -1,7 +1,15 @@
 {% block sw_cc_recent_jobs %}
 <sw-card :title="$tc('sw-content-creator.batch.recentJobs')">
-    <p style="color:#758ca3; font-size:13px; margin-bottom:8px;">
-        {{ $tc('sw-content-creator.batch.recentJobsHelp') }}
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+        <p style="color:#758ca3; font-size:13px; flex:1; margin:0;">
+            {{ $tc('sw-content-creator.batch.recentJobsHelp') }}
+        </p>
+        <sw-button size="small" @click="$emit('reload')">
+            {{ $tc('sw-content-creator.batch.reloadJobs') }}
+        </sw-button>
+    </div>
+    <p v-if="!jobs.length" style="color:#758ca3; font-size:13px;">
+        {{ $tc('sw-content-creator.batch.noJobs') }}
     </p>
     <div v-for="j in jobs" :key="j.id" style="display:flex; align-items:center; gap:12px; padding:6px 0; border-bottom:1px solid #f0f2f5; font-size:13px;">
         <span style="min-width:130px;">{{ formatJobDate(j.createdAt) }}</span>
@@ -14,6 +22,11 @@
         <sw-button size="small" @click="$emit('open', j)">
             {{ $tc('sw-content-creator.batch.openJob') }}
         </sw-button>
+    </div>
+    <div v-if="pageCount > 1" style="display:flex; align-items:center; justify-content:flex-end; gap:12px; margin-top:12px; font-size:13px;">
+        <sw-button size="small" :disabled="page <= 1" @click="$emit('page-change', page - 1)">‹</sw-button>
+        <span>{{ $tc('sw-content-creator.batch.pageOf', { page: page, pages: pageCount }) }}</span>
+        <sw-button size="small" :disabled="page >= pageCount" @click="$emit('page-change', page + 1)">›</sw-button>
     </div>
 </sw-card>
 {% endblock %}
